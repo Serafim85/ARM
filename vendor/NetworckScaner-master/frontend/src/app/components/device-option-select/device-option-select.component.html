@@ -1,0 +1,42 @@
+<p-select
+  [class]="styleClass() + ' device-option-select-trigger'"
+  optionLabel="label"
+  [optionValue]="optionValueKey()"
+  [panelStyleClass]="panelStyleClass()"
+  appendTo="body"
+  [placeholder]="placeholder()"
+  [emptyFilterMessage]="emptyFilterMessage()"
+  [emptyMessage]="emptyMessage()"
+  [options]="options()"
+  [ngModel]="value()"
+  (ngModelChange)="valueChange.emit($event)"
+  [ngModelOptions]="{ standalone: true }"
+  [filter]="filter()"
+  [filterPlaceholder]="filterPlaceholder()"
+  [disabled]="disabled()"
+  [editable]="editable()"
+  [showClear]="showClear()"
+>
+  <ng-template pTemplate="selectedItem" let-option>
+    <span
+      class="device-option-select-label"
+      [attr.title]="option?.label"
+      [pTooltip]="option?.label ?? ''"
+      nsTooltipOnOverflow
+      tooltipPosition="bottom"
+    >
+      {{ option?.label ?? '—' }}
+    </span>
+  </ng-template>
+  <ng-template pTemplate="item" let-option>
+    <span
+      class="device-option-select-option"
+      [attr.title]="option?.label"
+      [pTooltip]="option?.label ?? ''"
+      nsTooltipOnOverflow
+      tooltipPosition="bottom"
+    >
+      {{ option?.label ?? '—' }}
+    </span>
+  </ng-template>
+</p-select>

@@ -1,0 +1,294 @@
+<section class="content-card dashboards-detail-card list-page-card">
+  <p-menu #dashboardActionsMenu [popup]="true" [model]="dashboardDetailMenuItems()" appendTo="body" />
+  <p-menu #widgetTileMenu [popup]="true" [model]="widgetTileMenuItems()" appendTo="body" />
+  <div class="section-heading dashboards-detail-heading">
+    <div class="dashboards-detail-heading-main">
+      <a
+        routerLink="/dashboards"
+        class="dashboards-back-link"
+        pTooltip="К списку дашбордов"
+        tooltipPosition="bottom"
+        aria-label="К списку дашбордов"
+      >
+        <i class="pi pi-arrow-left" aria-hidden="true"></i>
+      </a>
+      <div class="dashboards-detail-heading-text">
+        @if (dashboard(); as d) {
+          <h1 class="dashboards-detail-title">{{ d.name }}</h1>
+          <p class="dashboards-detail-meta">
+            <span class="dashboards-detail-meta-sep" aria-hidden="true">·</span>
+            Видимость: <strong>{{ visibilityLabel(d.visibility) }}</strong>
+            @if (d.visibility === 'SHARED' && d.sharedUserIds.length > 0) {
+              <span> · Пользователей с доступом: {{ d.sharedUserIds.length }}</span>
+            }
+            <span> · Обновлён {{ d.updatedAt | date: 'medium' }}</span>
+          </p>
+        } @else if (!loading()) {
+          <h1 class="dashboards-detail-title">Дашборд</h1>
+        }
+      </div>
+    </div>
+    <div class="dashboards-widget-header">
+      @if (canEdit() && layoutSaving()) {
+        <div class="dashboards-widget-header-actions">
+          <span class="dashboards-layout-saving-hint">Сохраняем раскладку…</span>
+        </div>
+      }
+    </div>
+    @if (dashboard(); as d) {
+      @if (canEdit()) {
+        <div class="list-page-heading-actions dashboards-detail-actions">
+          <p-button
+            icon="pi pi-ellipsis-v"
+            [text]="true"
+            [rounded]="true"
+            severity="secondary"
+            (onClick)="openDashboardActionsMenu($event)"
+            aria-label="Действия с дашбордом"
+          />
+        </div>
+      }
+    }
+  </div>
+
+  @if (error()) {
+    <div class="dashboards-banner dashboards-banner-error">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <p class="dashboards-loading">Загрузка…</p>
+  }
+  @else if (dashboard()) {
+    @let d = dashboard()!;
+    <div class="dashboards-widgets-section">
+      @if (d.widgets.length === 0) {
+        <div class="empty-state-inline">На дашборде пока нет виджетов.</div>
+      } @else {
+        <gridster class="dashboard-gridster" [options]="gridOptions()">
+          @for (item of widgetGridItems(); track item.widgetId) {
+            <gridster-item [item]="item" class="dashboard-gridster-item" [ngStyle]="gridsterItemBorderStyle(item.widget)">
+              <article class="dashboard-widget-tile" role="document">
+                @if (item.widget.showHeader) {
+                  <header class="dashboard-widget-tile-head">
+                    <div
+                      class="dashboard-widget-tile-head-row dashboard-widget-tile-drag-handle"
+                    >
+                      <h3 class="dashboard-widget-tile-title">{{ item.widget.name }}</h3>
+                      @if (item.widget.widgetType === 'GRAPH') {
+                        <div
+                          class="dashboard-graph-period-in-head"
+                          (mousedown)="$event.stopPropagation()"
+                          (touchstart)="$event.stopPropagation()"
+                        >
+                          <span class="dashboard-graph-period-label">Период</span>
+                          <p-selectButton
+                            [options]="graphPeriodOptions"
+                            optionLabel="label"
+                            optionValue="value"
+                            [allowEmpty]="false"
+                            [ngModel]="graphPeriod(item.widget)"
+                            (ngModelChange)="setGraphPeriod(item.widgetId, $event)"
+                            [ngModelOptions]="{ standalone: true }"
+                            styleClass="dashboard-graph-period-selectbutton"
+                          />
+                        </div>
+                      }
+                      @if (canEdit()) {
+                        <span
+                          class="dashboard-widget-tile-menu-anchor"
+                          (mousedown)="$event.stopPropagation()"
+                          (touchstart)="$event.stopPropagation()"
+                        >
+                          <p-button
+                            icon="pi pi-ellipsis-v"
+                            [text]="true"
+                            [rounded]="true"
+                            severity="secondary"
+                            size="small"
+                            styleClass="dashboard-widget-tile-menu-btn"
+                            (onClick)="openWidgetTileMenu($event, item.widget)"
+                            [attr.aria-label]="'Действия: ' + item.widget.name"
+                          />
+                        </span>
+                      }
+                    </div>
+                  </header>
+                } @else {
+                  <div class="dashboard-widget-tile-head dashboard-widget-tile-head--compact">
+                    <div
+                      class="dashboard-widget-tile-head-row dashboard-widget-tile-drag-handle"
+                    >
+                      <span class="dashboard-widget-tile-name-plain">{{ item.widget.name }}</span>
+                      @if (item.widget.widgetType === 'GRAPH') {
+                        <div
+                          class="dashboard-graph-period-in-head"
+                          (mousedown)="$event.stopPropagation()"
+                          (touchstart)="$event.stopPropagation()"
+                        >
+                          <span class="dashboard-graph-period-label">Период</span>
+                          <p-selectButton
+                            [options]="graphPeriodOptions"
+                            optionLabel="label"
+                            optionValue="value"
+                            [allowEmpty]="false"
+                            [ngModel]="graphPeriod(item.widget)"
+                            (ngModelChange)="setGraphPeriod(item.widgetId, $event)"
+                            [ngModelOptions]="{ standalone: true }"
+                            styleClass="dashboard-graph-period-selectbutton"
+                          />
+                        </div>
+                      }
+                      @if (canEdit()) {
+                        <span
+                          class="dashboard-widget-tile-menu-anchor"
+                          (mousedown)="$event.stopPropagation()"
+                          (touchstart)="$event.stopPropagation()"
+                        >
+                          <p-button
+                            icon="pi pi-ellipsis-v"
+                            [text]="true"
+                            [rounded]="true"
+                            severity="secondary"
+                            size="small"
+                            styleClass="dashboard-widget-tile-menu-btn"
+                            (onClick)="openWidgetTileMenu($event, item.widget)"
+                            [attr.aria-label]="'Действия: ' + item.widget.name"
+                          />
+                        </span>
+                      }
+                    </div>
+                  </div>
+                }
+                <div class="dashboard-widget-tile-body" (mousedown)="$event.stopPropagation()" (touchstart)="$event.stopPropagation()">
+                  <div class="dashboard-widget-tile-body-inner">
+                    @switch (item.widget.widgetType) {
+                      @case ('CLOCK') {
+                        <app-dashboard-clock-widget
+                          [fields]="item.widget.fields"
+                          [refreshIntervalSeconds]="item.widget.refreshIntervalSeconds"
+                        />
+                      }
+                      @case ('PROBLEMS') {
+                        <app-dashboard-problems-widget
+                          [fields]="item.widget.fields"
+                          [refreshIntervalSeconds]="item.widget.refreshIntervalSeconds"
+                        />
+                      }
+                      @case ('GRAPH') {
+                        <app-dashboard-graph-widget
+                          [fields]="item.widget.fields"
+                          [refreshIntervalSeconds]="item.widget.refreshIntervalSeconds"
+                          [period]="graphPeriod(item.widget)"
+                        />
+                      }
+                    }
+                  </div>
+                </div>
+              </article>
+            </gridster-item>
+          }
+        </gridster>
+      }
+    </div>
+  }
+</section>
+
+@if (dashboard(); as d) {
+  <app-dashboard-widget-dialog
+    [visible]="widgetDialogVisible()"
+    (visibleChange)="onWidgetDialogVisibleChange($event)"
+    [dashboardId]="d.id"
+    [widget]="widgetDialogTarget()"
+    (saved)="onWidgetSaved()"
+  />
+}
+
+<p-dialog
+  header="Параметры дашборда"
+  [modal]="true"
+  [style]="{ width: 'min(520px, 94vw)' }"
+  styleClass="dashboards-dialog"
+  [visible]="editOpen()"
+  (visibleChange)="editOpen.set($event)"
+>
+  <div class="dashboards-dialog-body">
+    <label class="p-input-container">
+      <span>Название</span>
+      <input
+        pInputText
+        class="w-full"
+        [ngModel]="editName()"
+        (ngModelChange)="editName.set($event)"
+        [ngModelOptions]="{ standalone: true }"
+      />
+    </label>
+    <label class="p-input-container">
+      <span>Видимость</span>
+      <app-device-option-select
+        [options]="visibilityOptions"
+        optionValueKey="value"
+        [value]="editVisibility()"
+        (valueChange)="onEditVisibilityChange($event)"
+        styleClass="w-full"
+      />
+    </label>
+    @if (editVisibility() === 'SHARED') {
+      <label class="p-input-container">
+        <span>Кому открыть доступ</span>
+        <p-multiSelect
+          optionLabel="displayName"
+          optionValue="id"
+          placeholder="Выберите пользователей"
+          display="chip"
+          class="w-full"
+          filterPlaceHolder="Поиск"
+          appendTo="body"
+          emptyFilterMessage="Ничего не найдено"
+          emptyMessage="Ничего не найдено"
+          selectedItemsLabel="{0} элементов выбранно"
+          [options]="multiSelectOptions()"
+          [ngModel]="editSharedIds()"
+          (ngModelChange)="editSharedIds.set($event)"
+          [ngModelOptions]="{ standalone: true }"
+          [filter]="true"
+        />
+      </label>
+    }
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Отмена" [text]="true" [disabled]="saving()" (onClick)="closeEdit()" />
+    <p-button [label]="saving() ? 'Сохранение…' : 'Сохранить'" [disabled]="saving()" (onClick)="submitEdit()" />
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  header="Удалить дашборд?"
+  [modal]="true"
+  [style]="{ width: 'min(400px, 94vw)' }"
+  styleClass="dashboards-dialog"
+  [visible]="deleteOpen()"
+  (visibleChange)="deleteOpen.set($event)"
+>
+  <p>Действие необратимо: дашборд и связанные виджеты будут удалены.</p>
+  <ng-template pTemplate="footer">
+    <p-button label="Отмена" [text]="true" [disabled]="deleting()" (onClick)="closeDelete()" />
+    <p-button label="Удалить" severity="danger" [disabled]="deleting()" (onClick)="confirmDelete()" />
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  header="Удалить виджет?"
+  [modal]="true"
+  [style]="{ width: 'min(400px, 94vw)' }"
+  styleClass="dashboards-dialog"
+  [visible]="widgetDeleteOpen()"
+  (visibleChange)="onWidgetDeleteDialogVisibleChange($event)"
+>
+  <p>
+    Виджет «<strong>{{ widgetDeleteTarget()?.name }}</strong>» будет удалён с дашборда. Действие необратимо.
+  </p>
+  <ng-template pTemplate="footer">
+    <p-button label="Отмена" [text]="true" [disabled]="widgetDeleting()" (onClick)="closeWidgetDelete()" />
+    <p-button label="Удалить" severity="danger" [disabled]="widgetDeleting()" (onClick)="confirmDeleteWidget()" />
+  </ng-template>
+</p-dialog>

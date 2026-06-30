@@ -1,0 +1,597 @@
+<section class="topology-page content-card">
+  <header class="topology-page__header section-heading">
+    <div class="topology-page__header-line">
+      <span id="topology-picker-label" class="topology-page__sr-only">Топология</span>
+      <div class="topology-page__picker-row">
+        <p-autocomplete
+          inputId="topology-autocomplete"
+          class="topology-page__autocomplete"
+          [fluid]="true"
+          [suggestions]="topologyAutocompleteSuggestions()"
+          (completeMethod)="filterTopologies($event)"
+          [ngModel]="topologyPick()"
+          (ngModelChange)="onTopologyPickChange($event)"
+          [ngModelOptions]="{ standalone: true }"
+          optionLabel="label"
+          dataKey="value"
+          [dropdown]="true"
+          [completeOnFocus]="true"
+          [minQueryLength]="0"
+          [delay]="0"
+          placeholder="Найти или выберите топологию"
+          [showClear]="true"
+          [forceSelection]="true"
+          emptyMessage="Ничего не найдено"
+          dropdownMode="blank"
+          ariaLabelledBy="topology-picker-label"
+          dropdownAriaLabel="Показать все топологии"
+        />
+      </div>
+      <div class="topology-page__header-actions">
+        @if (showSaveLayoutButton()) {
+          <p-button
+            type="button"
+            label="Сохранить"
+            icon="pi pi-save"
+            [loading]="layoutSaving()"
+            [disabled]="layoutSaving()"
+            styleClass="topology-page__save-btn ns-action-blue"
+            (onClick)="saveTopologyLayout()"
+          />
+        }
+        <p-button
+          type="button"
+          icon="pi pi-ellipsis-v"
+          [text]="true"
+          [rounded]="true"
+          styleClass="topology-page__menu-btn ns-action-blue"
+          (onClick)="openTopologyMenu($event)"
+          aria-label="Меню действий топологии"
+        />
+        <p-menu #topologyMenu [model]="topologyMenuItems()" [popup]="true" />
+      </div>
+    </div>
+    <p class="topology-page__picker-meta">
+      <span class="topology-page__star-hint">* — топология по умолчанию (открывается при входе на страницу).</span>
+      @if (currentAutosaveHint()) {
+        <span class="topology-page__autosave-hint"> {{ currentAutosaveHint() }}.</span>
+      }
+      @if (currentAutoCenterHint()) {
+        <span class="topology-page__autosave-hint"> {{ currentAutoCenterHint() }}.</span>
+      }
+      <span class="topology-page__level-hint"> {{ currentLayerLabel() }}.</span>
+      @if (topologyGraphReadOnly()) {
+        <span class="topology-page__readonly-banner"> Режим просмотра: схему можно только просматривать (масштаб, панорама, переход по уровням).</span>
+      }
+    </p>
+  </header>
+  <div class="topology-page__cy-host">
+    @if (canNavigateBackLevel()) {
+      <div class="topology-page__cy-back">
+        <p-button
+          type="button"
+          icon="pi pi-arrow-circle-left"
+          [text]="true"
+          [rounded]="true"
+          [disabled]="layoutSaving()"
+          styleClass="topology-page__back-btn ns-action-blue"
+          (onClick)="onLayerBack()"
+          aria-label="Назад на уровень выше"
+        />
+      </div>
+    }
+    <div
+      class="topology-page__cy"
+      role="img"
+      [attr.aria-label]="
+        topologyGraphReadOnly()
+          ? 'Диаграмма сетевой топологии, только просмотр'
+          : 'Диаграмма сетевой топологии'
+      "
+    >
+      <div
+        class="topology-page__cy-layer-backdrop"
+        [style.background-color]="layerHostBackdropFillCss()"
+        aria-hidden="true"
+      >
+        @if (layerHostBackdropBgUrl(); as bgUrl) {
+          @if (layerHostBackdropImgLayout(); as imgL) {
+            <img
+              class="topology-page__cy-layer-backdrop-img"
+              [src]="bgUrl"
+              alt=""
+              [style.left.px]="imgL.left"
+              [style.top.px]="imgL.top"
+              [style.width.px]="imgL.width"
+              [style.height.px]="imgL.height"
+              [style.object-fit]="imgL.objectFit"
+              (load)="onLayerHostBackdropImgLoad()"
+            />
+          }
+        }
+      </div>
+      <div
+        #cyMount
+        class="topology-page__cy-mount"
+        [class.topology-page__cy-mount--refreshing]="cyMountRefreshing()"
+        [class.topology-page__cy-mount--readonly]="topologyGraphReadOnly()"
+        [attr.aria-busy]="cyMountRefreshing() ? 'true' : null"
+      ></div>
+<!--     <div class="topology-page__cy-debug" aria-live="polite">-->
+<!--      <div><strong>DOM Path:</strong> {{ cyDebugDomPath() }}</div>-->
+<!--      <div><strong>Position:</strong> {{ cyDebugPosition() }}</div>-->
+<!--      <div><strong>HTML Element:</strong> {{ cyDebugHtmlElement() }}</div>-->
+<!--      <div><strong>Scale:</strong> {{ cyZoomLabel() }}</div>-->
+<!--    </div>-->
+    </div>
+  </div>
+  <p-tieredMenu
+    #cyContextMenu
+    [model]="cyContextMenuModel()"
+    [popup]="true"
+    appendTo="body"
+    styleClass="topology-page__cy-context-menu"
+  />
+
+  <p-confirmDialog />
+
+  <p-dialog
+    [header]="objectSettingsDialogHeader()"
+    [modal]="true"
+    appendTo="body"
+    [style]="{ width: 'min(560px, 96vw)' }"
+    [visible]="objectSettingsVisible()"
+    (visibleChange)="onObjectSettingsDialogVisibleChange($event)"
+    [closable]="!objectSettingsSaving() && !objectSettingsLayerBgUploading()"
+    [closeOnEscape]="!objectSettingsSaving() && !objectSettingsLayerBgUploading()"
+    [dismissableMask]="!objectSettingsSaving() && !objectSettingsLayerBgUploading()"
+    styleClass="topology-page__object-settings-dialog"
+  >
+    <div class="topology-page__object-settings-body" role="region" aria-label="Настройки объекта топологии">
+      <div class="topology-page__object-settings-grid">
+        <label class="topology-page__settings-field">
+          <span class="topology-page__settings-label">Имя</span>
+          <input
+            pInputText
+            type="text"
+            class="w-full"
+            [ngModel]="objectSettingsName()"
+            (ngModelChange)="objectSettingsName.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+            [disabled]="objectSettingsSaving() || objectSettingsLayerBgUploading()"
+          />
+        </label>
+        @if (objectSettingsObjectKind() === 'NODE') {
+          <label class="topology-page__settings-field">
+            <span class="topology-page__settings-label">Тип</span>
+            <app-device-option-select
+              styleClass="w-full topology-page__settings-control"
+              [options]="topologyNodeKindSelectOptions"
+              optionValueKey="value"
+              [value]="objectSettingsNodeKind()"
+              (valueChange)="onObjectSettingsNodeKindChange($event)"
+              [disabled]="objectSettingsSaving() || objectSettingsLayerBgUploading()"
+            />
+          </label>
+          <label class="topology-page__settings-field">
+            <span class="topology-page__settings-label">Связанное устройство</span>
+            <app-device-option-select
+              styleClass="w-full topology-page__settings-control"
+              [options]="objectSettingsDeviceOptions()"
+              optionValueKey="value"
+              [value]="objectSettingsDeviceId()"
+              (valueChange)="onObjectSettingsDeviceIdChange($event)"
+              placeholder="Не выбрано"
+              [showClear]="true"
+              [filter]="true"
+              filterPlaceholder="Поиск по подписи или IP…"
+              emptyFilterMessage="Ничего не найдено"
+              emptyMessage="Ничего не найдено"
+              [disabled]="objectSettingsSaving() || objectSettingsLayerBgUploading()"
+            />
+          </label>
+        } @else if (objectSettingsObjectKind() === 'GROUP') {
+          <div class="topology-page__settings-field">
+            <span class="topology-page__settings-label">Тип</span>
+            <span class="topology-page__settings-readonly">Группа</span>
+          </div>
+          <div class="topology-page__settings-field">
+            <span class="topology-page__settings-label">Цвет рамки</span>
+            <div class="topology-page__group-border-row">
+              <input
+                type="color"
+                class="topology-page__group-border-swatch"
+                [value]="groupBorderPickerDisplayValue()"
+                (input)="onGroupBorderColorInput($event)"
+                title="Цвет рамки группы"
+                aria-label="Цвет рамки группы"
+                [disabled]="objectSettingsSaving() || objectSettingsLayerBgUploading()"
+              />
+              <p-button
+                type="button"
+                label="По умолчанию"
+                [outlined]="true"
+                [disabled]="objectSettingsGroupBorderColor() === null || objectSettingsSaving() || objectSettingsLayerBgUploading()"
+                styleClass="topology-page__group-border-reset ns-action-blue"
+                (onClick)="resetGroupBorderColorToDefault()"
+              />
+            </div>
+            @if (objectSettingsGroupBorderColor() === null) {
+              <span class="topology-page__settings-hint">Используется цвет по умолчанию</span>
+            }
+          </div>
+          <div class="topology-page__settings-field">
+            <span class="topology-page__settings-label">Фон слоя</span>
+            <input
+              #layerBgFileInput
+              type="file"
+              class="topology-page__layer-bg-file"
+              accept="image/png,image/jpeg,image/svg+xml,.svg"
+              [disabled]="
+                objectSettingsPending() ||
+                objectSettingsLayerBgUploading() ||
+                objectSettingsSaving()
+              "
+              (change)="onGroupLayerBackgroundFileInput($event)"
+              aria-label="Выбрать файл фона слоя (PNG, JPEG или SVG)"
+            />
+            <div class="topology-page__layer-bg-actions">
+              <p-button
+                type="button"
+                label="Выбрать изображение"
+                icon="pi pi-image"
+                [outlined]="true"
+                [disabled]="
+                  objectSettingsPending() ||
+                  objectSettingsLayerBgUploading() ||
+                  objectSettingsSaving()
+                "
+                styleClass="ns-action-blue"
+                (onClick)="pickLayerBackgroundFile()"
+              />
+              <p-button
+                type="button"
+                label="Удалить фон"
+                icon="pi pi-trash"
+                severity="danger"
+                [outlined]="true"
+                [disabled]="
+                  !objectSettingsLayerBackgroundPresent() ||
+                  objectSettingsPending() ||
+                  objectSettingsLayerBgUploading() ||
+                  objectSettingsSaving()
+                "
+                styleClass="topology-page__layer-bg-delete"
+                (onClick)="deleteLayerBackgroundFromPanel()"
+              />
+            </div>
+            @if (objectSettingsLayerPreviewSrc(); as layerBgSrc) {
+              <div class="topology-page__layer-bg-preview">
+                <img [src]="layerBgSrc" alt="Превью фона слоя" />
+              </div>
+            }
+            @if (objectSettingsPending()) {
+              <span class="topology-page__settings-hint"
+                >Сохраните топологию, затем можно загрузить фон слоя.</span
+              >
+            } @else {
+              <span class="topology-page__settings-hint">PNG, JPEG или SVG, до 5 МБ.</span>
+            }
+          </div>
+          <div class="topology-page__settings-field">
+            <span class="topology-page__settings-label">Связанное устройство</span>
+            <span class="topology-page__settings-readonly">—</span>
+          </div>
+        } @else {
+          <div class="topology-page__settings-field">
+            <span class="topology-page__settings-label">Тип</span>
+            <span class="topology-page__settings-readonly">Связь</span>
+          </div>
+          <div class="topology-page__settings-field">
+            <span class="topology-page__settings-label">Цвет линии</span>
+            <div class="topology-page__group-border-row">
+              <input
+                type="color"
+                class="topology-page__group-border-swatch"
+                [value]="edgeLinePickerDisplayValue()"
+                (input)="onEdgeLineColorInput($event)"
+                title="Цвет линии связи"
+                aria-label="Цвет линии связи"
+                [disabled]="objectSettingsSaving() || objectSettingsLayerBgUploading()"
+              />
+              <p-button
+                type="button"
+                label="По умолчанию"
+                [outlined]="true"
+                [disabled]="objectSettingsEdgeLineColor() === null || objectSettingsSaving() || objectSettingsLayerBgUploading()"
+                styleClass="topology-page__group-border-reset ns-action-blue"
+                (onClick)="resetEdgeLineColorToDefault()"
+              />
+            </div>
+            @if (objectSettingsEdgeLineColor() === null) {
+              <span class="topology-page__settings-hint">Используется цвет по умолчанию</span>
+            }
+          </div>
+          <div class="topology-page__settings-field">
+            <span class="topology-page__settings-label">Связанное устройство</span>
+            <span class="topology-page__settings-readonly">—</span>
+          </div>
+        }
+      </div>
+      <div class="topology-page__object-settings-actions">
+        <p-button
+          type="button"
+          label="Сохранить"
+          icon="pi pi-check"
+          styleClass="ns-action-blue"
+          [loading]="objectSettingsSaving()"
+          [disabled]="objectSettingsSaving()"
+          (onClick)="saveObjectSettingsFromPanel()"
+        />
+        <p-button
+          type="button"
+          label="Удалить"
+          icon="pi pi-trash"
+          severity="danger"
+          [outlined]="true"
+          [disabled]="objectSettingsSaving()"
+          (onClick)="deleteObjectFromSettingsPanel()"
+        />
+      </div>
+    </div>
+  </p-dialog>
+
+  <p-dialog
+    header="Настройки слоя"
+    [modal]="true"
+    appendTo="body"
+    [style]="{ width: 'min(480px, 96vw)' }"
+    [visible]="layerSettingsDialogVisible()"
+    (visibleChange)="onLayerSettingsDialogVisibleChange($event)"
+    [closable]="!layerSettingsSaving() && !layerSettingsLayerBgUploading()"
+    [closeOnEscape]="!layerSettingsSaving() && !layerSettingsLayerBgUploading()"
+    [dismissableMask]="!layerSettingsSaving() && !layerSettingsLayerBgUploading()"
+    styleClass="topology-page__layer-settings-dialog"
+  >
+    @if (layerSettingsLoading()) {
+      <p class="topology-page__layer-settings-loading">Загрузка…</p>
+    } @else {
+      <div class="topology-page__layer-settings-grid">
+        <label class="topology-page__settings-field">
+          <span class="topology-page__settings-label">Имя слоя</span>
+          <input
+            pInputText
+            type="text"
+            class="w-full"
+            [ngModel]="layerSettingsName()"
+            (ngModelChange)="layerSettingsName.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+            [disabled]="layerSettingsSaving() || layerSettingsLayerBgUploading()"
+          />
+        </label>
+        <div class="topology-page__settings-field">
+          <span class="topology-page__settings-label">Цвет подложки</span>
+          <div class="topology-page__group-border-row">
+            <input
+              type="color"
+              class="topology-page__group-border-swatch"
+              [value]="layerSettingsBackdropPickerDisplayValue()"
+              (input)="onLayerSettingsBackdropInput($event)"
+              title="Цвет подложки слоя"
+              aria-label="Цвет подложки слоя"
+              [disabled]="layerSettingsSaving() || layerSettingsLayerBgUploading()"
+            />
+            <p-button
+              type="button"
+              label="Без заливки"
+              [outlined]="true"
+              [disabled]="layerSettingsBackdropHex() === null || layerSettingsSaving() || layerSettingsLayerBgUploading()"
+              styleClass="topology-page__group-border-reset ns-action-blue"
+              (onClick)="resetLayerSettingsBackdropToClear()"
+            />
+          </div>
+          @if (layerSettingsBackdropHex() === null) {
+            <span class="topology-page__settings-hint">Подложка прозрачная (виден фон области графа)</span>
+          }
+        </div>
+        @if (layerSettingsAllowLayerBackgroundImage()) {
+          <div class="topology-page__settings-field">
+            <span class="topology-page__settings-label">Изображение фона</span>
+            <input
+              #layerSettingsBgFileInput
+              type="file"
+              class="topology-page__layer-bg-file"
+              accept="image/png,image/jpeg,image/svg+xml,.svg"
+              [disabled]="layerSettingsSaving() || layerSettingsLayerBgUploading()"
+              (change)="onLayerSettingsBgFileInput($event)"
+              aria-label="Выбрать изображение фона слоя"
+            />
+            <div class="topology-page__layer-bg-actions">
+              <p-button
+                type="button"
+                label="Выбрать изображение"
+                icon="pi pi-image"
+                [outlined]="true"
+                [disabled]="layerSettingsSaving() || layerSettingsLayerBgUploading()"
+                styleClass="ns-action-blue"
+                (onClick)="pickLayerSettingsBgFile()"
+              />
+              <p-button
+                type="button"
+                label="Удалить фон"
+                icon="pi pi-trash"
+                severity="danger"
+                [outlined]="true"
+                [disabled]="!layerSettingsLayerBgPresent() || layerSettingsSaving() || layerSettingsLayerBgUploading()"
+                styleClass="topology-page__layer-bg-delete"
+                (onClick)="deleteLayerSettingsLayerBg()"
+              />
+            </div>
+            @if (layerSettingsLayerPreviewSrc(); as layerDlgSrc) {
+              <div class="topology-page__layer-bg-preview">
+                <img [src]="layerDlgSrc" alt="Превью фона слоя" />
+              </div>
+            }
+            <span class="topology-page__settings-hint">PNG, JPEG или SVG, до 5 МБ.</span>
+          </div>
+        }
+      </div>
+    }
+    <ng-template pTemplate="footer">
+      <p-button
+        label="Отмена"
+        [text]="true"
+        styleClass="ns-action-blue"
+        [disabled]="layerSettingsSaving() || layerSettingsLayerBgUploading()"
+        (onClick)="closeLayerSettingsDialog()"
+      />
+      <p-button
+        label="Сохранить"
+        icon="pi pi-check"
+        styleClass="ns-action-blue"
+        [loading]="layerSettingsSaving()"
+        [disabled]="layerSettingsLoading() || layerSettingsSaving() || layerSettingsLayerBgUploading()"
+        (onClick)="saveLayerSettingsFromDialog()"
+      />
+    </ng-template>
+  </p-dialog>
+
+  <p-dialog
+    header="Параметры топологии"
+    [modal]="true"
+    [style]="{ width: 'min(520px, 94vw)' }"
+    styleClass="dashboards-dialog"
+    [visible]="topologyEditOpen()"
+    (visibleChange)="onTopologyEditVisibleChange($event)"
+    [closable]="!topologyEditSaving()"
+    [closeOnEscape]="!topologyEditSaving()"
+    [dismissableMask]="!topologyEditSaving()"
+  >
+    <div class="dashboards-dialog-body">
+      <label class="p-input-container">
+        <span>Имя</span>
+        <input
+          pInputText
+          class="w-full"
+          [ngModel]="topologyEditName()"
+          (ngModelChange)="topologyEditName.set($event)"
+          [ngModelOptions]="{ standalone: true }"
+        />
+      </label>
+      <div class="checkbox-line">
+        <p-checkbox
+          [ngModel]="topologyEditOpenByDefault()"
+          (ngModelChange)="topologyEditOpenByDefault.set($event)"
+          [ngModelOptions]="{ standalone: true }"
+          [binary]="true"
+          inputId="topology-edit-open-default"
+          id="topology-edit-open-default"
+        />
+        <label for="topology-edit-open-default">Открывать по умолчанию при входе на страницу топологии</label>
+      </div>
+      <label class="p-input-container">
+        <span>Видимость</span>
+        <app-device-option-select
+          [options]="topologyVisibilityEditOptions"
+          optionValueKey="value"
+          [value]="topologyEditVisibility()"
+          (valueChange)="onTopologyEditVisibilityChange($event)"
+          styleClass="w-full"
+        />
+      </label>
+      @if (topologyEditVisibility() === 'SHARED') {
+        <label class="p-input-container">
+          <span>Кому открыть доступ</span>
+          <p-multiSelect
+            optionLabel="displayName"
+            optionValue="id"
+            placeholder="Выберите пользователей"
+            display="chip"
+            class="w-full"
+            filterPlaceHolder="Поиск"
+            appendTo="body"
+            emptyFilterMessage="Ничего не найдено"
+            emptyMessage="Ничего не найдено"
+            selectedItemsLabel="{0} элементов выбранно"
+            [options]="topologyEditMultiSelectOptions()"
+            [ngModel]="topologyEditSharedIds()"
+            (ngModelChange)="topologyEditSharedIds.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+            [filter]="true"
+          />
+          <small class="dashboards-hint">Показаны активные пользователи системы (кроме вас).</small>
+        </label>
+      }
+    </div>
+    <ng-template pTemplate="footer">
+      <p-button
+        label="Отмена"
+        styleClass="ns-action-blue"
+        [text]="true"
+        [disabled]="topologyEditSaving()"
+        (onClick)="closeTopologyEditDialog()"
+      />
+      <p-button
+        [label]="topologyEditSaving() ? 'Сохранение…' : 'Сохранить'"
+        styleClass="ns-action-blue"
+        [disabled]="topologyEditSaving()"
+        (onClick)="submitTopologyEdit()"
+      />
+    </ng-template>
+  </p-dialog>
+
+  <p-dialog
+    header="Несохранённые изменения"
+    [modal]="true"
+    appendTo="body"
+    [style]="{ width: 'min(520px, 96vw)' }"
+    [visible]="topologySwitchDialogVisible()"
+    (visibleChange)="onTopologySwitchDialogVisibleChange($event)"
+    [closable]="!layoutSaving()"
+    [closeOnEscape]="!layoutSaving()"
+    [dismissableMask]="!layoutSaving()"
+    styleClass="topology-page__switch-dialog"
+  >
+    @if (pendingUnsavedChanges(); as pending) {
+      @if (pending.kind === 'topology') {
+        @if (pending.to) {
+          <p class="topology-page__switch-dialog-text">
+            На текущей топологии есть несохранённые изменения. Сохранить их перед переходом к «{{ pendingSwitchTargetLabel() }}» или отменить
+            переключение?
+          </p>
+        } @else {
+          <p class="topology-page__switch-dialog-text">
+            На текущей топологии есть несохранённые изменения. Сохранить их перед очисткой выбора или отменить?
+          </p>
+        }
+      } @else {
+        <p class="topology-page__switch-dialog-text">
+          На текущей топологии есть несохранённые изменения. Сохранить их перед переходом на другую страницу или отменить?
+        </p>
+      }
+    }
+    <ng-template pTemplate="footer">
+      <p-button
+        label="Отмена"
+        styleClass="ns-action-blue"
+        [text]="true"
+        [disabled]="layoutSaving()"
+        (onClick)="onTopologySwitchCancel()"
+      />
+      <p-button
+        label="Удалить изменения"
+        severity="secondary"
+        [disabled]="layoutSaving()"
+        (onClick)="onTopologySwitchDiscard()"
+      />
+      <p-button
+        label="Сохранить"
+        icon="pi pi-save"
+        styleClass="ns-action-blue"
+        [loading]="layoutSaving()"
+        [disabled]="layoutSaving()"
+        (onClick)="onTopologySwitchSave()"
+      />
+    </ng-template>
+  </p-dialog>
+</section>

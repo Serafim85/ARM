@@ -1,0 +1,76 @@
+<section class="workstation-telemetry-grid">
+  <article class="content-card workstation-telemetry-card">
+    <header class="workstation-telemetry-header">
+      <h2>События</h2>
+      <p>BSoD, kernel panic и другие значимые инциденты.</p>
+    </header>
+
+    @if (ws.workstationEventsLoading()) {
+      <p class="workstation-telemetry-empty">Загрузка событий…</p>
+    } @else if (ws.workstationEvents().length === 0) {
+      <p class="workstation-telemetry-empty">Значимых событий пока нет.</p>
+    } @else {
+      <ul class="workstation-event-list">
+        @for (event of ws.workstationEvents(); track event.id) {
+          <li class="workstation-event-item">
+            <div class="workstation-event-top">
+              <p-tag
+                [value]="eventTypeLabel(event.eventType)"
+                [severity]="severityTag(event.severity)"
+              />
+              <time>{{ event.recordedAt | date: 'dd.MM.yyyy HH:mm:ss' }}</time>
+            </div>
+            <p class="workstation-event-message">{{ event.message }}</p>
+            @if (event.errorCode || event.errorText) {
+              <p class="workstation-event-meta">
+                @if (event.errorCode) {
+                  <span>Код: {{ event.errorCode }}</span>
+                }
+                @if (event.errorText) {
+                  <span>{{ event.errorText }}</span>
+                }
+              </p>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </article>
+
+  <article class="content-card workstation-telemetry-card">
+    <header class="workstation-telemetry-header">
+      <h2>Логи warning / error</h2>
+      <p>Последние записи из журнала ОС, переданные агентом.</p>
+    </header>
+
+    @if (ws.workstationLogsLoading()) {
+      <p class="workstation-telemetry-empty">Загрузка логов…</p>
+    } @else if (ws.workstationLogs().length === 0) {
+      <p class="workstation-telemetry-empty">Записей warning/error нет.</p>
+    } @else {
+      <p-table
+        [value]="ws.workstationLogs()"
+        styleClass="p-datatable-sm workstation-logs-table"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Время</th>
+            <th>Уровень</th>
+            <th>Сообщение</th>
+            <th>Источник</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.recordedAt | date: 'dd.MM.yyyy HH:mm:ss' }}</td>
+            <td>
+              <p-tag [value]="row.level" [severity]="logLevelTag(row.level)" />
+            </td>
+            <td class="workstation-log-message">{{ row.message }}</td>
+            <td>{{ row.source || '—' }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </article>
+</section>

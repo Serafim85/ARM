@@ -1,0 +1,101 @@
+.workstation-telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-bottom: 1rem;
+}
+
+.workstation-telemetry-card {
+  min-height: 12rem;
+}
+
+.workstation-telemetry-header h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+}
+
+.workstation-telemetry-header p {
+  margin: 0 0 1rem;
+  color: var(--p-text-muted-color, #6b7280);
+  font-size: 0.9rem;
+}
+
+.workstation-telemetry-empty {
+  color: var(--p-text-muted-color, #6b7280);
+}
+
+.workstation-event-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.workstation-event-item {
+  border: 1px solid var(--p-content-border-color, #e5e7eb);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+.workstation-event-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.workstation-event-top time {
+  font-size: 0.85rem;
+  color: var(--p-text-muted-color, #6b7280);
+}
+
+.workstation-event-message {
+  margin: 0;
+  font-weight: 500;
+}
+
+.workstation-event-meta {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: var(--p-text-muted-color, #6b7280);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.workstation-log-message {
+  max-width: 28rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  .workstation-telemetry-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .workstation-log-message {
+    max-width: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .workstation-telemetry-card.content-card {
+    padding: 14px;
+  }
+
+  .workstation-logs-table th:nth-child(4),
+  .workstation-logs-table td:nth-child(4) {
+    display: none;
+  }
+
+  .workstation-event-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

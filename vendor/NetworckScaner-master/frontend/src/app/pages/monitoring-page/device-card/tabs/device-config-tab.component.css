@@ -1,0 +1,51 @@
+@import '../../../../shared-ui.css';
+
+/* Два столбца: широкий поиск слева, селект «Показать» справа — как на /users */
+.config-ports-filters {
+  grid-template-columns: minmax(420px, 1fr) 260px;
+  gap: 16px;
+  align-items: end;
+}
+
+/* Одна высота с p-select (Aura): у type=search без этого инпут часто выше триггера */
+:host {
+  --config-port-filter-control-height: 2.5rem;
+}
+
+input.config-port-search-input {
+  box-sizing: border-box;
+  block-size: var(--config-port-filter-control-height);
+  min-block-size: var(--config-port-filter-control-height);
+  line-height: 1.25;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+:host ::ng-deep .config-ports-filters p-select .p-select {
+  min-height: var(--config-port-filter-control-height);
+}
+
+/* На узких экранах аккуратно ужимаем второй столбец, но держим в одной строке */
+@media (max-width: 900px) {
+  .config-ports-filters {
+    grid-template-columns: minmax(260px, 1fr) 220px;
+    gap: 12px;
+  }
+}
+
+.port-name-link {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.port-name-link:hover {
+  text-decoration-thickness: 2px;
+}

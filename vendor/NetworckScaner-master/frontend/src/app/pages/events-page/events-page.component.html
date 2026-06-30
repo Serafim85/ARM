@@ -1,0 +1,414 @@
+<section class="content-card events-list-card list-page-card">
+  <div class="section-heading">
+    <div>
+      <h1>События мониторинга</h1>
+      <p>Пороговые нарушения метрик устройств. Фильтрация по статусу, имени устройства, интервалу времени, длительности инцидента, метрике и отдельно по MAC.</p>
+    </div>
+    <div class="list-page-heading-actions">
+      <p-button
+        styleClass="ns-action-blue"
+        label="Настроить столбцы"
+        icon="pi pi-cog"
+        [outlined]="true"
+        (onClick)="openColumnsDialog()"
+        aria-label="Настроить столбцы таблицы событий"
+      />
+      <p-button styleClass="ns-action-blue" label="Обновить" [outlined]="true" [disabled]="loading()" (onClick)="applyFilters()" />
+    </div>
+  </div>
+
+  <div class="events-level-strip" aria-label="Количество событий по уровню порога">
+    <div
+      class="level-card events-level-disaster"
+      [class.level-card-selected]="isThresholdLevelActive('DISASTER')"
+      role="button"
+      tabindex="0"
+      (click)="toggleThresholdLevel('DISASTER')"
+      (keydown.enter)="toggleThresholdLevel('DISASTER')"
+      (keydown.space)="$event.preventDefault(); toggleThresholdLevel('DISASTER')"
+      [attr.aria-pressed]="isThresholdLevelActive('DISASTER')"
+      aria-label="Фильтр по уровню: Катастрофа"
+    >
+      <span class="events-level-label">{{ eventLevelStripLabels.DISASTER }}</span>
+      <strong class="events-level-value">{{ levelSummary().disaster }}</strong>
+    </div>
+    <div
+      class="level-card events-level-high"
+      [class.level-card-selected]="isThresholdLevelActive('HIGH')"
+      role="button"
+      tabindex="0"
+      (click)="toggleThresholdLevel('HIGH')"
+      (keydown.enter)="toggleThresholdLevel('HIGH')"
+      (keydown.space)="$event.preventDefault(); toggleThresholdLevel('HIGH')"
+      [attr.aria-pressed]="isThresholdLevelActive('HIGH')"
+      aria-label="Фильтр по уровню: Высокий"
+    >
+      <span class="events-level-label">{{ eventLevelStripLabels.HIGH }}</span>
+      <strong class="events-level-value">{{ levelSummary().high }}</strong>
+    </div>
+    <div
+      class="level-card events-level-average"
+      [class.level-card-selected]="isThresholdLevelActive('AVERAGE')"
+      role="button"
+      tabindex="0"
+      (click)="toggleThresholdLevel('AVERAGE')"
+      (keydown.enter)="toggleThresholdLevel('AVERAGE')"
+      (keydown.space)="$event.preventDefault(); toggleThresholdLevel('AVERAGE')"
+      [attr.aria-pressed]="isThresholdLevelActive('AVERAGE')"
+      aria-label="Фильтр по уровню: Средний"
+    >
+      <span class="events-level-label">{{ eventLevelStripLabels.AVERAGE }}</span>
+      <strong class="events-level-value">{{ levelSummary().average }}</strong>
+    </div>
+    <div
+      class="level-card events-level-warning"
+      [class.level-card-selected]="isThresholdLevelActive('WARNING')"
+      role="button"
+      tabindex="0"
+      (click)="toggleThresholdLevel('WARNING')"
+      (keydown.enter)="toggleThresholdLevel('WARNING')"
+      (keydown.space)="$event.preventDefault(); toggleThresholdLevel('WARNING')"
+      [attr.aria-pressed]="isThresholdLevelActive('WARNING')"
+      aria-label="Фильтр по уровню: Предупреждение"
+    >
+      <span class="events-level-label">{{ eventLevelStripLabels.WARNING }}</span>
+      <strong class="events-level-value">{{ levelSummary().warning }}</strong>
+    </div>
+    <div
+      class="level-card events-level-information"
+      [class.level-card-selected]="isThresholdLevelActive('INFORMATION')"
+      role="button"
+      tabindex="0"
+      (click)="toggleThresholdLevel('INFORMATION')"
+      (keydown.enter)="toggleThresholdLevel('INFORMATION')"
+      (keydown.space)="$event.preventDefault(); toggleThresholdLevel('INFORMATION')"
+      [attr.aria-pressed]="isThresholdLevelActive('INFORMATION')"
+      aria-label="Фильтр по уровню: Информация"
+    >
+      <span class="events-level-label">{{ eventLevelStripLabels.INFORMATION }}</span>
+      <strong class="events-level-value">{{ levelSummary().information }}</strong>
+    </div>
+    <div
+      class="level-card events-level-unknown"
+      [class.level-card-selected]="isThresholdLevelActive('NOT_CLASSIFIED')"
+      role="button"
+      tabindex="0"
+      (click)="toggleThresholdLevel('NOT_CLASSIFIED')"
+      (keydown.enter)="toggleThresholdLevel('NOT_CLASSIFIED')"
+      (keydown.space)="$event.preventDefault(); toggleThresholdLevel('NOT_CLASSIFIED')"
+      [attr.aria-pressed]="isThresholdLevelActive('NOT_CLASSIFIED')"
+      aria-label="Фильтр по уровню: Не классифицирован"
+    >
+      <span class="events-level-label events-level-label-long">{{ eventLevelStripLabels.NOT_CLASSIFIED }}</span>
+      <strong class="events-level-value">{{ levelSummary().notClassified }}</strong>
+    </div>
+  </div>
+  <p class="events-level-strip-hint">
+    Количество по каждому уровню при тех же фильтрах, что и таблица, но без учёта выбранного уровня в полосе; по всей выборке, не только текущая страница.
+  </p>
+
+  @if (hasActiveFilters()) {
+    <div class="list-summary-grid">
+      <div class="list-summary-tile"><span>Всего по фильтру</span><strong>{{ eventsTotal() }}</strong></div>
+      <div class="list-summary-tile"><span>На странице</span><strong>{{ eventsOnPage() }}</strong></div>
+      <div
+        class="list-summary-tile"
+        role="button"
+        tabindex="0"
+        (click)="applyQuickStatusFilter('OPEN')"
+        (keydown.enter)="applyQuickStatusFilter('OPEN')"
+        (keydown.space)="$event.preventDefault(); applyQuickStatusFilter('OPEN')"
+        [attr.aria-label]="'Фильтр по статусу: ' + monitoringEventStatusLabel('OPEN')"
+      >
+        <span>Активных на странице</span><strong>{{ eventsOpenOnPage() }}</strong>
+      </div>
+      <div
+        class="list-summary-tile"
+        role="button"
+        tabindex="0"
+        (click)="applyQuickStatusFilter('RESOLVED')"
+        (keydown.enter)="applyQuickStatusFilter('RESOLVED')"
+        (keydown.space)="$event.preventDefault(); applyQuickStatusFilter('RESOLVED')"
+        [attr.aria-label]="'Фильтр по статусу: ' + monitoringEventStatusLabel('RESOLVED')"
+      >
+        <span>Устранённых на странице</span><strong>{{ eventsResolvedOnPage() }}</strong>
+      </div>
+    </div>
+  }
+
+  <section class="events-filters-accordion" aria-label="Дополнительные фильтры списка событий">
+    <div class="events-filters-header">
+      <button
+        type="button"
+        class="events-filters-header-toggle"
+        (click)="toggleFiltersExpanded()"
+        [attr.aria-expanded]="filtersExpanded()"
+        aria-controls="events-filters-content"
+      >
+        <span>Расширенные фильтры</span>
+        <i class="pi" [class.pi-chevron-down]="!filtersExpanded()" [class.pi-chevron-up]="filtersExpanded()" aria-hidden="true"></i>
+      </button>
+      @if (!filtersExpanded() && hasActiveFilters()) {
+        <div class="events-filters-applied" aria-label="Применённые фильтры">
+          <span class="events-filters-applied-label">Применены фильтры:</span>
+          <div class="events-filters-applied-tags">
+            @for (chip of appliedFiltersChips(); track chip.key) {
+              <p-chip
+                [label]="chip.label"
+                [removable]="true"
+                (onRemove)="clearAppliedFilter(chip.key)"
+              />
+            }
+          </div>
+        </div>
+      }
+    </div>
+    <div
+      id="events-filters-content"
+      class="events-filters-content"
+      (keydown.enter)="onFiltersEnter($event)"
+      [hidden]="!filtersExpanded()"
+    >
+      <div class="list-filter-panel events-filter-panel">
+    <div class="events-filter-rows">
+      <div class="events-filter-row events-filter-row-top">
+        <div class="p-input-container events-filter-group-status">
+          <span>Статус</span>
+          <p-selectButton
+            [options]="statusOptions"
+            optionLabel="label"
+            optionValue="value"
+            [ngModel]="statusFilter()"
+            (ngModelChange)="statusFilter.set($event); applyFilters()"
+            [ngModelOptions]="{ standalone: true }"
+          />
+        </div>
+
+        <div class="p-input-container events-filter-group-dates">
+          <span>Начало</span>
+          <div class="events-date-range">
+            <input
+              pInputText
+              type="datetime-local"
+              class="events-filter-input events-filter-input-datetime"
+              [ngModel]="breachFrom()"
+              (ngModelChange)="breachFrom.set($event)"
+              [ngModelOptions]="{ standalone: true }"
+            />
+            <span class="events-date-sep">—</span>
+            <input
+              pInputText
+              type="datetime-local"
+              class="events-filter-input events-filter-input-datetime"
+              [ngModel]="breachTo()"
+              (ngModelChange)="breachTo.set($event)"
+              [ngModelOptions]="{ standalone: true }"
+            />
+          </div>
+        </div>
+
+        <div class="p-input-container events-filter-group-duration">
+          <span>Длительность (минуты)</span>
+          <div class="events-date-range events-duration-row">
+            <p-inputNumber
+              [ngModel]="minDurationMin()"
+              (ngModelChange)="minDurationMin.set($event)"
+              [ngModelOptions]="{ standalone: true }"
+              [min]="0"
+              placeholder="Мин"
+              [showButtons]="false"
+              inputStyleClass="events-p-input"
+            />
+            <span class="events-date-sep">—</span>
+            <p-inputNumber
+              [ngModel]="maxDurationMin()"
+              (ngModelChange)="maxDurationMin.set($event)"
+              [ngModelOptions]="{ standalone: true }"
+              [min]="0"
+              placeholder="Макс"
+              [showButtons]="false"
+              inputStyleClass="events-p-input"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="events-filter-row events-filter-row-bottom">
+        <div class="p-input-container">
+          <span>Имя устройства</span>
+          <input
+            #deviceNameFilterInput
+            id="events-deviceName-filter"
+            pInputText
+            type="search"
+            class="events-filter-input"
+            [ngModel]="deviceNameSearch()"
+            (ngModelChange)="deviceNameSearch.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="Часть имени устройства"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="p-input-container">
+          <span>IP-адрес</span>
+          <input
+            id="events-deviceIp-filter"
+            pInputText
+            type="search"
+            class="events-filter-input"
+            [ngModel]="deviceIpSearch()"
+            (ngModelChange)="deviceIpSearch.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="Часть IP-адреса"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="p-input-container">
+          <span>MAC-адрес</span>
+          <input
+            id="events-mac-filter"
+            pInputText
+            type="text"
+            class="events-filter-input"
+            [ngModel]="macSearch()"
+            (ngModelChange)="macSearch.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="Подстрока MAC устройства"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="p-input-container">
+          <span>Метрика</span>
+          <input
+            #metricNameFilterInput
+            id="events-metricName-filter"
+            pInputText
+            type="text"
+            class="events-filter-input"
+            [ngModel]="metricSearch()"
+            (ngModelChange)="metricSearch.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="Подстрока в имени метрики"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="list-filter-panel-actions events-filter-panel-footer">
+      <p-button
+        label="Применить"
+        styleClass="ns-action-blue"
+        [disabled]="loading() || !hasActiveFilters()"
+        (onClick)="applyFilters()"
+      />
+      <p-button label="Сбросить" styleClass="ns-action-blue" [outlined]="true" (onClick)="resetFilters()" />
+    </div>
+      </div>
+    </div>
+  </section>
+
+  <app-monitoring-events-table
+    [events]="sortedEvents()"
+    [loading]="loading()"
+    [lazy]="true"
+    (lazyLoad)="onLazyLoad($event)"
+    [sortField]="sortField()"
+    [sortOrder]="sortOrder()"
+    [paginator]="true"
+    [rows]="page()?.size ?? pageSize()"
+    [totalRecords]="page()?.totalElements ?? 0"
+    [first]="tableFirst()"
+    [rowsPerPageOptions]="[10, 20, 50]"
+    [showCurrentPageReport]="true"
+    [alwaysShowPaginator]="false"
+    currentPageReportTemplate="{first}–{last} из {totalRecords}"
+    [tableMinWidthPx]="1040"
+    [showTimeline]="true"
+    [cellLinksEnabled]="true"
+    [columns]="tableColumns()"
+    [columnWidthsMap]="eventsTableColumnWidthsMap()"
+    (deviceNameFilterRequest)="onTableDeviceNameFilter($event)"
+    (deviceIpFilterRequest)="onTableDeviceIpFilter($event)"
+    (macFilterRequest)="onTableMacFilter($event)"
+    (metricFilterRequest)="onTableMetricFilter($event)"
+    (statusFilterRequest)="onTableStatusFilter($event)"
+    (levelFilterRequest)="onTableLevelFilter($event)"
+  />
+
+  <p-dialog
+    header="Настройка столбцов"
+    [modal]="true"
+    [style]="{ width: 'min(420px, 94vw)' }"
+    styleClass="events-columns-dialog"
+    [visible]="columnsDialogOpen()"
+    (visibleChange)="columnsDialogOpen.set($event)"
+    [draggable]="false"
+    [resizable]="false"
+  >
+    <div class="events-columns-dialog-body">
+      <p class="events-columns-dialog-hint">
+        Отметьте столбцы для отображения и перетащите строки за значок «≡», чтобы изменить порядок.
+      </p>
+      <ul
+        class="monitoring-events-columns-list"
+        cdkDropList
+        (cdkDropListDropped)="onColumnsDraftDrop($event)"
+        role="list"
+        aria-label="Список колонок таблицы событий"
+      >
+        @for (col of columnsDraft(); track col.id) {
+          <li class="monitoring-events-columns-item" cdkDrag role="listitem">
+            <span
+              class="monitoring-events-columns-drag"
+              cdkDragHandle
+              tabindex="0"
+              role="button"
+              aria-hidden="false"
+              [attr.aria-label]="'Перетащить колонку «' + col.label + '»'"
+            >
+              ≡
+            </span>
+            <span class="monitoring-events-columns-label">{{ col.label }}</span>
+            <p-checkbox
+              [binary]="true"
+              [ngModel]="col.visible"
+              (ngModelChange)="onColumnsDraftVisibilityChange(col.id, $event)"
+              [ngModelOptions]="{ standalone: true }"
+              [disabled]="isColumnsDraftVisibilityLocked(col)"
+              [inputId]="'events-page-col-' + col.id"
+              [attr.aria-label]="'Показывать колонку «' + col.label + '»'"
+            />
+          </li>
+        }
+      </ul>
+    </div>
+    <ng-template #footer>
+      <div class="events-columns-dialog-footer">
+        <p-button
+          label="Применить"
+          styleClass="ns-action-blue"
+          [loading]="columnsSaving()"
+          [disabled]="columnsSaving()"
+          (onClick)="applyColumnsDraft()"
+        />
+        <p-button
+          label="Отмена"
+          styleClass="ns-action-blue"
+          [outlined]="true"
+          [disabled]="columnsSaving()"
+          (onClick)="closeColumnsDialog()"
+        />
+        <p-button
+          label="Сбросить по умолчанию"
+          styleClass="ns-action-blue"
+          [text]="true"
+          [disabled]="columnsSaving()"
+          (onClick)="resetColumnsDraftToDefault()"
+        />
+      </div>
+    </ng-template>
+  </p-dialog>
+</section>

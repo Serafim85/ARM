@@ -1,0 +1,228 @@
+<section class="content-card list-page-card users-card">
+  <div class="section-heading">
+    <div>
+      <h1>Пользователи</h1>
+      <p>Управление учетными записями, ролями доступа и блокировкой пользователей системы.</p>
+    </div>
+    <div class="list-page-heading-actions">
+      <p-button
+        styleClass="ns-action-blue"
+        label="Настроить столбцы"
+        icon="pi pi-cog"
+        [outlined]="true"
+        (onClick)="openColumnsDialog()"
+        aria-label="Настроить ширину столбцов таблицы пользователей"
+      />
+      <p-button
+        label="Новый пользователь"
+        styleClass="ns-action-blue"
+        [disabled]="us.usersLoading() || us.createUserLoading()"
+        (onClick)="us.openCreateUserModal()"
+      />
+      <p-button label="Обновить" styleClass="ns-action-blue" [outlined]="true" [disabled]="us.usersLoading()" (onClick)="us.loadSystemUsers()" />
+    </div>
+  </div>
+
+  <div class="list-summary-grid">
+    <div class="list-summary-tile"><span>Всего пользователей</span><strong>{{ us.totalUsersCount() }}</strong></div>
+    <div class="list-summary-tile"><span>Активные</span><strong>{{ us.activeUsersCount() }}</strong></div>
+    <div class="list-summary-tile"><span>Заблокированные</span><strong>{{ us.blockedUsersCount() }}</strong></div>
+    <div class="list-summary-tile"><span>По фильтрам</span><strong>{{ us.filteredSystemUsers().length }}</strong></div>
+  </div>
+
+  <div class="list-filters">
+    <label class="users-search users-field p-input-container">
+      <span>Поиск</span>
+      <input
+        pInputText
+        type="text"
+        [ngModel]="us.usersSearch()"
+        (ngModelChange)="us.usersSearch.set($event)"
+        [ngModelOptions]="{ standalone: true }"
+        placeholder="Имя, email, ID или роль"
+        class="w-full"
+      />
+    </label>
+    <label class="users-field p-input-container">
+      <span>Роль</span>
+      <app-device-option-select
+        [options]="roleFilterOptions()"
+        optionValueKey="value"
+        [value]="us.usersRoleFilter()"
+        (valueChange)="onRoleFilterChange($event)"
+        styleClass="w-full"
+      />
+    </label>
+    <label class="users-field p-input-container">
+      <span>Статус</span>
+      <app-device-option-select
+        [options]="statusFilterOptions"
+        optionValueKey="value"
+        [value]="us.usersStatusFilter()"
+        (valueChange)="onStatusFilterChange($event)"
+        styleClass="w-full"
+      />
+    </label>
+  </div>
+
+  <p-table
+    #usersTableWidths="nsTableColumnWidths"
+    nsTableColumnWidths="users"
+    [nsTableColumnDefs]="usersTableColumns"
+    [nsTableColumnOrder]="usersTableColumnOrder"
+    [nsTableColumnWidthsMap]="usersTableColumnWidthsMap()"
+    [value]="us.filteredSystemUsers()"
+    [paginator]="true"
+    [rows]="15"
+    [rowsPerPageOptions]="[10, 15, 25, 50]"
+    [showCurrentPageReport]="true"
+    [alwaysShowPaginator]="false"
+    currentPageReportTemplate="{first}–{last} из {totalRecords}"
+    dataKey="id"
+    stripedRows
+    [resizableColumns]="true"
+    columnResizeMode="fit"
+    [tableStyle]="{ width: '100%' }"
+    class="p-datatable-sm netscan-p-table users-p-table"
+  >
+    <ng-template #header>
+      <tr>
+        <th
+          pResizableColumn
+          pSortableColumn="displayName"
+          [ngStyle]="columnBoundsStyle(usersTableColumnBounds, 'displayName')"
+        >
+          Пользователь <p-sortIcon field="displayName" />
+        </th>
+        <th
+          pResizableColumn
+          pSortableColumn="email"
+          [ngStyle]="columnBoundsStyle(usersTableColumnBounds, 'email')"
+        >
+          Email <p-sortIcon field="email" />
+        </th>
+        <th pResizableColumn [ngStyle]="columnBoundsStyle(usersTableColumnBounds, 'roles')">Роли</th>
+        <th
+          pResizableColumn
+          pSortableColumn="createdAt"
+          [ngStyle]="columnBoundsStyle(usersTableColumnBounds, 'createdAt')"
+        >
+          Создан <p-sortIcon field="createdAt" />
+        </th>
+        <th pResizableColumn [ngStyle]="columnBoundsStyle(usersTableColumnBounds, 'status')">Статус</th>
+        <th class="users-actions-col" [ngStyle]="columnBoundsStyle(usersTableColumnBounds, 'actions')">
+          <div class="users-actions-cell-inner">Действия</div>
+        </th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-user>
+      <tr>
+        <td>
+          <div class="users-identity">
+            <strong>{{ user.displayName }}</strong>
+          </div>
+        </td>
+        <td>{{ user.email }}</td>
+        <td>
+          <div class="user-role-toggle-list">
+            @for (role of us.appRoles; track role) {
+              <div class="user-role-toggle user-role-toggle-prime">
+                <p-checkbox
+                  [inputId]="'user-' + user.id + '-' + role"
+                  [binary]="true"
+                  [ngModel]="us.hasRole(user, role)"
+                  (ngModelChange)="us.onUserRoleChange(user, role, $event)"
+                  [ngModelOptions]="{ standalone: true }"
+                  [disabled]="!us.canEditUserRoles(user)"
+                />
+                <label [for]="'user-' + user.id + '-' + role">{{ role }}</label>
+              </div>
+            }
+          </div>
+        </td>
+        <td>{{ user.createdAt }}</td>
+        <td>
+          <span class="user-status-chip" [class.user-status-chip-blocked]="!user.enabled">{{
+            user.enabled ? 'Активен' : 'Заблокирован'
+          }}</span>
+        </td>
+        <td class="users-actions-cell">
+          <div class="users-actions-cell-inner">
+            <p-button
+              icon="pi pi-ellipsis-v"
+              [text]="true"
+              [rounded]="true"
+              severity="secondary"
+              [disabled]="us.usersLoading()"
+              (onClick)="openUserRowMenu($event, user)"
+              [attr.aria-label]="'Действия: ' + user.displayName"
+            />
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</section>
+<p-menu #userRowMenu [popup]="true" [model]="userRowMenuItems()" appendTo="body" />
+
+<p-dialog
+  header="Настройка столбцов"
+  [modal]="true"
+  [style]="{ width: 'min(420px, 94vw)' }"
+  styleClass="users-columns-dialog"
+  [visible]="columnsDialogOpen()"
+  (visibleChange)="columnsDialogOpen.set($event)"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <p class="users-columns-dialog-hint">
+    Потяните разделитель между заголовками колонок в таблице, чтобы изменить ширину. При наведении на границу
+    появится маркер изменения размера.
+  </p>
+  <ng-template #footer>
+    <div class="users-columns-dialog-footer">
+      <p-button label="Закрыть" styleClass="ns-action-blue" [outlined]="true" (onClick)="closeColumnsDialog()" />
+      <p-button
+        label="Сбросить ширину колонок"
+        styleClass="ns-action-blue"
+        [text]="true"
+        (onClick)="resetUsersTableColumnWidths()"
+      />
+    </div>
+  </ng-template>
+</p-dialog>
+
+@if (us.confirmBlockUser(); as targetUser) {
+  <div class="modal-backdrop" (click)="us.closeBlockConfirmModal()">
+    <section class="user-modal user-confirm-modal" (click)="$event.stopPropagation()">
+      <div class="user-modal-header">
+        <div>
+          <span class="overline">Подтверждение действия</span>
+          <h2>{{ targetUser.enabled ? 'Заблокировать пользователя' : 'Разблокировать пользователя' }}</h2>
+        </div>
+        <p-button label="Закрыть" [text]="true" styleClass="user-modal-close" (onClick)="us.closeBlockConfirmModal()" />
+      </div>
+      <div class="user-confirm-copy">
+        <strong>{{ targetUser.displayName }}</strong>
+        <p>{{ targetUser.email }}</p>
+        <span>
+          {{
+            targetUser.enabled
+              ? 'После подтверждения пользователь потеряет доступ к системе до разблокировки.'
+              : 'После подтверждения пользователь снова сможет войти в систему.'
+          }}
+        </span>
+      </div>
+      <div class="user-confirm-actions">
+        <p-button label="Отмена" [outlined]="true" (onClick)="us.closeBlockConfirmModal()" />
+        <p-button
+          [label]="targetUser.enabled ? 'Подтвердить блокировку' : 'Подтвердить разблокировку'"
+          [disabled]="us.usersLoading()"
+          (onClick)="us.confirmToggleUserBlocked()"
+        />
+      </div>
+    </section>
+  </div>
+}
+
+<app-user-form-modal />

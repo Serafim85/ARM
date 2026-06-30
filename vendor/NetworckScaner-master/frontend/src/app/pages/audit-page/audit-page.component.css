@@ -1,0 +1,40 @@
+.audit-page-card .audit-target-cell,
+.audit-page-card .audit-details-cell {
+  word-break: break-word;
+  max-width: 22rem;
+}
+
+.audit-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.75rem 1rem;
+  align-items: end;
+  margin-bottom: 0.75rem;
+}
+
+.audit-field-wide {
+  grid-column: span 2;
+}
+
+@media (max-width: 720px) {
+  .audit-field-wide {
+    grid-column: span 1;
+  }
+}
+
+.audit-datetime-input {
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--p-border-radius-md, 6px);
+  border: 1px solid var(--p-input-border-color, #cbd5e1);
+  background: var(--p-input-background, #fff);
+  color: var(--p-input-color, inherit);
+  font: inherit;
+}
+
+.audit-filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}

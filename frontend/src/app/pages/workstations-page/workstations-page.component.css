@@ -1,0 +1,62 @@
+.workstations-card .list-summary-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 720px) {
+  .workstations-card .list-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.workstations-card .list-summary-tile {
+  min-height: 84px;
+  align-content: center;
+}
+
+.workstations-card .list-summary-tile strong {
+  font-size: 1.75rem;
+}
+
+.workstations-card .workstations-row {
+  cursor: pointer;
+}
+
+.workstations-card .workstations-row:hover td {
+  background: color-mix(in srgb, var(--p-primary-color) 6%, transparent);
+}
+
+.workstations-card .list-filters {
+  align-items: flex-end;
+}
+
+.workstations-field {
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .workstations-card .list-filters {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .workstations-card .list-page-heading-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .workstations-card .list-page-heading-actions > * {
+    min-width: 0;
+  }
+
+  /* На телефоне: хост, IP, статус */
+  .workstations-table th:nth-child(3),
+  .workstations-table td:nth-child(3),
+  .workstations-table th:nth-child(5),
+  .workstations-table td:nth-child(5),
+  .workstations-table th:nth-child(6),
+  .workstations-table td:nth-child(6) {
+    display: none;
+  }
+}

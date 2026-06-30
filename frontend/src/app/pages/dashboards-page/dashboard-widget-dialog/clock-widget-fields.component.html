@@ -1,0 +1,134 @@
+<div class="editor-section">
+  <h4 class="editor-title">Настройки часов</h4>
+
+  <label class="p-input-container">
+    <span>Тип времени</span>
+    <app-device-option-select
+      [options]="timeTypeOptions"
+      optionValueKey="value"
+      [(value)]="timeType"
+      styleClass="w-full"
+    />
+  </label>
+
+  <label class="p-input-container">
+    <span>Тип отображения</span>
+    <app-device-option-select
+      [options]="clockTypeOptions"
+      optionValueKey="value"
+      [(value)]="clockType"
+      styleClass="w-full"
+    />
+  </label>
+
+  <div class="editor-checkbox-grid">
+    <div class="checkbox-line">
+      <p-checkbox
+        [(ngModel)]="showDate"
+        [ngModelOptions]="{ standalone: true }"
+        binary="true"
+        inputId="clock-show-date"
+        id="clock-show-date"
+      />
+      <label for="clock-show-date">Показывать дату</label>
+    </div>
+    <div class="checkbox-line">
+      <p-checkbox
+        [(ngModel)]="showTime"
+        [ngModelOptions]="{ standalone: true }"
+        binary="true"
+        inputId="clock-show-time"
+        id="clock-show-time"
+      />
+      <label for="clock-show-time">Показывать время</label>
+    </div>
+    <div class="checkbox-line">
+      <p-checkbox
+        [(ngModel)]="showTimeZone"
+        [ngModelOptions]="{ standalone: true }"
+        binary="true"
+        inputId="clock-show-tz"
+        id="clock-show-tz"
+      />
+      <label for="clock-show-tz">Показывать таймзону</label>
+    </div>
+    <div class="checkbox-line">
+      <p-checkbox
+        [(ngModel)]="showSeconds"
+        [ngModelOptions]="{ standalone: true }"
+        binary="true"
+        inputId="clock-show-seconds"
+        id="clock-show-seconds"
+      />
+      <label for="clock-show-seconds">Показывать секунды</label>
+    </div>
+  </div>
+
+  <label class="p-input-container">
+    <span>Формат времени</span>
+    <app-device-option-select
+      [options]="timeFormatOptions"
+      optionValueKey="value"
+      [(value)]="timeFormat"
+      styleClass="w-full"
+    />
+  </label>
+
+  <label class="p-input-container">
+    <span>Формат таймзоны</span>
+    <app-device-option-select
+      [options]="timeZoneFormatOptions"
+      optionValueKey="value"
+      [(value)]="timeZoneFormat"
+      styleClass="w-full"
+    />
+  </label>
+
+  <label class="p-input-container">
+    <span>Item ref (опционально)</span>
+    <input
+      pInputText
+      class="w-full"
+      [(ngModel)]="itemRef"
+      [ngModelOptions]="{ standalone: true }"
+      placeholder="Например: system.localtime[local]"
+    />
+  </label>
+
+  <label class="p-input-container">
+    <span>Таймзона (опционально)</span>
+    <app-device-option-select
+      [options]="timeZoneOptions"
+      optionValueKey="value"
+      [(value)]="timeZone"
+      placeholder="Выберите временную зону"
+      [showClear]="true"
+      [filter]="true"
+      filterPlaceholder="Поиск по названию зоны"
+      styleClass="w-full"
+      emptyFilterMessage="Ничего не найдено"
+      emptyMessage="Ничего не найдено"
+    />
+  </label>
+
+  <label class="p-input-container">
+    <span>Цвет фона (опционально)</span>
+    <div class="color-field-row">
+      <input
+        type="color"
+        class="color-picker-native"
+        [value]="backgroundColorPickerValue"
+        (input)="onBackgroundColorPicked($event)"
+        title="Выбрать цвет"
+        aria-label="Выбрать цвет фона"
+      />
+      <input
+        pInputText
+        class="w-full color-field-text"
+        [(ngModel)]="backgroundColor"
+        [ngModelOptions]="{ standalone: true }"
+        placeholder="#1f2937"
+      />
+    </div>
+  </label>
+</div>

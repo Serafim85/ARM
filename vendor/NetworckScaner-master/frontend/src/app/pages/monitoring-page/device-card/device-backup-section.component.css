@@ -1,0 +1,254 @@
+.backup-config-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.backup-config-card-embedded {
+  padding: 20px;
+}
+
+.backup-config-embedded-header {
+  margin-bottom: 4px;
+}
+
+.backup-config-embedded-header h2 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.backup-config-embedded-header p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.backup-config-body-embedded {
+  padding: 0;
+  margin-top: 16px;
+  border-top: 1px solid #e2e8f0;
+  animation: none;
+}
+
+.backup-config-body-embedded .backup-config-body-inner {
+  padding-top: 18px;
+}
+
+.backup-list-summary {
+  margin-bottom: 4px;
+}
+
+.backup-summary-schedule {
+  font-size: 1rem !important;
+  font-weight: 700;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+.backup-summary-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  font-size: 13px;
+  color: #64748b;
+  margin: 0 0 14px;
+}
+
+.backup-table-filters {
+  grid-template-columns: minmax(240px, 1fr);
+  margin-bottom: 2px;
+}
+
+.backup-search-field span {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.backup-config-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  width: 100%;
+  margin: 0;
+  padding: 18px 20px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  border-radius: 20px;
+  transition: background 0.15s ease;
+}
+
+.backup-config-toggle:hover {
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.backup-config-toggle:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.backup-chevron {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  margin-top: 2px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 12px;
+  line-height: 1;
+  transition: transform 0.2s ease, background 0.15s ease;
+}
+
+.backup-config-toggle:hover .backup-chevron {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.backup-config-card[data-expanded='true'] .backup-chevron {
+  transform: rotate(90deg);
+}
+
+.backup-toggle-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.backup-toggle-text h2 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.backup-toggle-text p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.backup-config-body {
+  padding: 0 20px 20px;
+  border-top: 1px solid #e2e8f0;
+  animation: backup-body-in 0.2s ease;
+}
+
+@keyframes backup-body-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.backup-config-body-inner {
+  padding-top: 16px;
+}
+
+.backup-body-preloader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 120px;
+  justify-content: center;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.backup-body-preloader-spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #e2e8f0;
+  border-top-color: #2563eb;
+  animation: backup-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes backup-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.backup-config-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.backup-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.backup-helper-text {
+  color: #64748b;
+  margin: 2px 0 12px;
+}
+
+.backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.backup-status-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: #059669;
+}
+
+.backup-status-warning {
+  color: #ea580c;
+}
+
+.backup-baseline-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.backup-baseline-diff {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.backup-upload-button-prime {
+  position: relative;
+  display: inline-block;
+}
+
+.backup-upload-button-prime input[type='file'] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.backup-upload-button-disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.backup-table-search {
+  width: 100%;
+  max-width: 22rem;
+}

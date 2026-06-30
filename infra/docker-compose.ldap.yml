@@ -1,0 +1,25 @@
+# Тестовый OpenLDAP для демо (admin/operator/viewer).
+# Usage: docker compose -f infra/docker-compose.yml -f infra/docker-compose.ldap.yml up -d ldap
+
+services:
+  ldap:
+    image: osixia/openldap:1.5.0
+    container_name: wisla-arm-ldap
+    restart: unless-stopped
+    ports:
+      - "389:389"
+    environment:
+      LDAP_ORGANISATION: NetworkScanner
+      LDAP_DOMAIN: networkscanner.local
+      LDAP_ADMIN_PASSWORD: admin
+      LDAP_CONFIG_PASSWORD: config
+      LDAP_TLS: "false"
+      LDAP_REMOVE_CONFIG_AFTER_SETUP: "false"
+    volumes:
+      - wisla-arm-ldap-data:/var/lib/ldap
+      - wisla-arm-ldap-config:/etc/ldap/slapd.d
+      - ./ldap/bootstrap:/container/service/slapd/assets/config/bootstrap/ldif/custom
+
+volumes:
+  wisla-arm-ldap-data:
+  wisla-arm-ldap-config:

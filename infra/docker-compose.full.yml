@@ -1,0 +1,32 @@
+# Optional: Kafka + LDAP from NS (v1 / full dev)
+# Usage: docker compose -f infra/docker-compose.yml -f infra/docker-compose.full.yml up -d
+
+services:
+  zookeeper:
+    image: docker.io/bitnamilegacy/zookeeper:3.9
+    container_name: wisla-arm-zookeeper
+    restart: unless-stopped
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+    volumes:
+      - wisla-arm-zookeeper-data:/bitnami/zookeeper
+
+  kafka:
+    image: docker.io/bitnamilegacy/kafka:3.7
+    container_name: wisla-arm-kafka
+    restart: unless-stopped
+    depends_on:
+      - zookeeper
+    ports:
+      - "9094:9094"
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CFG_LISTENERS: INTERNAL://:9092,EXTERNAL://:9094
+      KAFKA_CFG_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:9094
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+
+volumes:
+  wisla-arm-zookeeper-data:

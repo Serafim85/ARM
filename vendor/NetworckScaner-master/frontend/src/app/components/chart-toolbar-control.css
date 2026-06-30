@@ -1,0 +1,132 @@
+.chart-toolbar-control,
+.chart-toolbar-selectbutton.p-selectbutton {
+  --chart-toolbar-btn-size: 2.35rem;
+  --chart-toolbar-shell-padding: 4px;
+  --chart-toolbar-shell-height: calc(var(--chart-toolbar-btn-size) + var(--chart-toolbar-shell-padding) * 2 + 2px);
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  height: var(--chart-toolbar-shell-height);
+  min-height: var(--chart-toolbar-shell-height);
+  max-height: var(--chart-toolbar-shell-height);
+  padding: var(--chart-toolbar-shell-padding);
+  border-radius: 12px;
+  background: var(--ns-bg-muted, #f1f5f9);
+  border: 1px solid var(--ns-border, #e2e8f0);
+  gap: 4px;
+}
+
+.chart-toolbar-control__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  align-self: center;
+  box-sizing: border-box;
+  width: var(--chart-toolbar-btn-size, 2.35rem);
+  height: var(--chart-toolbar-btn-size, 2.35rem);
+  min-width: var(--chart-toolbar-btn-size, 2.35rem);
+  min-height: var(--chart-toolbar-btn-size, 2.35rem);
+  max-height: var(--chart-toolbar-btn-size, 2.35rem);
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ns-text, #0f172a);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: none;
+  appearance: none;
+}
+
+.chart-toolbar-control__btn--text {
+  width: auto;
+  min-width: 2.35rem;
+  padding: 0 0.65rem;
+}
+
+.chart-toolbar-control__btn:hover {
+  background: rgba(148, 163, 184, 0.18);
+}
+
+.chart-toolbar-control__btn.is-selected {
+  background: var(--ns-surface, #fff);
+  box-shadow: 0 0 0 1px var(--ns-border, #e2e8f0);
+}
+
+.chart-toolbar-control__btn i {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.chart-toolbar-control-menu {
+  display: grid;
+  gap: 4px;
+}
+
+.chart-toolbar-control-popover.p-popover {
+  --p-popover-content-padding: 0.35rem;
+}
+
+.chart-toolbar-selectbutton.p-selectbutton .p-togglebutton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  align-self: center;
+  box-sizing: border-box;
+  height: var(--chart-toolbar-btn-size, 2.35rem);
+  min-width: var(--chart-toolbar-btn-size, 2.35rem);
+  min-height: var(--chart-toolbar-btn-size, 2.35rem);
+  max-height: var(--chart-toolbar-btn-size, 2.35rem);
+  padding: 0 0.65rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ns-text, #0f172a);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: none;
+}
+
+.chart-toolbar-selectbutton--embedded.p-selectbutton {
+  height: var(--chart-toolbar-btn-size, 2.35rem);
+  min-height: var(--chart-toolbar-btn-size, 2.35rem);
+  max-height: var(--chart-toolbar-btn-size, 2.35rem);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  gap: 4px;
+}
+
+.chart-toolbar-selectbutton--text.p-selectbutton .p-togglebutton {
+  width: auto;
+  min-width: var(--chart-toolbar-btn-size, 2.35rem);
+  padding: 0 0.65rem;
+}
+
+.chart-toolbar-selectbutton--icon-only.p-selectbutton .p-togglebutton {
+  width: var(--chart-toolbar-btn-size, 2.35rem);
+  padding: 0;
+}
+
+.chart-toolbar-selectbutton.p-selectbutton .p-togglebutton:not(:disabled):hover {
+  background: rgba(148, 163, 184, 0.18);
+}
+
+.chart-toolbar-selectbutton.p-selectbutton .p-togglebutton.p-togglebutton-checked {
+  background: var(--ns-surface, #fff);
+  box-shadow: 0 0 0 1px var(--ns-border, #e2e8f0);
+}
+
+.chart-toolbar-selectbutton.p-selectbutton .p-togglebutton i {
+  font-size: 1rem;
+  line-height: 1;
+}

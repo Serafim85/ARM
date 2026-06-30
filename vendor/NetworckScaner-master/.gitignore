@@ -1,0 +1,23 @@
+target/
+**/target/
+
+# Runtime logs (see app.logging.file.path in application.properties)
+logs/
+**/logs/
+*.log
+
+.idea/
+**/.idea/
+
+/.idea/
+**/target/**
+**/node_modules
+**/dist
+**/node_installation
+**/angular
+.vscode/
+**/.vscode/
+
+/.vscode/
+**/tools/**
+

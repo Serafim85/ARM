@@ -1,0 +1,29 @@
+<div class="monitoring-details-grid">
+  <section class="content-card device-info-card device-info-card-inner">
+    <div class="device-info-list">
+      <div class="device-info-row"><span>Серийный номер</span><strong>{{ device.serialNumber }}</strong></div>
+      <div class="device-info-row"><span>Модель</span><strong>{{ device.model }}</strong></div>
+      <div class="device-info-row"><span>IP-адрес</span><strong>{{ device.ip }}</strong></div>
+      <div class="device-info-row"><span>SNMP-порт</span><strong>{{ device.port ?? '—' }}</strong></div>
+      <div class="device-info-row"><span>Имя хоста</span><strong>{{ device.hostName }}</strong></div>
+      <div class="device-info-row"><span>Доменное имя</span><strong>{{ device.domainName }}</strong></div>
+      <div class="device-info-row"><span>Производитель</span><strong>{{ device.vendor }}</strong></div>
+      <div class="device-info-row"><span>MAC-адрес</span><strong>{{ device.macAddress }}</strong></div>
+      <div class="device-info-row"><span>Статус обслуживания</span><strong>{{ device.status }}</strong></div>
+      <div class="device-info-row"><span>Версия ПО</span><strong>{{ device.firmwareVersion }}</strong></div>
+      <div class="device-info-row"><span>Версия загрузчика</span><strong>{{ details().bootVersion }}</strong></div>
+      <div class="device-info-row"><span>Время работы</span><strong>{{ details().uptime }}</strong></div>
+      <div class="device-info-row"><span>Описание</span><strong>{{ details().description }}</strong></div>
+      <div class="device-info-row"><span>Контакты администратора</span><strong>{{ details().adminContact }}</strong></div>
+      <div class="device-info-row"><span>Аппаратная версия</span><strong>{{ details().hardwareVersion }}</strong></div>
+      <div class="device-info-row"><span>Местоположение устройства</span><strong>{{ details().location }}</strong></div>
+      <div class="device-info-row"><span>Время добавления</span><strong>{{ details().addedAt }}</strong></div>
+      <div class="device-info-row"><span>Выбранный шаблон</span><strong>{{ meta()?.templateId || '—' }}</strong></div>
+      <div class="device-info-row"><span>Effective template</span><strong>{{ meta()?.effectiveTemplateId || '—' }}</strong></div>
+      <div class="device-info-row"><span>Версия шаблона</span><strong>{{ meta()?.templateVersion || '—' }}</strong></div>
+      <div class="device-info-row"><span>Версия пакета</span><strong>{{ meta()?.packVersion || '—' }}</strong></div>
+    </div>
+  </section>
+
+  <app-device-telemetry-live-panel [device]="device"></app-device-telemetry-live-panel>
+</div>

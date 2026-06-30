@@ -1,0 +1,31 @@
+CREATE TABLE IF NOT EXISTS access_profiles (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL UNIQUE,
+  description VARCHAR(1024),
+  snmp_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+  snmp_version VARCHAR(16),
+  snmp_port INTEGER,
+  snmp_community VARCHAR(512),
+  snmp_security_username VARCHAR(255),
+  snmp_auth_protocol VARCHAR(32),
+  snmp_auth_password VARCHAR(512),
+  snmp_privacy_protocol VARCHAR(32),
+  snmp_privacy_password VARCHAR(512),
+  ssh_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+  ssh_port INTEGER,
+  ssh_username VARCHAR(255),
+  ssh_password VARCHAR(512),
+  ssh_private_key_pem TEXT,
+  ssh_passphrase VARCHAR(512),
+  https_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+  https_port INTEGER,
+  https_username VARCHAR(255),
+  https_password VARCHAR(512),
+  https_client_cert_pem TEXT,
+  https_client_key_pem TEXT,
+  https_insecure_skip_verify BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_access_profiles_name ON access_profiles (name);

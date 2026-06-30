@@ -1,0 +1,149 @@
+<section class="content-card configuration-panel list-page-card">
+  <div class="section-heading">
+    <div>
+      <h2>Настройки мониторинга</h2>
+      <p>Включайте и отключайте item мониторинга из связанных шаблонов устройства.</p>
+    </div>
+    <button
+      pButton
+      type="button"
+      class="ns-action-blue"
+      label="Сохранить"
+      icon="pi pi-save"
+      [disabled]="saving() || !hasChanges()"
+      [loading]="saving()"
+      (click)="save()"
+    ></button>
+  </div>
+
+  <div class="list-summary-grid item-config-summary-grid">
+    <div class="list-summary-tile device-templates-tile">
+      @if (canManageTemplates()) {
+        <div class="device-templates-edit-btn">
+          <p-button
+            icon="pi pi-pencil"
+            [text]="true"
+            [rounded]="true"
+            severity="secondary"
+            size="small"
+            [disabled]="templatesSaving()"
+            [loading]="templatesSaving()"
+            (onClick)="openTemplatePicker()"
+            aria-label="Редактировать шаблоны мониторинга"
+          />
+        </div>
+      }
+      <span>Шаблоны</span>
+      <strong
+        [pTooltip]="assignedTemplatesTooltip()"
+        tooltipPosition="top"
+        [showDelay]="120"
+      >
+        {{ assignedTemplateIds().length > 0 ? assignedTemplateIds().length : '—' }}
+      </strong>
+    </div>
+    <div class="list-summary-tile"><span>Всего item</span><strong>{{ totalCount() }}</strong></div>
+    <div class="list-summary-tile"><span>Активно</span><strong>{{ activeCount() }}</strong></div>
+    <div class="list-summary-tile"><span>Доступно для включения</span><strong>{{ totalCount() - activeCount() }}</strong></div>
+    <div class="list-summary-tile"><span>Показано в таблице</span><strong>{{ filteredItems().length }}</strong></div>
+  </div>
+
+  <div class="list-filters config-ports-filters">
+    <label class="users-search users-field p-input-container">
+      <span>Поиск</span>
+      <input
+        pInputText
+        type="search"
+        [ngModel]="search()"
+        (ngModelChange)="search.set($event)"
+        [ngModelOptions]="{ standalone: true }"
+        placeholder="Имя, ключ, тип item, discovery rule…"
+        class="w-full config-port-search-input"
+      />
+    </label>
+  </div>
+
+  <p-table
+    [value]="filteredItems()"
+    [paginator]="true"
+    [rows]="15"
+    [rowsPerPageOptions]="[10, 15, 25, 50]"
+    [showCurrentPageReport]="true"
+    [alwaysShowPaginator]="false"
+    currentPageReportTemplate="{first}–{last} из {totalRecords}"
+    stripedRows
+    [tableStyle]="{ 'min-width': '72rem' }"
+    class="p-datatable-sm netscan-p-table"
+  >
+    <ng-template #header>
+      <tr>
+        <th style="width: 7rem">Активно</th>
+        <th>Имя</th>
+        <th>Ключ</th>
+        <th>Тип</th>
+        <th>Discovery</th>
+        <th>Инстанс</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-row>
+      <tr>
+        <td>
+          <p-checkbox
+            [binary]="true"
+            [ngModel]="row.active"
+            (ngModelChange)="onItemEnabledChange(row, $event)"
+            [ngModelOptions]="{ standalone: true }"
+          />
+        </td>
+        <td>{{ row.name }}</td>
+        <td>{{ row.itemKey }}</td>
+        <td>{{ row.itemType }}</td>
+        <td>{{ row.discoveryPrototype ? (row.discoveryRuleKey || 'Да') : 'Нет' }}</td>
+        <td>{{ row.instanceKey || '—' }}</td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="6">Каталог item недоступен для этого устройства.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</section>
+
+<section class="content-card device-info-card device-info-card-inner">
+  <div class="chart-card-header">
+    <div>
+      <h2>Discovery instances</h2>
+      <p>Активные LLD-инстансы и их macros.</p>
+    </div>
+  </div>
+  @if (discoveryState().length === 0) {
+    <div class="empty-state empty-state-inline">
+      <strong>Discovery-инстансов нет</strong>
+      <p>Для шаблона без LLD это нормально.</p>
+    </div>
+  } @else {
+    <div class="device-info-list">
+      @for (instance of discoveryState().slice(0, 10); track instance.discoveryRuleKey + '::' + instance.instanceKey) {
+        <div class="device-info-row">
+          <span>{{ instance.discoveryRuleKey }}</span>
+          <strong>{{ instance.instanceKey }}</strong>
+        </div>
+      }
+    </div>
+  }
+</section>
+
+<p-confirmDialog appendTo="body" />
+
+<app-monitoring-template-picker-dialog
+  [visible]="templatePickerOpen()"
+  (visibleChange)="onTemplatePickerVisibleChange($event)"
+  [templates]="ms.monitoringTemplates()"
+  [templatesLoading]="ms.templatesLoading()"
+  [selectedTemplateIds]="draftTemplateIds()"
+  (selectedTemplateIdsChange)="onTemplatePickerDraftChange($event)"
+  title="Шаблоны мониторинга устройства"
+  [minSelectedCount]="1"
+  [closeOnSave]="false"
+/>

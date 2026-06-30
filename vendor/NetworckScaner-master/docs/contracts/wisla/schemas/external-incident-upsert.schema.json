@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://networkscanner.local/contracts/wisla/schemas/external-incident-upsert.schema.json",
+  "title": "ExternalIncidentUpsert",
+  "description": "NS -> Wisla incident lifecycle payload (§8.4)",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "eventId",
+    "sourceSystem",
+    "externalDeviceId",
+    "templateId",
+    "templateVersion",
+    "incidentStatus",
+    "triggerUuid",
+    "triggerName",
+    "metricName",
+    "instanceKey",
+    "thresholdLevel",
+    "thresholdValue",
+    "actualValue",
+    "breachStartedAt",
+    "receivedAt",
+    "correlationKey"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "eventId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceSystem": {
+      "type": "string",
+      "minLength": 1
+    },
+    "externalDeviceId": {
+      "type": "integer"
+    },
+    "templateId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "templateVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "incidentStatus": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "RESOLVED"
+      ]
+    },
+    "triggerUuid": {
+      "type": "string",
+      "minLength": 1
+    },
+    "triggerName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "metricName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "instanceKey": {
+      "type": "string"
+    },
+    "thresholdLevel": {
+      "type": "string",
+      "enum": [
+        "NOT_CLASSIFIED",
+        "INFORMATION",
+        "WARNING",
+        "AVERAGE",
+        "HIGH",
+        "DISASTER"
+      ]
+    },
+    "thresholdValue": {
+      "type": "number"
+    },
+    "actualValue": {
+      "type": "number"
+    },
+    "breachStartedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "normalizedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "receivedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlationKey": {
+      "type": "string",
+      "minLength": 1
+    },
+    "severity": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "triggerExpression": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "recoveryExpression": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "recoveryPath": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "packVersion": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

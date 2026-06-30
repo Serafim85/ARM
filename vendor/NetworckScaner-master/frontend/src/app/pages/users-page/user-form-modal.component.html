@@ -1,0 +1,165 @@
+@if (us.userFormSheet(); as sheet) {
+  <div class="modal-backdrop" (click)="onBackdrop()">
+    <section class="user-modal user-edit-modal user-form-modal-panel" (click)="$event.stopPropagation()">
+      <div class="user-modal-header">
+        <div>
+          @if (sheet.kind === 'create') {
+            <span class="overline">Новая учётная запись</span>
+            <h2>Создать пользователя</h2>
+          } @else {
+            <span class="overline">Редактирование пользователя</span>
+            <h2>{{ sheet.user!.displayName }}</h2>
+          }
+        </div>
+        <p-button label="Закрыть" styleClass="ns-action-blue user-modal-close" [text]="true" (onClick)="close()" />
+      </div>
+
+      @if (sheet.kind === 'create') {
+        <p class="user-form-modal-lead">
+          После создания пользователь появится в таблице. Роли можно изменить и в списке.
+        </p>
+
+        <div class="user-form-modal-grid users-form-prime">
+          <label class="p-input-container">
+            <span>Имя</span>
+            <input
+              pInputText
+              type="text"
+              [ngModel]="us.createUserDisplayName()"
+              (ngModelChange)="us.createUserDisplayName.set($event)"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="System Administrator"
+              class="w-full"
+            />
+          </label>
+          <label class="p-input-container">
+            <span>Email</span>
+            <input
+              pInputText
+              type="email"
+              [ngModel]="us.createUserEmail()"
+              (ngModelChange)="us.createUserEmail.set($event)"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="user@example.com"
+              class="w-full"
+            />
+          </label>
+          <label class="p-input-container">
+            <span>Пароль</span>
+            <p-password
+              [ngModel]="us.createUserPassword()"
+              (ngModelChange)="us.createUserPassword.set($event)"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="Минимум 6 символов"
+              [toggleMask]="true"
+              [feedback]="false"
+              class="w-full"
+              inputStyleClass="w-full"
+            />
+          </label>
+          <label class="p-input-container">
+            <span>Статус</span>
+            <app-device-option-select
+              [options]="createStatusOptions"
+              optionValueKey="value"
+              [value]="us.createUserEnabled() ? 'ENABLED' : 'BLOCKED'"
+              (valueChange)="onCreateUserStatusChange($event)"
+              styleClass="w-full"
+            />
+          </label>
+        </div>
+
+        <div class="user-form-modal-roles">
+          <span class="user-form-modal-roles-label">Роли</span>
+          <div class="users-create-roles">
+            @for (role of us.appRoles; track role) {
+              <div class="user-role-toggle user-role-toggle-prime">
+                <p-checkbox
+                  [inputId]="'modal-create-role-' + role"
+                  [binary]="true"
+                  [ngModel]="hasCreateRole(role)"
+                  (ngModelChange)="onCreateRoleChange(role, $event)"
+                  [ngModelOptions]="{ standalone: true }"
+                  [disabled]="us.createUserLoading()"
+                />
+                <label [for]="'modal-create-role-' + role">{{ role }}</label>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="user-confirm-actions">
+          <p-button label="Отмена" styleClass="ns-action-blue" [outlined]="true" [disabled]="us.createUserLoading()" (onClick)="close()" />
+          <p-button
+            styleClass="ns-action-blue"
+            [label]="us.createUserLoading() ? 'Создание...' : 'Создать'"
+            [disabled]="us.createUserLoading()"
+            (onClick)="us.createUser()"
+          />
+        </div>
+      } @else {
+        <div class="user-edit-grid users-form-prime">
+          <label class="p-input-container">
+            <span>Имя</span>
+            <input
+              pInputText
+              type="text"
+              [ngModel]="us.editUserDisplayName()"
+              (ngModelChange)="us.editUserDisplayName.set($event)"
+              [ngModelOptions]="{ standalone: true }"
+              class="w-full"
+            />
+          </label>
+          <label class="p-input-container">
+            <span>Email</span>
+            <input
+              pInputText
+              type="email"
+              [ngModel]="us.editUserEmail()"
+              (ngModelChange)="us.editUserEmail.set($event)"
+              [ngModelOptions]="{ standalone: true }"
+              class="w-full"
+            />
+          </label>
+        </div>
+
+        <div class="user-edit-password-panel">
+          <label class="p-input-container">
+            <span>Новый пароль</span>
+            <input
+              pInputText
+              type="text"
+              [ngModel]="us.resetPasswordValue()"
+              (ngModelChange)="us.resetPasswordValue.set($event)"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="Введите вручную или сгенерируйте"
+              class="w-full"
+            />
+          </label>
+          <div class="users-actions">
+            <p-button label="Сгенерировать пароль" styleClass="ns-action-blue" [outlined]="true" (onClick)="us.generateTemporaryPassword()" />
+            <p-button
+              label="Копировать пароль"
+              styleClass="ns-action-blue"
+              [outlined]="true"
+              [disabled]="!us.generatedPassword() && !us.resetPasswordValue().trim()"
+              (onClick)="us.copyGeneratedPassword()"
+            />
+            <p-button
+              label="Сбросить пароль"
+              styleClass="ns-action-blue"
+              [outlined]="true"
+              [disabled]="us.usersLoading() || !us.resetPasswordValue().trim()"
+              (onClick)="resetPassword()"
+            />
+          </div>
+        </div>
+
+        <div class="user-confirm-actions">
+          <p-button label="Отмена" styleClass="ns-action-blue" [outlined]="true" [disabled]="us.usersLoading()" (onClick)="close()" />
+          <p-button label="Сохранить изменения" styleClass="ns-action-blue" [disabled]="us.usersLoading()" (onClick)="saveProfile()" />
+        </div>
+      }
+    </section>
+  </div>
+}

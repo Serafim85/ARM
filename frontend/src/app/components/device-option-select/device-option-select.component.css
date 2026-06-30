@@ -1,0 +1,41 @@
+/* Выбранное значение в закрытом p-select — ужимание и троеточие. */
+:host,
+::ng-deep .device-option-select-trigger {
+  min-width: 0;
+}
+
+::ng-deep .device-option-select-trigger .p-select-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+::ng-deep .device-option-select-trigger .device-option-select-label {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+/* Overlay в body: ограничение ширины панели. */
+::ng-deep .device-option-select-panel {
+  width: 400px;
+  max-width: 400px;
+}
+
+::ng-deep .device-option-select-panel .p-select-list-container,
+::ng-deep .device-option-select-panel .p-select-list {
+  width: 100%;
+}
+
+::ng-deep .device-option-select-panel .device-option-select-option,
+::ng-deep .device-option-select-panel .device-option-select-label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}

@@ -1,0 +1,879 @@
+@if (discoveryViewOpen()) {
+  <section
+    class="content-card scan-section scan-section-results scan-section-discovery"
+    [class.scan-section-results--empty]="!discoveryLoading() && discoveryDevices().length === 0"
+  >
+    <div class="scan-job-results-meta">
+      <div class="scan-job-results-meta-main">
+        <strong class="scan-job-results-title">Обнаружено новых</strong>
+        <div class="scan-job-results-sub">
+          <span class="muted">Уникальные IP из последних результатов задач, ещё не поставлены на мониторинг</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="scan-section-head scan-section-head-results">
+      <div class="scan-section-titles">
+        <h2>Список устройств</h2>
+        <p>
+          @if (discoveryLoading()) {
+            Загрузка списка…
+          } @else if (discoveryDevices().length === 0) {
+            Нет устройств для постановки на мониторинг.
+          } @else {
+            Отметьте строки в таблице. Шаблон мониторинга и кнопка — под таблицей. Поиск учитывает поля устройства и подписи доступности.
+          }
+        </p>
+      </div>
+      <div class="scan-results-heading-actions">
+        <div class="scan-results-heading-actions-left">
+          <p-button
+            label="Назад к устройствам"
+            [outlined]="true"
+            icon="pi pi-arrow-left"
+            (onClick)="closeDiscoveryView()"
+          />
+        </div>
+      </div>
+    </div>
+
+    @if (discoveryLoading()) {
+      <p class="discovery-view-loading muted">Загрузка…</p>
+    } @else if (discoveryDevices().length === 0) {
+      <div class="scan-results-placeholder">
+        <p class="scan-results-placeholder-title">Устройств нет</p>
+        <p class="scan-results-placeholder-text">
+          В последних результатах задач не осталось устройств без мониторинга или сканирование ещё не выполнялось.
+        </p>
+      </div>
+    } @else {
+      <div class="results-toolbar results-toolbar-prime">
+        <label class="results-filter p-input-container">
+          <span>Поиск по списку</span>
+          <input
+            pInputText
+            type="search"
+            name="discoveryFilter"
+            [ngModel]="discoveryFilter()"
+            (ngModelChange)="discoveryFilter.set($event)"
+            placeholder="IP, вендор, модель, SNMP, ICMP…"
+            class="w-full"
+          />
+        </label>
+      </div>
+
+      @if (filteredDiscoveryDevices().length === 0) {
+        <div class="empty-state">
+          <strong>Совпадений нет</strong>
+          <p>Измените строку поиска — фильтр проходит по всем полям устройства и доступности.</p>
+        </div>
+      } @else {
+        <div class="monitoring-table-container">
+          <app-scan-results-table
+            [devices]="filteredDiscoveryDevices()"
+            [showSelection]="true"
+            [selectedIps]="discoverySelectedIps()"
+            (selectionChange)="onDiscoverySelectionChange($event)"
+          />
+        </div>
+
+        <div class="scan-results-monitoring-footer">
+          <label class="p-input-container template-select-wrap">
+            <span>Шаблоны мониторинга</span>
+            <p-button
+              label="Выбрать шаблоны мониторинга"
+              styleClass="ns-action-blue w-full"
+              [outlined]="true"
+              (onClick)="openMonitoringTemplatePicker()"
+            />
+            <span class="muted">
+              @if (selectedMonitoringTemplateNames().length === 0) {
+                Шаблоны не выбраны
+              } @else {
+                Выбрано: {{ selectedMonitoringTemplateNames().join(', ') }}
+              }
+            </span>
+          </label>
+          <div class="scan-results-monitoring-actions">
+            <p-button
+              label="Поставить на мониторинг отмеченные"
+              styleClass="ns-action-blue"
+              [outlined]="false"
+              [disabled]="discoverySelectedIps().length === 0"
+              (onClick)="activateDiscoveryMonitoring()"
+            />
+          </div>
+        </div>
+      }
+    }
+  </section>
+} @else {
+<section class="content-card monitoring-card list-page-card">
+  <div class="section-heading">
+    <div>
+      <h1>Устройства</h1>
+      <p>Сводка по состоянию хостов на мониторинге с быстрым переходом к отфильтрованному списку устройств.</p>
+    </div>
+    <div class="list-page-heading-actions monitoring-heading-actions">
+      <p-button
+        styleClass="ns-action-blue"
+        label="Настроить столбцы"
+        icon="pi pi-cog"
+        [outlined]="true"
+        (onClick)="openColumnsDialog()"
+        aria-label="Настроить столбцы таблицы устройств"
+      />
+      <p-button
+        label="Обновить"
+        styleClass="ns-action-blue"
+        [outlined]="true"
+        [disabled]="mon.devicesLoading()"
+        (onClick)="applyFilters()"
+      />
+    </div>
+  </div>
+
+  <div class="monitoring-availability-strip" aria-label="Фильтр доступности устройств">
+    @for (item of mon.monitoringStatusSummary(); track item.key) {
+      <div
+        class="monitoring-availability-card level-card"
+        [class.level-card-selected]="isAvailabilityActive(item.key)"
+        [class.monitoring-availability-green]="item.tone === 'green'"
+        [class.monitoring-availability-red]="item.tone === 'red'"
+        [class.monitoring-availability-gray]="item.tone === 'gray'"
+        [class.monitoring-availability-slate]="item.tone === 'slate'"
+        role="button"
+        tabindex="0"
+        (click)="toggleAvailability(item.key)"
+        (keydown.enter)="toggleAvailability(item.key)"
+        (keydown.space)="$event.preventDefault(); toggleAvailability(item.key)"
+        [attr.aria-pressed]="isAvailabilityActive(item.key)"
+        [attr.aria-label]="'Фильтр по доступности: ' + item.label"
+      >
+        <span class="monitoring-availability-label">{{ item.label }}</span>
+        <strong class="monitoring-availability-value">{{ item.count }}</strong>
+      </div>
+    }
+    <div
+      class="monitoring-availability-card level-card monitoring-availability-slate monitoring-availability-discovery"
+      role="button"
+      tabindex="0"
+      (click)="openDiscoveryView()"
+      (keydown.enter)="openDiscoveryView()"
+      (keydown.space)="$event.preventDefault(); openDiscoveryView()"
+      [attr.aria-label]="'Открыть список устройств из последних запусков задач, ещё не на мониторинге'"
+    >
+      <span class="monitoring-availability-label">Обнаружено новых</span>
+      <strong class="monitoring-availability-value">{{ scanJobs.discoveredNotMonitoredCount() ?? '—' }}</strong>
+    </div>
+  </div>
+  <p class="monitoring-availability-hint">
+    Доступность учитывает текущие фильтры списка; повторный клик по выбранному фильтру сбрасывает его.
+  </p>
+
+  <div class="monitoring-devices-search-toolbar">
+    <label class="monitoring-devices-search p-input-container">
+      <span>Поиск</span>
+      <div class="monitoring-devices-search-field">
+        <input
+          id="monitoring-search-filter"
+          pInputText
+          type="text"
+          class="monitoring-filter-input monitoring-devices-search-input"
+          [ngModel]="searchDraft()"
+          (ngModelChange)="onSearchDraftChange($event)"
+          [ngModelOptions]="{ standalone: true }"
+          placeholder="Имя, IP, модель, тег, серия…"
+          autocomplete="off"
+        />
+        @if (searchDraft()) {
+          <button
+            type="button"
+            class="monitoring-devices-search-clear"
+            aria-label="Очистить поиск"
+            (click)="clearSearchDraft()"
+          >
+            <i class="pi pi-times" aria-hidden="true"></i>
+          </button>
+        }
+      </div>
+    </label>
+  </div>
+
+  <section class="monitoring-filters-accordion" aria-label="Дополнительные фильтры списка устройств">
+    <div class="monitoring-filters-header">
+      <button
+        type="button"
+        class="monitoring-filters-header-toggle"
+        (click)="toggleFiltersExpanded()"
+        [attr.aria-expanded]="filtersExpanded()"
+        aria-controls="monitoring-filters-content"
+      >
+        <span>Расширенные фильтры</span>
+        <i class="pi" [class.pi-chevron-down]="!filtersExpanded()" [class.pi-chevron-up]="filtersExpanded()" aria-hidden="true"></i>
+      </button>
+      @if (!filtersExpanded() && hasActiveAppliedChips()) {
+        <div class="monitoring-filters-applied" aria-label="Применённые фильтры">
+          <span class="monitoring-filters-applied-label">Применены фильтры:</span>
+          <div class="monitoring-filters-applied-tags">
+            @for (chip of appliedFiltersChips(); track chip.key) {
+              <p-chip [label]="chip.label" [removable]="true" (onRemove)="clearAppliedFilter(chip.key)" />
+            }
+          </div>
+        </div>
+      }
+    </div>
+    <div id="monitoring-filters-content" class="monitoring-filters-content" [hidden]="!filtersExpanded()">
+      <div class="list-filter-panel monitoring-filter-panel">
+        <div class="monitoring-filter-rows">
+          <div class="monitoring-filter-row monitoring-filter-row-top">
+            <div class="p-input-container monitoring-filter-group-fill">
+              <span>IP</span>
+              <input
+                id="monitoring-ip-filter"
+                pInputText
+                type="search"
+                class="monitoring-filter-input"
+                [ngModel]="ipDraft()"
+                (ngModelChange)="ipDraft.set($event)"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="1.2.3.4"
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="p-input-container monitoring-filter-group-fill">
+              <span>MAC</span>
+              <input
+                id="monitoring-mac-filter"
+                pInputText
+                type="search"
+                class="monitoring-filter-input"
+                [ngModel]="macDraft()"
+                (ngModelChange)="macDraft.set($event)"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="aa:bb:cc:dd:ee:ff"
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="p-input-container monitoring-filter-group-fill">
+              <span>Тег</span>
+              <div class="monitoring-tag-filter">
+                @if (tagDraft().length > 0) {
+                  <div class="monitoring-tag-filter-chips" aria-label="Выбранные теги">
+                    @for (t of tagDraft(); track t) {
+                      <p-chip [label]="t" [removable]="true" (onRemove)="removeTagFilter(t)" />
+                    }
+                  </div>
+                }
+                <input
+                  id="monitoring-tag-filter"
+                  pInputText
+                  type="search"
+                  class="monitoring-filter-input"
+                  [ngModel]="tagInputDraft()"
+                  (ngModelChange)="tagInputDraft.set($event)"
+                  [ngModelOptions]="{ standalone: true }"
+                  placeholder="Нажмите на тег в таблице или введите и нажмите Enter"
+                  autocomplete="off"
+                  (keydown.enter)="$event.preventDefault(); addTagFromInput()"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="monitoring-filter-row monitoring-filter-row-bottom">
+            <div class="p-input-container monitoring-filter-group-fill">
+              <span>Статус опроса</span>
+              <input
+                pInputText
+                type="search"
+                class="monitoring-filter-input"
+                [ngModel]="statusDraft()"
+                (ngModelChange)="statusDraft.set($event)"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="Статус опроса"
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="p-input-container monitoring-filter-group-fill">
+              <span>Состояние</span>
+              <app-device-option-select
+                styleClass="w-full ns-action-blue"
+                [options]="healthStatusOptions"
+                optionValueKey="value"
+                [value]="healthDraft()"
+                (valueChange)="onHealthDraftChange($event)"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="list-filter-panel-actions monitoring-filter-panel-footer">
+          <p-button label="Применить" styleClass="ns-action-blue" [disabled]="mon.devicesLoading()" (onClick)="applyFilters()" />
+          <p-button label="Сбросить" styleClass="ns-action-blue" [outlined]="true" [disabled]="mon.devicesLoading()" (onClick)="resetFilters()" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  @if (showSummary()) {
+    <div class="list-summary-grid">
+      <div class="list-summary-tile"><span>Всего по фильтру</span><strong>{{ devicesTotal() }}</strong></div>
+      <div class="list-summary-tile"><span>На странице</span><strong>{{ devicesOnPage() }}</strong></div>
+    </div>
+  }
+
+  @if (mon.monitoredDevicesPage() === null) {
+    <div class="monitoring-preloader">
+      <div class="monitoring-preloader-spinner"></div>
+      <span>Загрузка устройств...</span>
+    </div>
+  } @else if ((mon.monitoredDevicesPage()?.totalElements ?? 0) === 0 && !mon.devicesLoading()) {
+    <div class="empty-state">
+      <strong>Устройства не найдены</strong>
+      <p>Измените параметры поиска или фильтры, либо поставьте устройства на мониторинг из результатов сканирования.</p>
+    </div>
+  } @else {
+    @if (hasDeviceSelection()) {
+      <div class="monitoring-bulk-actions-bar" role="toolbar" aria-label="Массовые действия с выбранными устройствами">
+        <span class="monitoring-bulk-actions-count">Выбрано: {{ selectedDevicesCount() }}</span>
+        <span class="monitoring-bulk-actions-label">Действия:</span>
+        <div class="monitoring-bulk-actions-buttons">
+          @if (canManageMonitoring()) {
+            <p-button
+              label="Снять с мониторинга"
+              icon="pi pi-ban"
+              styleClass="ns-action-blue"
+              [outlined]="true"
+              [disabled]="bulkActionPending() || mon.devicesLoading()"
+              (onClick)="confirmBulkDeactivate()"
+            />
+            <p-button
+              label="Применить шаблон"
+              icon="pi pi-file"
+              styleClass="ns-action-blue"
+              [outlined]="true"
+              [disabled]="bulkActionPending() || mon.devicesLoading()"
+              (onClick)="openBulkTemplatePicker()"
+            />
+            <p-button
+              label="Удалить"
+              icon="pi pi-trash"
+              severity="danger"
+              [outlined]="true"
+              [disabled]="bulkActionPending() || mon.devicesLoading()"
+              (onClick)="confirmBulkDelete()"
+            />
+          }
+          <p-button
+            label="Изменить теги"
+            icon="pi pi-tags"
+            styleClass="ns-action-blue"
+            [outlined]="true"
+            [disabled]="bulkActionPending() || mon.devicesLoading()"
+            (onClick)="openBulkTagEditor()"
+          />
+        </div>
+        <p-button
+          label="Отменить выбор"
+          icon="pi pi-times"
+          styleClass="ns-action-blue"
+          [text]="true"
+          [disabled]="bulkActionPending()"
+          (onClick)="clearDeviceSelection()"
+          aria-label="Отменить выбор устройств"
+        />
+      </div>
+    }
+    <div class="monitoring-table-container">
+      <p-table
+          #devicesTableWidths="nsTableColumnWidths"
+          nsTableColumnWidths="devices"
+          [nsTableColumnDefs]="devicesTableWidthColumnDefs()"
+          [nsTableColumnOrder]="devicesTableWidthColumnOrder()"
+          [nsTableColumnWidthsMap]="devicesTableColumnWidthsMap()"
+          [value]="mon.monitoredDevices()"
+          [lazy]="true"
+          (onLazyLoad)="onLazyLoad($event)"
+          [loading]="devicesTableLoading()"
+          [paginator]="true"
+          [rows]="mon.monitoredDevicesPage()?.size ?? mon.monitoredDevicesPageSize()"
+          [totalRecords]="mon.monitoredDevicesPage()?.totalElements ?? 0"
+          [first]="mon.monitoredDevicesTableFirst()"
+          [rowsPerPageOptions]="[10, 15, 25, 50]"
+          [showCurrentPageReport]="true"
+          [alwaysShowPaginator]="false"
+          currentPageReportTemplate="{first}–{last} из {totalRecords}"
+          dataKey="id"
+          stripedRows
+          [resizableColumns]="true"
+          columnResizeMode="fit"
+          [tableStyle]="{ width: '100%' }"
+          class="p-datatable-sm netscan-p-table monitoring-hosts-table"
+        >
+        <ng-template #header>
+          <tr>
+            <th
+              class="monitoring-select-col"
+              pResizableColumn
+              [ngStyle]="columnBoundsStyle(devicesTableColumnBounds(), '_select')"
+            >
+              <p-checkbox
+                [binary]="true"
+                [ngModel]="pageSelectAllChecked()"
+                [indeterminate]="pageSelectAllIndeterminate()"
+                (ngModelChange)="setSelectAllOnPage($event)"
+                [ngModelOptions]="{ standalone: true }"
+                [disabled]="bulkActionPending() || mon.devicesLoading()"
+                [attr.aria-label]="'Выбрать все устройства на странице'"
+              />
+            </th>
+            @for (col of displayedTableColumns(); track col.id) {
+              @switch (col.id) {
+                @case ('hostName') {
+                  <th
+                    pResizableColumn
+                    pSortableColumn="hostName"
+                    [class]="col.headerClass"
+                    [ngStyle]="columnBoundsStyle(devicesTableColumnBounds(), col.id)"
+                  >
+                    Имя хоста <p-sortIcon field="hostName" />
+                  </th>
+                }
+                @case ('name') {
+                  <th
+                    pResizableColumn
+                    pSortableColumn="name"
+                    [class]="col.headerClass"
+                    [ngStyle]="columnBoundsStyle(devicesTableColumnBounds(), col.id)"
+                  >
+                    Название <p-sortIcon field="name" />
+                  </th>
+                }
+                @case ('deviceParams') {
+                  <th
+                    pResizableColumn
+                    [class]="col.headerClass"
+                    [ngStyle]="columnBoundsStyle(devicesTableColumnBounds(), col.id)"
+                  >
+                    Параметры устройства
+                  </th>
+                }
+                @case ('series') {
+                  <th
+                    pResizableColumn
+                    [class]="col.headerClass"
+                    [ngStyle]="columnBoundsStyle(devicesTableColumnBounds(), col.id)"
+                  >
+                    Серия
+                  </th>
+                }
+                @case ('model') {
+                  <th
+                    pResizableColumn
+                    pSortableColumn="model"
+                    [class]="col.headerClass"
+                    [ngStyle]="columnBoundsStyle(devicesTableColumnBounds(), col.id)"
+                  >
+                    Модель <p-sortIcon field="model" />
+                  </th>
+                }
+                @case ('firmwareVersion') {
+                  <th
+                    pResizableColumn
+                    pSortableColumn="firmwareVersion"
+                    [class]="col.headerClass"
+                    [ngStyle]="columnBoundsStyle(devicesTableColumnBounds(), col.id)"
+                  >
+                    Версия ПО <p-sortIcon field="firmwareVersion" />
+                  </th>
+                }
+                @case ('availability') {
+                  <th
+                    pResizableColumn
+                    [class]="col.headerClass"
+                    [ngStyle]="columnBoundsStyle(devicesTableColumnBounds(), col.id)"
+                  >
+                    Доступность
+                  </th>
+                }
+                @case ('protocol') {
+                  <th
+                    pResizableColumn
+                    pSortableColumn="status"
+                    [class]="col.headerClass"
+                    [ngStyle]="columnBoundsStyle(devicesTableColumnBounds(), col.id)"
+                  >
+                    Протокол <p-sortIcon field="status" />
+                  </th>
+                }
+                @case ('healthStatus') {
+                  <th
+                    pResizableColumn
+                    pSortableColumn="healthStatus"
+                    [class]="col.headerClass"
+                    [ngStyle]="columnBoundsStyle(devicesTableColumnBounds(), col.id)"
+                  >
+                    Состояние <p-sortIcon field="healthStatus" />
+                  </th>
+                }
+                @case ('tags') {
+                  <th
+                    pResizableColumn
+                    [class]="col.headerClass"
+                    [ngStyle]="columnBoundsStyle(devicesTableColumnBounds(), col.id)"
+                  >
+                    Теги
+                  </th>
+                }
+                @case ('actions') {
+                  <th [class]="col.headerClass" [ngStyle]="columnBoundsStyle(devicesTableColumnBounds(), col.id)">
+                    <div class="monitoring-actions-cell-inner">Действия</div>
+                  </th>
+                }
+              }
+            }
+          </tr>
+        </ng-template>
+        <ng-template #body let-device>
+          <tr class="monitoring-row p-selectable-row" (click)="openDevice(device)">
+            <td class="monitoring-select-col" (click)="$event.stopPropagation()">
+              <p-checkbox
+                [binary]="true"
+                [ngModel]="isDeviceSelected(device)"
+                (ngModelChange)="toggleDeviceSelection(device, $event)"
+                [ngModelOptions]="{ standalone: true }"
+                [disabled]="bulkActionPending() || mon.devicesLoading()"
+                [attr.aria-label]="'Выбрать устройство ' + (device.hostName || device.name || device.ip)"
+              />
+            </td>
+            @for (col of displayedTableColumns(); track col.id) {
+              @switch (col.id) {
+                @case ('hostName') {
+                  <td [class]="col.bodyClass">
+                    <button
+                      type="button"
+                      class="monitoring-cell-link"
+                      (click)="$event.stopPropagation(); focusSearchFilter(device.hostName, true)"
+                      [attr.aria-label]="'Фильтр по имени хоста: ' + device.hostName"
+                      [attr.title]="device.hostName || ''"
+                      [pTooltip]="device.hostName || ''"
+                      tooltipPosition="bottom"
+                    >
+                      <strong>{{ device.hostName }}</strong>
+                    </button>
+                  </td>
+                }
+                @case ('name') {
+                  <td [class]="col.bodyClass">
+                    <button
+                      type="button"
+                      class="monitoring-cell-link"
+                      (click)="$event.stopPropagation(); focusSearchFilter(device.name, true)"
+                      [attr.aria-label]="'Фильтр по названию устройства: ' + device.name"
+                      [attr.title]="device.name || ''"
+                      [pTooltip]="device.name || ''"
+                      tooltipPosition="bottom"
+                    >
+                      <strong>{{ device.name }}</strong>
+                    </button>
+                  </td>
+                }
+                @case ('deviceParams') {
+                  <td [class]="col.bodyClass">
+                    <div class="monitoring-ident-cell">
+                      <div class="monitoring-ident-row monitoring-mono" [attr.title]="'Серийный номер: ' + (device.serialNumber || '—')">
+                        {{ device.serialNumber || '—' }}
+                      </div>
+                      <button
+                        type="button"
+                        class="monitoring-cell-link monitoring-mono monitoring-ident-row"
+                        (click)="$event.stopPropagation(); focusIpFilter(device.ip, true)"
+                        [attr.aria-label]="'Фильтр по IP: ' + device.ip"
+                        [attr.title]="'IP: ' + device.ip"
+                      >
+                        {{ device.ip }}
+                      </button>
+                      <div class="monitoring-ident-row monitoring-mono" [attr.title]="'SNMP порт: ' + (device.port ?? '—')">
+                        SNMP: {{ device.port ?? '—' }}
+                      </div>
+                      <button
+                        type="button"
+                        class="monitoring-cell-link monitoring-mono monitoring-ident-row"
+                        (click)="$event.stopPropagation(); focusMacFilter(device.macAddress, true)"
+                        [attr.aria-label]="'Фильтр по MAC: ' + device.macAddress"
+                        [attr.title]="'MAC: ' + device.macAddress"
+                      >
+                        {{ device.macAddress }}
+                      </button>
+                    </div>
+                  </td>
+                }
+                @case ('series') {
+                  <td [class]="col.bodyClass">{{ mon.deviceSeries(device) }}</td>
+                }
+                @case ('model') {
+                  <td [class]="col.bodyClass">{{ device.model }}</td>
+                }
+                @case ('firmwareVersion') {
+                  <td [class]="col.bodyClass">
+                    <span
+                      class="monitoring-fw-text"
+                      [attr.title]="device.firmwareVersion || '—'"
+                      [pTooltip]="device.firmwareVersion || '—'"
+                      tooltipPosition="bottom"
+                    >
+                      {{ device.firmwareVersion || '—' }}
+                    </span>
+                  </td>
+                }
+                @case ('availability') {
+                  <td [class]="col.bodyClass">
+                    <div class="protocol-availability-list">
+                      <span class="protocol-chip" [class]="mon.protocolAvailabilityChipClass(device, 'ICMP')">ICMP</span>
+                      <span class="protocol-chip" [class]="mon.protocolAvailabilityChipClass(device, 'SNMP')">SNMP</span>
+                      <span class="protocol-chip" [class]="mon.protocolAvailabilityChipClass(device, 'SSH')">SSH</span>
+                    </div>
+                  </td>
+                }
+                @case ('protocol') {
+                  <td [class]="col.bodyClass">{{ device.pollingStatus }}</td>
+                }
+                @case ('healthStatus') {
+                  <td [class]="col.bodyClass">
+                    <p-tag
+                      [value]="monitoringHealthStatusLabel(device.healthStatus)"
+                      [severity]="monitoringHealthStatusTagSeverity(device.healthStatus)"
+                      class="monitoring-tag"
+                    />
+                  </td>
+                }
+                @case ('tags') {
+                  <td [class]="col.bodyClass" (click)="$event.stopPropagation()">
+                    <div class="monitoring-tags-cell">
+                      @if (device.tags.length === 0) {
+                        <button
+                          type="button"
+                          class="monitoring-tags-add-btn"
+                          (click)="openTagEditor(device)"
+                          [attr.aria-label]="'Добавить тег для устройства ' + (device.hostName || device.name || device.ip)"
+                        >
+                          +
+                        </button>
+                      } @else {
+                        <div class="monitoring-tags-list">
+                          @for (t of device.tags; track t) {
+                            <button
+                              type="button"
+                              class="monitoring-tag-chip-btn"
+                              (click)="applyTagFilter(t)"
+                              [attr.aria-label]="'Фильтр по тегу: ' + t"
+                            >
+                              <p-chip [label]="t" />
+                            </button>
+                          }
+                        </div>
+                        <p-button
+                          icon="pi pi-pencil"
+                          [text]="true"
+                          [rounded]="true"
+                          severity="secondary"
+                          size="small"
+                          (onClick)="openTagEditor(device)"
+                          [attr.aria-label]="'Редактировать теги устройства ' + (device.hostName || device.name || device.ip)"
+                        />
+                      }
+                    </div>
+                  </td>
+                }
+                @case ('actions') {
+                  <td [class]="col.bodyClass" (click)="$event.stopPropagation()">
+                    <div class="monitoring-actions-cell-inner">
+                      <p-button
+                        icon="pi pi-ellipsis-v"
+                        [text]="true"
+                        [rounded]="true"
+                        severity="secondary"
+                        [disabled]="isActionPending(device) || mon.devicesLoading()"
+                        (onClick)="openActionsMenu($event, device)"
+                        [attr.aria-label]="'Действия для устройства ' + (device.hostName || device.name || device.ip)"
+                      />
+                    </div>
+                  </td>
+                }
+              }
+            }
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  }
+</section>
+<p-confirmDialog />
+<p-menu #deviceActionsMenu [popup]="true" [model]="deviceActionsMenuItems()" appendTo="body" />
+}
+
+<p-dialog
+  header="Настройка столбцов"
+  [modal]="true"
+  [style]="{ width: 'min(420px, 94vw)' }"
+  styleClass="monitoring-columns-dialog"
+  [visible]="columnsDialogOpen()"
+  (visibleChange)="columnsDialogOpen.set($event)"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <div class="monitoring-columns-dialog-body">
+    <p class="monitoring-columns-dialog-hint">
+      Отметьте столбцы для отображения и перетащите строки за значок «≡», чтобы изменить порядок.
+    </p>
+    <ul
+      class="monitoring-devices-columns-list"
+      cdkDropList
+      (cdkDropListDropped)="onColumnsDraftDrop($event)"
+      role="list"
+      aria-label="Список колонок таблицы устройств"
+    >
+      @for (col of columnsDraft(); track col.id) {
+        <li class="monitoring-devices-columns-item" cdkDrag role="listitem">
+          <span
+            class="monitoring-devices-columns-drag"
+            cdkDragHandle
+            tabindex="0"
+            role="button"
+            aria-hidden="false"
+            [attr.aria-label]="'Перетащить колонку «' + col.label + '»'"
+          >
+            ≡
+          </span>
+          <span class="monitoring-devices-columns-label">{{ col.label }}</span>
+          <p-checkbox
+            [binary]="true"
+            [ngModel]="col.visible"
+            (ngModelChange)="onColumnsDraftVisibilityChange(col.id, $event)"
+            [ngModelOptions]="{ standalone: true }"
+            [disabled]="isColumnsDraftVisibilityLocked(col)"
+            [inputId]="'monitoring-page-col-' + col.id"
+            [attr.aria-label]="'Показывать колонку «' + col.label + '»'"
+          />
+        </li>
+      }
+    </ul>
+  </div>
+  <ng-template #footer>
+    <div class="monitoring-columns-dialog-footer">
+      <p-button
+        label="Применить"
+        styleClass="ns-action-blue"
+        [loading]="columnsSaving()"
+        [disabled]="columnsSaving()"
+        (onClick)="applyColumnsDraft()"
+      />
+      <p-button
+        label="Отмена"
+        styleClass="ns-action-blue"
+        [outlined]="true"
+        [disabled]="columnsSaving()"
+        (onClick)="closeColumnsDialog()"
+      />
+      <p-button
+        label="Сбросить по умолчанию"
+        styleClass="ns-action-blue"
+        [text]="true"
+        [disabled]="columnsSaving()"
+        (onClick)="resetColumnsDraftToDefault()"
+      />
+    </div>
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  [header]="tagEditorBulkMode() ? 'Теги выбранных устройств' : 'Теги устройства'"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [dismissableMask]="true"
+  [visible]="tagEditorVisible()"
+  (visibleChange)="!$event && closeTagEditor()"
+  [style]="{ width: 'min(720px, 94vw)' }"
+>
+  @if (tagEditorBulkMode()) {
+    <p class="monitoring-tags-dialog-title">
+      <strong>Выбрано устройств: {{ selectedDevicesCount() }}</strong>
+      <span class="monitoring-tags-dialog-subtitle muted">Указанные теги будут применены ко всем выбранным устройствам</span>
+    </p>
+  } @else if (tagEditorDevice(); as d) {
+    <p class="monitoring-tags-dialog-title">
+      <strong>{{ d.hostName || d.name || d.ip }}</strong>
+      <span class="monitoring-tags-dialog-subtitle">{{ d.ip }}</span>
+    </p>
+  }
+
+  <div class="monitoring-tags-editor">
+    <div class="monitoring-tags-editor-addrow">
+      <input
+        pInputText
+        type="text"
+        placeholder="Новый тег"
+        [ngModel]="tagEditorNewTag()"
+        (ngModelChange)="tagEditorNewTag.set($event)"
+        [ngModelOptions]="{ standalone: true }"
+        (keydown.enter)="$event.preventDefault(); addDraftTag()"
+      />
+      <p-button
+        label="Добавить"
+        icon="pi pi-plus"
+        styleClass="ns-action-blue"
+        (onClick)="addDraftTag()"
+        [disabled]="tagEditorSaving()"
+      />
+    </div>
+
+    <div class="monitoring-tags-editor-list" aria-label="Список тегов">
+      @if (tagEditorDraftTags().length === 0) {
+        <div class="monitoring-tags-empty">Тегов пока нет</div>
+      } @else {
+        @for (t of tagEditorDraftTags(); track t; let i = $index) {
+          <div class="monitoring-tags-editor-item">
+            <input
+              pInputText
+              type="text"
+              [ngModel]="t"
+              (ngModelChange)="updateDraftTagAt(i, $event)"
+              [ngModelOptions]="{ standalone: true }"
+              [disabled]="tagEditorSaving()"
+            />
+            <p-button
+              icon="pi pi-trash"
+              severity="danger"
+              styleClass="ns-action-blue"
+              [text]="true"
+              [rounded]="true"
+              (onClick)="removeDraftTag(t)"
+              [disabled]="tagEditorSaving()"
+              ariaLabel="Удалить тег"
+            />
+          </div>
+        }
+      }
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Отмена" styleClass="ns-action-blue" [outlined]="true" (onClick)="closeTagEditor()" [disabled]="tagEditorSaving()" />
+    <p-button label="Сохранить" styleClass="ns-action-blue" (onClick)="saveTags()" [disabled]="tagEditorSaving()" />
+  </ng-template>
+</p-dialog>
+
+<app-monitoring-template-picker-dialog
+  [visible]="monitoringTemplatePickerOpen()"
+  (visibleChange)="onMonitoringTemplatePickerVisibleChange($event)"
+  [templates]="mon.monitoringTemplates()"
+  [templatesLoading]="mon.templatesLoading()"
+  [selectedTemplateIds]="mon.selectedMonitoringTemplateIds()"
+  (selectedTemplateIdsChange)="onMonitoringTemplatePickerSave($event)"
+  [title]="templatePickerPurpose() === 'bulk' ? 'Применить шаблон к выбранным устройствам' : 'Выбор шаблонов мониторинга'"
+/>

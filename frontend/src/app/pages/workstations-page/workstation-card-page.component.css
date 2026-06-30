@@ -1,0 +1,57 @@
+.workstation-card-page .workstation-back-link {
+  color: var(--p-primary-color);
+  text-decoration: none;
+}
+
+.workstation-card-page .workstation-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.workstation-card-page .workstation-facts dt {
+  font-size: 0.85rem;
+  color: var(--p-text-muted-color, #6b7280);
+}
+
+.workstation-card-page .workstation-facts dd {
+  margin: 0.25rem 0 0;
+  font-weight: 600;
+}
+
+.workstation-card-page .workstation-card-note {
+  color: var(--p-text-muted-color, #6b7280);
+}
+
+@media (max-width: 768px) {
+  .workstation-card-page .section-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .workstation-card-page .workstation-facts {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .workstation-card-page h1 {
+    font-size: 1.35rem;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+
+  .workstation-card-page .workstation-back-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 6px 0;
+    font-size: 0.95rem;
+  }
+
+  .workstation-card-page .section-heading p {
+    overflow-wrap: anywhere;
+  }
+}

@@ -1,0 +1,85 @@
+.problems-multiselect-host {
+  min-width: 0;
+  width: 100%;
+}
+
+.editor-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 0.75rem;
+}
+
+.editor-title {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #334155;
+}
+
+.editor-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem 1rem;
+}
+
+.checkbox-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox-line label {
+  font-size: 0.9rem;
+  color: #334155;
+  cursor: pointer;
+}
+
+.editor-inline-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto;
+  gap: 0.6rem;
+  align-items: end;
+}
+
+.color-field-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+.color-field-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.color-picker-native {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  cursor: pointer;
+  background: transparent;
+}
+
+.color-picker-native::-webkit-color-swatch-wrapper {
+  padding: 2px;
+}
+
+.color-picker-native::-webkit-color-swatch {
+  border-radius: 6px;
+  border: none;
+}
+
+.widget-field-hint {
+  color: var(--ns-text-muted, #64748b);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.widget-field-disabled {
+  cursor: help;
+  opacity: 0.72;
+}

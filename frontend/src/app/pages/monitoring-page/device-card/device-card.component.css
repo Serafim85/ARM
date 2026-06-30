@@ -1,0 +1,351 @@
+@import '../../../shared-ui.css';
+
+/* Назад к списку мониторинга: иконка слева от заголовка (как на scan-page-title) */
+.device-card-page-header .device-card-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.device-card-back-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  margin-top: -2px;
+  border-radius: 12px;
+  color: #2563eb;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.device-card-back-link:hover {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.device-card-back-link:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.device-card-back-link .pi {
+  font-size: 1.1rem;
+}
+
+.device-card-title-block {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.device-card-preloader-outer {
+  display: grid;
+  place-items: center;
+  min-height: 200px;
+  margin-left: 20px;
+}
+
+.device-card-empty-hint {
+  display: grid;
+  place-items: center;
+  min-height: 200px;
+  margin-left: 20px;
+}
+
+.device-card-empty-hint p {
+  margin: 0;
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.55;
+  max-width: 36rem;
+  text-align: center;
+}
+
+.monitoring-preloader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.monitoring-preloader-spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #e2e8f0;
+  border-top-color: #2563eb;
+  animation: device-card-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes device-card-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Табы на фоне страницы: без внешней белой карточки; контент вкладок — белые блоки внутри дочерних шаблонов */
+/* Токены PrimeNG Aura (dt('tabs.tablist.background') / tabpanel) — иначе белая заливка остаётся поверх background */
+app-device-card .device-card-tabs-root,
+.device-card-tabs-root {
+  --p-tabs-tablist-background: transparent;
+  --p-tabs-tabpanel-background: transparent;
+  /* Active tab highlight should be blue (not green) */
+  --p-tabs-tab-active-color: #2563eb;
+  --p-tabs-tab-active-border-color: #2563eb;
+  --p-tabs-active-bar-background: #2563eb;
+  --p-tabs-tab-hover-color: #1d4ed8;
+  min-width: 0;
+}
+
+.device-card-tabs-root .p-tablist {
+  flex-wrap: wrap;
+}
+
+/* Fallback for themes that don't use the CSS vars above */
+.device-card-tabs-root .p-tab.p-tab-active {
+  color: #2563eb;
+}
+
+.device-card-tabs-root .p-tablist-active-bar {
+  background: #2563eb;
+}
+
+.device-card-tabs-root .p-tab.p-tab-active::after {
+  background: #2563eb;
+}
+
+.device-card-tabs-root .p-tabs {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.device-card-tabs-root .p-tablist {
+  background: transparent;
+}
+
+.device-card-tabs-root .p-tablist-content {
+  background: transparent;
+}
+
+.device-card-tabs-root .p-tablist-viewport {
+  background: transparent;
+}
+
+.device-card-tabs-root .p-tablist-tab-list {
+  background: transparent;
+}
+
+/* Класс вешается через [pt] на p-tabpanels — перебиваем padding: var(--p-tabs-tabpanel-padding) из темы */
+app-device-card .device-card-tabpanels.p-tabpanels,
+.device-card-tabpanels.p-tabpanels {
+  background: transparent !important;
+  padding: 0.875rem 1.125rem 1.125rem 0 !important;
+}
+
+app-device-card .device-card-tabs-root .p-tabpanel,
+.device-card-tabs-root .p-tabpanel {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 16px 0 0 !important;
+}
+
+.device-card-tab-events-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.device-info-card-inner,
+.configuration-panel {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+}
+
+.device-info-list {
+  display: grid;
+  margin-top: 12px;
+}
+
+.device-info-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 240px) 1fr;
+  gap: 18px;
+  padding: 14px 0;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.device-info-row:last-child {
+  border-bottom: none;
+}
+
+.config-filter-bar { margin: 12px 0 16px; }
+
+.config-port-filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+}
+
+.config-filter-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.config-port-filter-group .p-buttongroup {
+  flex-wrap: wrap;
+}
+.config-table { min-width: 1200px; }
+.port-state-text { font-size: 13px; font-weight: 700; }
+.port-state-up { color: #059669; }
+.port-state-down { color: #dc2626; }
+
+.monitoring-details-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 0.8fr);
+  row-gap: 20px;
+  column-gap: 24px;
+  align-items: start;
+}
+
+.monitoring-details-grid + .monitoring-details-grid {
+  margin-top: 24px;
+}
+.monitoring-charts-column { display: grid; gap: 14px; }
+.chart-card-inner { display: grid; gap: 12px; }
+.chart-card-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.chart-card-header p { margin: 0; color: #64748b; font-size: 13px; }
+
+.metric-summary-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.metric-summary-card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px; display: grid; gap: 4px; }
+
+.cpu-bars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: end; height: 170px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 14px; background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%); }
+.cpu-bar-item { display: grid; gap: 6px; justify-items: center; align-content: end; height: 100%; }
+.cpu-bar-track { width: 100%; max-width: 72px; height: 110px; border-radius: 10px; background: #e2e8f0; display: flex; align-items: end; overflow: hidden; }
+.cpu-bar { width: 100%; min-height: 4px; border-radius: 10px 10px 0 0; }
+.cpu-bar-green { background: linear-gradient(180deg, #34d399 0%, #16a34a 100%); }
+.cpu-bar-yellow { background: linear-gradient(180deg, #fde68a 0%, #f59e0b 100%); }
+.cpu-bar-red { background: linear-gradient(180deg, #fca5a5 0%, #ef4444 100%); }
+.cpu-bar-item strong { font-size: 14px; color: #0f172a; line-height: 1; }
+.cpu-bar-item span { font-size: 12px; color: #64748b; }
+.cpu-value-green { color: #16a34a !important; }
+.cpu-value-yellow { color: #d97706 !important; }
+.cpu-value-red { color: #dc2626 !important; }
+
+.monitoring-pies { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+
+/* Единый прелоадер для колонки CPU + RAM/ROM, пока нет ответа /details */
+.monitoring-charts-column-loader {
+  min-height: 420px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+}
+.donut-widget { display: flex; align-items: center; gap: 14px; }
+.pie-chart { width: 130px; height: 130px; border-radius: 50%; position: relative; display: grid; place-items: center; }
+.donut-center { width: 84px; height: 84px; border-radius: 50%; background: #fff; display: grid; place-items: center; text-align: center; border: 1px solid #e2e8f0; }
+.donut-center strong { font-size: 18px; color: #0f172a; line-height: 1; }
+.donut-center span { font-size: 11px; color: #64748b; letter-spacing: 0.08em; }
+.donut-side-stats { display: grid; gap: 8px; }
+.donut-side-stats div { display: flex; justify-content: space-between; gap: 16px; font-size: 13px; color: #475569; min-width: 120px; }
+
+@media (max-width: 1280px) {
+  .monitoring-details-grid {
+    grid-template-columns: 1fr;
+    row-gap: 20px;
+    column-gap: 24px;
+  }
+  .monitoring-pies { grid-template-columns: 1fr; }
+}
+
+/* ---- Events tab (badge on вкладке; содержимое вкладки — `device-events-tab.component.css`) ---- */
+
+.events-tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  margin-left: 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.events-tab-badge-open {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.events-pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 12px;
+}
+
+.pagination-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.pagination-pages {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.pagination-page-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 6px;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.pagination-page-btn:not(:disabled):hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  transform: none;
+  box-shadow: none;
+}
+
+.pagination-page-active {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #fff !important;
+  font-weight: 700;
+}
+
+.pagination-ellipsis {
+  color: #94a3b8;
+  font-size: 14px;
+  padding: 0 4px;
+}
+
+.pagination-info {
+  font-size: 13px;
+  color: #64748b;
+  margin-left: 8px;
+}

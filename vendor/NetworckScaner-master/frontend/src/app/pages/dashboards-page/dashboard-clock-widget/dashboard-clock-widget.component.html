@@ -1,0 +1,60 @@
+<div class="clock-root">
+  @if (hostPlaceholder()) {
+    <p class="clock-msg">Время хоста пока не поддерживается.</p>
+  } @else if (timeZoneInvalid()) {
+    <p class="clock-msg">Указана некорректная таймзона.</p>
+  } @else if (serverSyncFailed()) {
+    <p class="clock-msg">Не удалось получить время сервера.</p>
+  } @else if (serverWaiting()) {
+    <p class="clock-msg">Получение серверного времени…</p>
+  } @else {
+    @switch (config().clockType) {
+      @case ('DIGITAL') {
+        <div class="clock-digital" [ngStyle]="backgroundStyle() ?? {}">
+          @if (digitalEmpty()) {
+            <p class="clock-msg clock-msg--muted">Нет данных для отображения.</p>
+          } @else {
+            @if (digitalLines().dateLine; as dl) {
+              <div class="clock-digital__date">{{ dl }}</div>
+            }
+            @if (digitalLines().timeLine; as tl) {
+              <div class="clock-digital__time">{{ tl }}</div>
+            }
+            @if (digitalLines().zoneLine; as zl) {
+              <div class="clock-digital__zone">{{ zl }}</div>
+            }
+          }
+        </div>
+      }
+      @case ('ANALOG') {
+        <div class="clock-analog" [ngStyle]="backgroundStyle() ?? {}">
+          @if (analogEchartsOption(); as chartOpt) {
+            <div class="clock-analog__chart-slot">
+              <div
+                class="clock-analog__echarts"
+                [ngStyle]="analogChartHostStyle()"
+                echarts
+                [options]="chartOpt"
+                [autoResize]="true"
+                aria-hidden="true"
+              ></div>
+            </div>
+          }
+          @if (analogExtraLines().dateLine || analogExtraLines().timeLine || analogExtraLines().zoneLine) {
+            <div class="clock-analog__caption">
+              @if (analogExtraLines().dateLine; as dl) {
+                <div class="clock-analog__cap-date">{{ dl }}</div>
+              }
+              @if (analogExtraLines().timeLine; as tl) {
+                <div class="clock-analog__cap-time">{{ tl }}</div>
+              }
+              @if (analogExtraLines().zoneLine; as zl) {
+                <div class="clock-analog__cap-zone">{{ zl }}</div>
+              }
+            </div>
+          }
+        </div>
+      }
+    }
+  }
+</div>

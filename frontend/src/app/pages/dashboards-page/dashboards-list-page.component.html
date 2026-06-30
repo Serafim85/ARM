@@ -1,0 +1,217 @@
+<section class="content-card dashboards-list-card list-page-card">
+  <div class="section-heading">
+    <div>
+      <h1>Дашборды</h1>
+      <p>
+        Ваши дашборды и те, что другие пользователи открыли вам по списку доступа. Создайте новый дашборд и при необходимости
+        включите видимость «Общий» и выберите коллег.
+      </p>
+    </div>
+    <div class="list-page-heading-actions">
+      <p-button styleClass="ns-action-blue" label="Создать дашборд" (onClick)="openCreate()" />
+      <p-button styleClass="ns-action-blue" label="Обновить" [outlined]="true" [disabled]="loading()" (onClick)="refresh()" />
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="dashboards-banner dashboards-banner-error">{{ error() }}</div>
+  }
+
+  @if (currentUserId() === null) {
+    <div class="dashboards-banner dashboards-banner-warn">
+      В сессии нет идентификатора пользователя. Выйдите и войдите снова — тогда список разделится на «мои» и «расшаренные».
+    </div>
+  }
+
+  @if (!loading()) {
+    <div class="list-summary-grid">
+      <div class="list-summary-tile"><span>Всего</span><strong>{{ dashboards().length }}</strong></div>
+      <div class="list-summary-tile">
+        <span>Мои</span><strong>{{ currentUserId() !== null ? myDashboards().length : dashboards().length }}</strong>
+      </div>
+      <div class="list-summary-tile">
+        <span>Видимые мне</span><strong>{{ currentUserId() !== null ? sharedDashboards().length : 0 }}</strong>
+      </div>
+      <div class="list-summary-tile"><span>С общим доступом</span><strong>{{ dashboardsSharedCount() }}</strong></div>
+    </div>
+  }
+
+  @if (loading()) {
+    <p class="dashboards-loading">Загрузка…</p>
+  } @else {
+    @if (currentUserId() !== null) {
+      <div class="dashboards-subsection">
+        <h2 class="dashboards-subheading">Мои дашборды</h2>
+        @if (myDashboards().length === 0) {
+          <div class="empty-state-inline">Пока нет ни одного дашборда. Создайте первый.</div>
+        } @else {
+            <p-table
+              [value]="myDashboards()"
+              dataKey="id"
+              stripedRows
+              [tableStyle]="{ 'min-width': '56rem' }"
+              class="p-datatable-sm netscan-p-table"
+            >
+              <ng-template #header>
+                <tr>
+                  <th>Название</th>
+                  <th>Использовать по умолчанию</th>
+                  <th>Видимость</th>
+                  <th>Получатели доступа</th>
+                  <th>Обновлён</th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-row>
+                <tr class="dashboards-clickable-row" (click)="openRow(row)">
+                  <td>{{ row.name }}</td>
+                  <td class="dashboards-default-cell" (click)="$event.stopPropagation()">
+                    <p-radioButton
+                      name="defaultDashboard"
+                      [inputId]="'default-db-' + row.id"
+                      [value]="row.id"
+                      [ngModel]="defaultDashboardId()"
+                      (click)="$event.stopPropagation(); onDefaultDashboardToggle(row.id)"
+                      [ngModelOptions]="{ standalone: true }"
+                      [disabled]="defaultDashboardSaving()"
+                      size="small"
+                      [ariaLabel]="'Сделать дашбордом по умолчанию: ' + row.name"
+                    />
+                  </td>
+                  <td>{{ visibilityLabel(row.visibility) }}</td>
+                  <td>{{ formatSharedCount(row) }}</td>
+                  <td>{{ row.updatedAt | date: 'short' }}</td>
+                </tr>
+              </ng-template>
+            </p-table>
+        }
+      </div>
+
+      <div class="dashboards-subsection">
+        <h2 class="dashboards-subheading">Видимые мне</h2>
+        @if (sharedDashboards().length === 0) {
+          <div class="empty-state-inline">Нет доступных вам дашбордов.</div>
+        } @else {
+            <p-table
+              [value]="sharedDashboards()"
+              dataKey="id"
+              stripedRows
+              [tableStyle]="{ 'min-width': '44rem' }"
+              class="p-datatable-sm netscan-p-table"
+            >
+              <ng-template #header>
+                <tr>
+                  <th>Название</th>
+                  <th>Использовать по умолчанию</th>
+                  <th>Видимость</th>
+                  <th>Обновлён</th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-row>
+                <tr class="dashboards-clickable-row" (click)="openRow(row)">
+                  <td>{{ row.name }}</td>
+                  <td class="dashboards-default-cell" (click)="$event.stopPropagation()">
+                    <p-radioButton
+                      name="defaultDashboard"
+                      [inputId]="'default-db-' + row.id"
+                      [value]="row.id"
+                      [ngModel]="defaultDashboardId()"
+                      (click)="$event.stopPropagation(); onDefaultDashboardToggle(row.id)"
+                      [ngModelOptions]="{ standalone: true }"
+                      [disabled]="defaultDashboardSaving()"
+                      size="small"
+                      [ariaLabel]="'Сделать дашбордом по умолчанию: ' + row.name"
+                    />
+                  </td>
+                  <td>{{ visibilityLabel(row.visibility) }}</td>
+                  <td>{{ row.updatedAt | date: 'short' }}</td>
+                </tr>
+              </ng-template>
+            </p-table>
+        }
+      </div>
+    } @else {
+        <p-table
+          [value]="dashboards()"
+          dataKey="id"
+          stripedRows
+          [tableStyle]="{ 'min-width': '36rem' }"
+          class="p-datatable-sm netscan-p-table"
+        >
+          <ng-template #header>
+            <tr>
+              <th>Название</th>
+              <th>Видимость</th>
+              <th>Обновлён</th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-row>
+            <tr class="dashboards-clickable-row" (click)="openRow(row)">
+              <td>{{ row.name }}</td>
+              <td>{{ visibilityLabel(row.visibility) }}</td>
+              <td>{{ row.updatedAt | date: 'short' }}</td>
+            </tr>
+          </ng-template>
+        </p-table>
+    }
+  }
+</section>
+
+<p-dialog
+  header="Новый дашборд"
+  [modal]="true"
+  [style]="{ width: 'min(520px, 94vw)' }"
+  styleClass="dashboards-dialog"
+  [visible]="createOpen()"
+  (visibleChange)="createOpen.set($event)"
+>
+  <div class="dashboards-dialog-body">
+    <label class="p-input-container">
+      <span>Название</span>
+      <input
+        pInputText
+        class="w-full"
+        [ngModel]="createName()"
+        (ngModelChange)="createName.set($event)"
+        [ngModelOptions]="{ standalone: true }"
+        placeholder="Например, NOC overview"
+      />
+    </label>
+    <label class="p-input-container">
+      <span>Видимость</span>
+      <app-device-option-select
+        styleClass="w-full"
+        optionValueKey="value"
+        [options]="visibilityOptions"
+        [value]="createVisibility()"
+        (valueChange)="onCreateVisibilityChange($event)"
+      />
+    </label>
+    @if (createVisibility() === 'SHARED') {
+      <label class="p-input-container">
+        <span>Кому открыть доступ</span>
+        <p-multiSelect
+          optionLabel="displayName"
+          optionValue="id"
+          placeholder="Выберите пользователей"
+          display="chip"
+          class="w-full"
+          filterPlaceHolder="Поиск"
+          appendTo="body"
+          emptyFilterMessage="Ничего не найдено"
+          emptyMessage="Ничего не найдено"
+          selectedItemsLabel="{0} элементов выбранно"
+          [options]="multiSelectOptions()"
+          [ngModel]="createSharedIds()"
+          (ngModelChange)="createSharedIds.set($event)"
+          [ngModelOptions]="{ standalone: true }"
+          [filter]="true"
+        />
+        <small class="dashboards-hint">Показаны активные пользователи системы (кроме вас).</small>
+      </label>
+    }
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Отмена" styleClass="ns-action-blue" [text]="true" [disabled]="saving()" (onClick)="closeCreate()" />
+    <p-button styleClass="ns-action-blue" [label]="saving() ? 'Создание…' : 'Создать'" [disabled]="saving()" (onClick)="submitCreate()" />
+  </ng-template>
+</p-dialog>

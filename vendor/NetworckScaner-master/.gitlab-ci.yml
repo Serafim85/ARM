@@ -1,0 +1,76 @@
+stages:
+  - build
+  - deploy
+
+workflow:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+
+default:
+  tags:
+    - wisla-ditrib
+
+cache:
+  paths:
+    - .m2/repository
+    - frontend/node_modules/
+
+build_backend:
+  stage: build
+  image: maven:3.9.9-eclipse-temurin-17
+  script:
+    - cd backend
+    - mvn -B clean package -Dofficial.build=true
+    - cp target/*.jar ../backend.jar
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - backend.jar
+
+build_frontend:
+  stage: build
+  image: node:22
+  script:
+    - cd frontend
+    - npm ci
+    - npm run build
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - frontend/dist/
+
+deploy_test:
+  stage: deploy
+  image: alpine:3.20
+  needs:
+    - build_backend
+    - build_frontend
+  before_script:
+    - echo "https://mirrors.dotsrc.org/pub/alpine/v3.20/main" > /etc/apk/repositories
+    - echo "https://mirrors.dotsrc.org/pub/alpine/v3.20/community" >> /etc/apk/repositories
+    
+    - apk update
+    - apk add --no-cache openssh rsync
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - test -n "$DEPLOY_HOST" || (echo "DEPLOY_HOST is empty"; exit 1)
+    - test -n "$DEPLOY_USER" || (echo "DEPLOY_USER is empty"; exit 1)
+    - test -n "$DEPLOY_SSH_PRIVATE_KEY" || (echo "DEPLOY_SSH_PRIVATE_KEY is empty"; exit 1)
+    - if [ -z "$DEPLOY_SSH_PORT" ]; then export DEPLOY_SSH_PORT=22; fi
+    - echo "$DEPLOY_SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    - echo "Checking SSH reachability to ${DEPLOY_HOST}:${DEPLOY_SSH_PORT}"
+    - ssh-keyscan -T 10 -p "${DEPLOY_SSH_PORT}" "${DEPLOY_HOST}" > ~/.ssh/known_hosts
+  script:
+    - ssh -o BatchMode=yes -o ConnectTimeout=10 -p "${DEPLOY_SSH_PORT}" "${DEPLOY_USER}@${DEPLOY_HOST}" "echo SSH_OK"
+    - rsync -avz -e "ssh -p ${DEPLOY_SSH_PORT}" backend.jar "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/networkscanner/backend/backend.jar"
+    - rsync -avz --delete -e "ssh -p ${DEPLOY_SSH_PORT}" frontend/dist/frontend/browser/ "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/networkscanner/frontend/"
+    - >
+      ssh -p "${DEPLOY_SSH_PORT}" "${DEPLOY_USER}@${DEPLOY_HOST}"
+      "sudo systemctl restart networkscanner-backend &&
+       sudo systemctl reload nginx &&
+       sudo systemctl --no-pager --full status networkscanner-backend | sed -n '1,20p'"
+  environment:
+    name: test

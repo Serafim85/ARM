@@ -1,0 +1,301 @@
+.mtpd-auto-detection-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex: 0 0 auto;
+}
+
+.mtpd-auto-detection-row label {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mtpd-help-icon {
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: help;
+}
+
+.mtpd-help-icon:hover {
+  color: #334155;
+}
+
+.mtpd-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.mtpd-pane--disabled .mtpd-list,
+.mtpd-pane--disabled .mtpd-item {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.mtpd-pane--disabled .mtpd-search input[disabled] {
+  opacity: 0.7;
+}
+
+.mtpd-pane {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mtpd-pane-head {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.mtpd-head-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.mtpd-head-text .muted {
+  font-size: 0.85rem;
+}
+
+.mtpd-search {
+  margin: 0;
+}
+
+.mtpd-search--right {
+  position: relative;
+}
+
+.mtpd-hint-input[disabled] {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  opacity: 1;
+  pointer-events: none;
+}
+
+.mtpd-hint-input[disabled]::placeholder {
+  color: var(--text-color-secondary, #6b7280);
+  opacity: 0.65;
+  white-space: nowrap;
+}
+
+.mtpd-hint-input[disabled] {
+  font-size: 0.82rem;
+}
+
+.mtpd-hint--top {
+  display: none;
+}
+
+.mtpd-list {
+  border: 1px solid var(--surface-border, #dfe7ef);
+  border-radius: 10px;
+  background: var(--surface-card, #fff);
+  overflow: auto;
+  min-height: 22rem;
+  max-height: 22rem;
+}
+
+.mtpd-empty {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.mtpd-empty--center {
+  align-items: center;
+  text-align: center;
+}
+
+.mtpd-list--empty {
+  display: flex;
+}
+
+.mtpd-list--empty .mtpd-empty {
+  flex: 1;
+}
+
+/* Визуальная микро-юстировка: пустое состояние справа не должно «висеть» выше списка слева. */
+.mtpd-list--selected.mtpd-list--empty .mtpd-empty {
+  transform: translateY(3px);
+}
+
+.mtpd-item {
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 0.85rem;
+  border: 0;
+  background: transparent;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--surface-border, #dfe7ef);
+}
+
+.mtpd-item-main {
+  min-width: 0;
+}
+
+.mtpd-item-toprow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.mtpd-badges {
+  display: inline-flex;
+  gap: 0.35rem;
+  flex: 0 0 auto;
+}
+
+.mtpd-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--surface-border, #dfe7ef);
+  background: var(--surface-50, rgba(0, 0, 0, 0.02));
+  font-size: 0.75rem;
+  color: var(--text-color-secondary, #6b7280);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.mtpd-badge--secondary {
+  background: var(--surface-100, rgba(0, 0, 0, 0.04));
+}
+
+.mtpd-item:last-child {
+  border-bottom: 0;
+}
+
+.mtpd-item:hover {
+  background: var(--surface-hover, rgba(0, 0, 0, 0.03));
+}
+
+.mtpd-item-title {
+  font-weight: 600;
+  line-height: 1.2;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mtpd-item-sub {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mtpd-item-action {
+  font-weight: 700;
+  font-size: 1.15rem;
+  align-self: center;
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 999px;
+  color: var(--primary-color, #2563eb);
+}
+
+.mtpd-item--selected {
+  grid-template-columns: 1fr auto;
+  align-items: stretch;
+  padding: 0;
+}
+
+.mtpd-item-body {
+  text-align: left;
+  padding: 0.75rem 0.85rem;
+  border: 0;
+  background: transparent;
+  cursor: default;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 0.6rem;
+  row-gap: 0.15rem;
+  align-items: start;
+}
+
+.mtpd-selected-icon {
+  font-size: 1.05rem;
+  color: var(--text-color-secondary, #6b7280);
+}
+
+.mtpd-item--selected .mtpd-selected-icon {
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+
+.mtpd-item--selected .mtpd-item-title,
+.mtpd-item--selected .mtpd-item-sub {
+  grid-column: 2;
+}
+
+.mtpd-item-body:hover {
+  background: var(--surface-hover, rgba(0, 0, 0, 0.03));
+}
+
+.mtpd-remove {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 0 0.75rem;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--text-color-secondary, #6b7280);
+}
+
+.mtpd-remove:hover {
+  color: var(--text-color, #111827);
+}
+
+.mtpd-hint {
+  font-size: 0.82rem;
+  color: var(--text-color-secondary, #6b7280);
+  opacity: 0.85;
+}
+
+.mtpd-footer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.mtpd-footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+@media (max-width: 900px) {
+  .mtpd-grid {
+    grid-template-columns: 1fr;
+  }
+  .mtpd-list {
+    min-height: 18rem;
+    max-height: 18rem;
+  }
+  .mtpd-hint--top {
+    position: static;
+    display: block;
+    padding: 0.25rem 0 0;
+  }
+}
+

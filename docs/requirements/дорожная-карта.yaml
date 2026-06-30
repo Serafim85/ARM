@@ -1,0 +1,454 @@
+# Дорожная карта WISLA АРМ: MVP → v1 → v2
+# Цель v2: полное покрытие требований-мониторинг-АРМ.docx (кроме явно waived)
+# Связанные файлы: docs/requirements/трекинг-требований.yaml, docs/requirements/проблемные-места-требований_V1.xlsx
+
+meta:
+  project: WISLA АРМ
+  updated: "2026-06-17"
+  base_project: vendor/NetworckScaner-master
+  target_scale: 5000
+  reference: "Ориентир порогов и отчётов — Zabbix"
+
+# ─── Инфраструктура и стек (зафиксировано явно) ─────────────────────
+
+infrastructure:
+  summary: "Единая СУБД TimescaleDB (PostgreSQL 16) для метрик и прикладных данных"
+
+  database:
+    engine: PostgreSQL 16
+    distribution: TimescaleDB
+    rationale:
+      - "Переиспользование стека NetworckScaner (JPA, Flyway, metric_values)"
+      - "TimescaleDB — hypertable для временных рядов метрик (§3, §9)"
+      - "Одна БД для метрик, событий, конфигурации — проще MVP для команды из 2 человек"
+      - "PostgreSQL достаточен для 5000 АРМ при tiered storage в v2"
+    deployment:
+      dev: "docker-compose service timescaledb (из NS)"
+      image: "timescale/timescaledb:latest-pg16"
+      port_host: 5435
+      port_container: 5432
+      database_name_mvp: "wisla_arm"
+      jdbc_url_example: "jdbc:postgresql://localhost:5435/wisla_arm"
+    access:
+      orm: "Spring Data JPA"
+      migrations: "Flyway (backend/src/main/resources/db/migration/)"
+      driver: "org.postgresql.Driver"
+      pool: "HikariCP (spring.datasource.hikari.*)"
+
+  data_layout:
+    timescale_hypertables:
+      - table: metric_values
+        content: "Временные ряды: CPU, RAM, диск, метрики из .template"
+        phase: mvp
+    postgresql_tables:
+      - table: workstations
+        content: "Реестр АРМ (hostname, ip, os, status, agent_version)"
+        phase: mvp
+      - table: agent_credentials
+        content: "API-key агентов, привязка к workstation"
+        phase: mvp
+      - table: monitoring_events
+        content: "Алерты, пороги, BSoD (из NS monitoring)"
+        phase: mvp
+      - table: log_events
+        content: "Warning/error из Event Log / journald"
+        phase: mvp
+      - table: alarm_journal
+        content: "Журнал аварийных сообщений (§4.8)"
+        phase: mvp
+      - table: maintenance_windows
+        content: "Окна техобслуживания (mute alerts)"
+        phase: mvp
+      - table: users
+        content: "Пользователи UI, роли (из NS users)"
+        phase: mvp
+      - table: session_events
+        content: "Аудит входов/выходов (§5)"
+        phase: v1
+      - table: agent_policies
+        content: "Политики с сервера для агентов"
+        phase: v1
+
+  retention:
+    mvp:
+      metrics_raw: "30 суток (§9.1)"
+      logs_events: "90 суток (прототип; в Excel «без срока» — осознанный компромисс)"
+    v1:
+      metrics_raw: "настраиваемо, default 30 суток"
+      logs_events: "настраиваемо, default 1 год для аудита"
+    v2:
+      metrics_tiered: "raw → hourly → daily (Timescale continuous aggregates, §9.3)"
+
+  not_used:
+    - "Отдельный InfluxDB / VictoriaMetrics — не выбираем"
+    - "MongoDB — не выбираем"
+    - "SQLite на сервере — только локальный буфер агента на АРМ"
+
+  related_docs:
+    - "docs/architecture/архитектура-и-техническая-реализация.docx — §3.4, §4"
+    - "vendor/NetworckScaner-master/docker-compose.yml — сервис timescaledb"
+    - "vendor/NetworckScaner-master/README.md — DB_*, metric_values, TimescaleDB"
+
+  stack_full:
+    agent: "Go (MVP) / C (v1–v2 опционально)"
+    backend: "Java 17, Spring Boot 3.4 (форк NS)"
+    frontend: "Angular 21, PrimeNG (форк NS)"
+    database: "TimescaleDB / PostgreSQL 16"
+    messaging_v1: "Kafka (внутренний pipeline, опционально с v1)"
+    messaging_v2: "Kafka → интеграция WISLA (после Swagger)"
+    local_dev: "docker-compose: timescaledb, kafka, ldap (из NS)"
+
+phases:
+
+  mvp:
+    codename: prototype
+    goal: "Рабочий прототип на 2 VM (Linux + Windows); задел архитектуры под масштаб"
+    audience: "Команда + заказчик, демо сквозного сценария"
+    success_criteria:
+      - "Агенты на 2 VM стабильно шлют метрики 3+ дня"
+      - "Список АРМ, карточка, графики CPU/RAM/диск"
+      - "Алерт на почту/Telegram при остановке службы или нехватке диска"
+      - "BSoD фиксируется как событие"
+      - "Warning/error логи видны в карточке"
+      - "UI читаем на мобильном (список + карточка)"
+    explicitly_out:
+      - "Интеграция WISLA (Kafka)"
+      - "SSO"
+      - "S.M.A.R.T., инвентарь ПО"
+      - "PDF-отчёты, глубокий аудит Security log"
+      - "Политики агента с сервера"
+      - "Горизонтальное масштабирование (только закладка в архитектуре)"
+    tz_sections:
+      "§1": "Агент Win/Linux, служба, HTTPS+API-key, batch, буфер, авто-регистрация, версия агента"
+      "§2": "Реестр АРМ, статус online/offline, одна группа/тег"
+      "§3": "CPU, RAM, диск (системный том), online/offline; без S.M.A.R.T. и метрик по логам"
+      "§4": "Статус служб (список из конфига), BSoD, лента событий; логи warning/error упрощённо; журнал аварийных базово"
+      "§5": "Last seen, текущий пользователь (best effort); без полного аудита вход/выход"
+      "§6": "—"
+      "§7": "Пороги через .template, Email, Telegram, окно ТО (простое)"
+      "§8": "Список, «требуют внимания», карточка с вкладками, графики, мобильная вёрстка, локальный вход"
+      "§9": "Метрики 30 дней; логи/события с TTL 90 дней (прототип)"
+      "§10": "Дашборд парка (базовый); без §10.1, §10.6"
+    deliverables:
+      - "Форк NS → wisla-arm (без scan/SNMP/topology)"
+      - "TimescaleDB / PostgreSQL 16 в docker-compose (БД wisla_arm, порт 5435)"
+      - "Flyway-миграции: workstations, metric_values (hypertable), events, logs"
+      - "arm-linux.template, arm-windows.template"
+      - "Агент: Go (systemd + Windows Service)"
+      - "Agent ingest API → запись в PostgreSQL"
+      - "docker-compose стенд на Mac (timescaledb + backend + frontend)"
+
+  v1:
+    codename: pilot
+    goal: "Пилот на парке 50–300 АРМ; закрыты основные требования ТЗ (разделы 1–9)"
+    audience: "Инженеры техподдержки"
+    depends_on: mvp
+    success_criteria:
+      - "50+ АРМ в production-пилоте"
+      - "Политики с сервера без переустановки агента"
+      - "Полный §4.7–4.8: логи, правила, переходы, «обработано»"
+      - "§5: вход/выход, сессии, тип RDP/SSH"
+      - "Отчёты CSV + XLSX с рекомендациями"
+      - "LDAP-вход"
+      - "Обновление агента RPM/deb/MSI"
+    tz_sections:
+      "§1": "Политики агента (§1.4.5), лимиты CPU/RAM агента, прокси HTTP/HTTPS через UI, ротация API-key, деактивация агента"
+      "§2": "Группы/теги, профили мониторинга, инвентарь железа (CPU/RAM/диски без S/N)"
+      "§3": "Все тома (§10.3), iowait, метрики по логам (§3.7)"
+      "§4": "Полный просмотр логов, правила, журнал аварийных, агрегированная лента; пороги по службам"
+      "§5": "Полный аудит сессий (кроме Security log — см. v2)"
+      "§6": "Отчёты по АРМ и парку, CSV+XLSX, авто-рекомендации по шаблонам Zabbix"
+      "§7": "Все типы алертов из §7.1, настройка получателей по группам, история срабатываний"
+      "§8": "Все блоки карточки §8.1, роли просмотр/админ, аудит действий админов"
+      "§9": "Настраиваемые сроки хранения, агрегация суточных метрик"
+      "§10": "Поиск по пользователю, комментарии к АРМ/событию, шаблоны отчётов; PDF — если успеем"
+    deliverables:
+      - "Policy API + pull-config в агенте"
+      - "Полноценный log pipeline с dedup и correlation_id"
+      - "Reports module"
+      - "Agent update endpoint или встроенный репозиторий пакетов"
+      - "Поля подписи/штампа в отчётах (без обязательного PDF)"
+      - "Настраиваемые сроки хранения в PostgreSQL (retention policies)"
+
+  v2:
+    codename: production
+    goal: "Полное покрытие ТЗ + готовность к 5000 АРМ и интеграции с WISLA"
+    audience: "Эксплуатация в организации"
+    depends_on: v1
+    success_criteria:
+      - "Все пункты ТЗ §1–§10 закрыты или формально waived с обоснованием"
+      - "Интеграция WISLA: объекты, метрики, события через Kafka+REST"
+      - "Нагрузочный тест на целевой конфигурации (5000 АРМ расчётно)"
+      - "S.M.A.R.T. и инвентарь ПО — если согласовано с заказчиком"
+    tz_sections:
+      "§1": "Интеграция WISLA §1.7 (полная), SSO §10.6, подпись бинарников агента, прокси с auth"
+      "§2": "Импорт АРМ, серийные номера при возможности"
+      "§3": "S.M.A.R.T. (§3.5), задержки диска при возможности"
+      "§4": "CPU/RAM по службе (§4.2–4.3), графики потребления служб"
+      "§5": "Security log / PAM / wtmp — при согласовании ИБ"
+      "§6": "PDF с корпоративным шаблоном, отчёты на модернизацию для закупок"
+      "§7": "Эскалации (если потребуется), политика дублирования в WISLA"
+      "§8": "SSO, единое меню WISLA"
+      "§9": "Tiered storage raw→hourly→daily, горизонтальный ingest"
+      "§10": "Инвентаризация ПО (§10.1), все доп. требования"
+    deliverables:
+      - "WislaEventBridge для АРМ (по образцу NS)"
+      - "Timescale continuous aggregates (tiered storage §9.3)"
+      - "Ingest horizontal scaling"
+      - "S.M.A.R.T. collector в агенте"
+      - "Software inventory collector"
+      - "Формальное соответствие 152-ФЗ (если выход из режима прототипа)"
+
+# ─── Матрица: пункт ТЗ → фаза ───────────────────────────────────────
+
+coverage_matrix:
+
+  # §1 Архитектура
+  - tz: "§1.4.1–1.4.2"
+    title: "Агент Win/Linux, служба"
+    mvp: full
+    v1: full
+    v2: full
+
+  - tz: "§1.4.3"
+    title: "Сбор метрик §3–5"
+    mvp: partial
+    v1: full
+    v2: full
+    note_mvp: "Базовые метрики + службы + логи warning/error"
+
+  - tz: "§1.4.4"
+    title: "Настраиваемый интервал опроса"
+    mvp: partial
+    v1: full
+    v2: full
+    note_mvp: "Фикс 1–5 мин в конфиге"
+
+  - tz: "§1.4.5"
+    title: "Политика с сервера"
+    mvp: none
+    v1: full
+    v2: full
+
+  - tz: "§1.4.6"
+    title: "Лимиты CPU/RAM агента"
+    mvp: none
+    v1: full
+    v2: full
+
+  - tz: "§1.4.7–1.4.12"
+    title: "Права, bootstrap, буфер, деактивация"
+    mvp: partial
+    v1: full
+    v2: full
+    note_mvp: "API-key, буфер, авто-регистрация"
+
+  - tz: "§1.5"
+    title: "HTTPS, auth, batch, heartbeat, прокси"
+    mvp: partial
+    v1: partial
+    v2: full
+    note_mvp: "Без прокси"
+    note_v1: "Прокси HTTP/HTTPS через UI"
+
+  - tz: "§1.6"
+    title: "Сервер + UI"
+    mvp: partial
+    v1: full
+    v2: full
+
+  - tz: "§1.7"
+    title: "Интеграция WISLA"
+    mvp: none
+    v1: none
+    v2: full
+
+  - tz: "§1.8"
+    title: "Регистрация и обновление агентов"
+    mvp: partial
+    v1: full
+    v2: full
+    note_mvp: "Авто-регистрация, версия в UI"
+
+  - tz: "§1.9"
+    title: "Безагентный режим"
+    mvp: waived
+    v1: waived
+    v2: waived
+
+  # §2 Учёт АРМ
+  - tz: "§2.1–2.3"
+    title: "Реестр, инвентарь, группы"
+    mvp: partial
+    v1: full
+    v2: full
+    note_mvp: "Без полного инвентаря железа"
+
+  - tz: "§2.4–2.7"
+    title: "Профили, статус, регистрация"
+    mvp: partial
+    v1: full
+    v2: full
+
+  # §3 Производительность
+  - tz: "§3.1–3.4, §3.6"
+    title: "CPU, RAM, диск, сеть"
+    mvp: full
+    v1: full
+    v2: full
+
+  - tz: "§3.5"
+    title: "S.M.A.R.T."
+    mvp: none
+    v1: none
+    v2: full
+
+  - tz: "§3.7"
+    title: "Метрики по логам"
+    mvp: none
+    v1: full
+    v2: full
+
+  # §4 Службы и стабильность
+  - tz: "§4.1, §4.5–4.6"
+    title: "Службы, BSoD, лента событий"
+    mvp: partial
+    v1: full
+    v2: full
+
+  - tz: "§4.2–4.4"
+    title: "Ресурсы по службе"
+    mvp: none
+    v1: partial
+    v2: full
+    note_v1: "Пороги по службам; графики CPU/RAM службы — v2"
+
+  - tz: "§4.7–4.8"
+    title: "Логи ОС и журнал аварийных"
+    mvp: partial
+    v1: full
+    v2: full
+    note_mvp: "Просмотр warning/error, без сложных правил"
+
+  # §5 Аудит
+  - tz: "§5.1"
+    title: "Доступность / last seen"
+    mvp: full
+    v1: full
+    v2: full
+
+  - tz: "§5.2–5.6"
+    title: "Вход/выход, сессии, RDP/SSH"
+    mvp: partial
+    v1: full
+    v2: full
+    note_mvp: "Текущий пользователь"
+
+  - tz: "§5 (Security log)"
+    title: "Глубокий аудит через Security log"
+    mvp: none
+    v1: none
+    v2: full
+    note_v2: "Только при согласовании ИБ"
+
+  # §6 Отчёты
+  - tz: "§6.1–6.3"
+    title: "Отчёты, CSV/XLSX/PDF"
+    mvp: none
+    v1: partial
+    v2: full
+    note_v1: "CSV+XLSX; PDF в v2"
+
+  - tz: "§6.4–6.5"
+    title: "Рекомендации модернизации"
+    mvp: none
+    v1: full
+    v2: full
+
+  # §7 Информирование
+  - tz: "§7.1–7.6"
+    title: "Алерты, Email, Telegram, получатели"
+    mvp: partial
+    v1: full
+    v2: full
+    note_mvp: "Базовые правила + ТО"
+
+  # §8 Интерфейс
+  - tz: "§8.1–8.4"
+    title: "Карточка, списки, графики, логи"
+    mvp: partial
+    v1: full
+    v2: full
+
+  - tz: "§8.5"
+    title: "Роли"
+    mvp: partial
+    v1: full
+    v2: full
+
+  - tz: "§8 mobile"
+    title: "Мобильная адаптация"
+    mvp: full
+    v1: full
+    v2: full
+
+  # §9 Хранение
+  - tz: "§9.1–9.2"
+    title: "Сроки хранения"
+    mvp: partial
+    v1: full
+    v2: full
+
+  - tz: "§9.3"
+    title: "Агрегация старых метрик"
+    mvp: none
+    v1: partial
+    v2: full
+
+  # §10 Дополнительные
+  - tz: "§10.1"
+    title: "Инвентаризация ПО"
+    mvp: none
+    v1: none
+    v2: full
+
+  - tz: "§10.2–10.5, §10.7"
+    title: "Поиск, диски, шаблоны, комментарии, дашборды"
+    mvp: partial
+    v1: full
+    v2: full
+    note_mvp: "Только дашборд базовый"
+
+  - tz: "§10.6"
+    title: "SSO WISLA"
+    mvp: none
+    v1: none
+    v2: full
+
+# ─── Сводка покрытия ТЗ по фазам (оценка) ───────────────────────────
+
+coverage_summary:
+  mvp:
+    tz_points_total: 35
+    full: 8
+    partial: 18
+    none: 7
+    waived: 2
+    estimated_percent: "~45% ТЗ (ядро + демо)"
+  v1:
+    full: 28
+    partial: 5
+    none: 0
+    waived: 2
+    estimated_percent: "~85% ТЗ (основные разделы)"
+  v2:
+    full: 33
+    partial: 0
+    none: 0
+    waived: 2
+    estimated_percent: "100% ТЗ (кроме §1.9 безагентный)"
+
+timeline_hint:
+  mvp: "3–4 недели (2 разработчика, NS как база)"
+  v1: "2–3 месяца после MVP"
+  v2: "3–6 месяцев после v1 (зависит от WISLA API и ИБ)"

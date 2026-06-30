@@ -1,0 +1,53 @@
+.user-form-modal-panel {
+  max-width: 520px;
+  width: calc(100% - 32px);
+}
+
+.user-form-modal-lead {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.user-form-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+  margin-bottom: 18px;
+}
+
+.user-form-modal-roles {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.user-form-modal-roles-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.users-create-roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.user-role-toggle .p-checkbox {
+  margin-right: 4px;
+}
+
+.users-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 560px) {
+  .user-form-modal-grid {
+    grid-template-columns: 1fr;
+  }
+}

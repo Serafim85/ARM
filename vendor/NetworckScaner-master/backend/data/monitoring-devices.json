@@ -1,0 +1,51 @@
+[ {
+  "hostName" : "Siska",
+  "name" : "Cisco IOS Software, C2600 Software (C2600-ADVSECURITYK9-M), Version 12.3(14)T5, RELEASE SOFTWARE (fc2)\r\nTechnical Support: http://www.cisco.com/techsupport\r\nCopyright (c) 1986-2005 by Cisco Systems, Inc.\r\nCompiled Mon 24-Oct-05 20:27 by kellythw",
+  "serialNumber" : "JAD04370HQ8 (248167514)",
+  "ip" : "192.168.176.194",
+  "macAddress" : "00:03:e3:0a:91:40",
+  "vendor" : "Cisco",
+  "model" : "2610",
+  "firmwareVersion" : "Cisco IOS Software, C2600 Software (C2600-ADVSECURITYK9-M), Version 12.3(14)T5, ",
+  "pollingStatus" : "SNMP v2c",
+  "status" : "Включено",
+  "group" : "-",
+  "availability" : [ {
+    "label" : "ICMP",
+    "active" : true,
+    "tone" : "green"
+  }, {
+    "label" : "SNMP",
+    "active" : true,
+    "tone" : "green"
+  }, {
+    "label" : "SSH",
+    "active" : false,
+    "tone" : "red"
+  } ]
+}, {
+  "hostName" : "S002-0135",
+  "name" : "AEN-1000-GE",
+  "serialNumber" : "noSuchObject",
+  "ip" : "192.168.176.186",
+  "macAddress" : "noSuchObject",
+  "vendor" : "-",
+  "model" : "noSuchObject",
+  "firmwareVersion" : "AEN-1000-GE",
+  "pollingStatus" : "SNMP v2c",
+  "status" : "Включено",
+  "group" : "-",
+  "availability" : [ {
+    "label" : "ICMP",
+    "active" : true,
+    "tone" : "green"
+  }, {
+    "label" : "SNMP",
+    "active" : true,
+    "tone" : "green"
+  }, {
+    "label" : "SSH",
+    "active" : true,
+    "tone" : "green"
+  } ]
+} ]

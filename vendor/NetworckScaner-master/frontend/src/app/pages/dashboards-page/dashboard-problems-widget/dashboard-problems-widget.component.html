@@ -1,0 +1,22 @@
+<div class="dashboard-problems-widget">
+  @if (error()) {
+    <p class="dashboard-problems-widget-error" role="alert">{{ error() }}</p>
+  }
+  <div class="dashboard-problems-widget-table-wrap">
+    <app-monitoring-events-table
+      [events]="displayEvents()"
+      [loading]="loading()"
+      [lazy]="false"
+      [paginator]="false"
+      [rows]="displayEvents().length || 1"
+      [totalRecords]="displayEvents().length"
+      [first]="0"
+      [showCurrentPageReport]="false"
+      [alwaysShowPaginator]="false"
+      [tableMinWidthPx]="720"
+      [showTimeline]="config().showTimeline"
+      [highlightRow]="config().highlightRow"
+      [cellLinksEnabled]="false"
+    />
+  </div>
+</div>

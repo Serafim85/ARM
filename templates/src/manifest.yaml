@@ -1,0 +1,17 @@
+schemaVersion: "1"
+packVersion: "2026.06.10-arm"
+defaultTemplateId: arm-linux
+templates:
+  - id: arm-linux
+    file: arm-linux.yaml
+    version: "1.0.0"
+    type: AGENT
+    priority: 100
+    zabbixTemplate: WISLA ARM Linux
+
+  - id: arm-windows
+    file: arm-windows.yaml
+    version: "1.0.0"
+    type: AGENT
+    priority: 100
+    zabbixTemplate: WISLA ARM Windows

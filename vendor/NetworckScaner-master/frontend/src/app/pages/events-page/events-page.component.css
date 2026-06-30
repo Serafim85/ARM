@@ -1,0 +1,515 @@
+@import '../../shared-ui.css';
+
+.events-list-card { display: grid; gap: 18px; align-content: start; }
+
+/* ---- Уровни порога (полоса как на макете) ---- */
+
+.events-level-strip {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 1200px) {
+  .events-level-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 960px) {
+  .events-level-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .events-level-strip {
+    grid-template-columns: 1fr;
+  }
+}
+
+.events-level-label {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.events-level-label-long {
+  font-size: 11px;
+  letter-spacing: -0.02em;
+}
+
+.events-level-value {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.events-level-disaster {
+  background: var(--ep-disaster);
+  color: var(--ns-surface);
+}
+
+.events-level-disaster .events-level-label {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.events-level-high {
+  background: var(--ep-high);
+  color: var(--ns-surface);
+}
+
+.events-level-high .events-level-label {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.events-level-average {
+  background: var(--ep-average);
+  color: var(--ns-surface);
+}
+
+.events-level-warning {
+  background: var(--ep-warning);
+  color: var(--ns-surface);
+}
+
+.events-level-information {
+  background: var(--ep-information);
+  color: var(--ep-info-text);
+}
+
+.events-level-unknown {
+  background: #cbd5e1;
+  color: var(--ns-neutral-900);
+}
+
+.events-level-strip-hint {
+  margin: -6px 0 0;
+  font-size: 12px;
+  color: var(--ns-text-muted);
+}
+
+/* ---- Аккордион с фильтрами ---- */
+
+.events-filters-accordion {
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--ns-border);
+  background: var(--ns-surface);
+}
+
+.events-filters-header {
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  font-weight: 700;
+  font-size: 14px;
+  background: var(--ns-surface);
+  border: none;
+  cursor: pointer;
+}
+
+.events-filters-header {
+  display: grid;
+  gap: 10px;
+}
+
+.events-filters-header-toggle {
+  width: 100%;
+  text-align: left;
+  padding: 0;
+  font-weight: 700;
+  font-size: 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-radius: 10px;
+}
+
+.events-filters-header-toggle:hover {
+  background: #f8fafc;
+}
+
+.events-filters-header-toggle:focus-visible {
+  outline: 2px solid rgba(37, 99, 235, 0.7);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+.events-filters-applied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.events-filters-applied-label {
+  font-size: 12px;
+  color: var(--ns-text-muted);
+  font-weight: 600;
+}
+
+.events-filters-applied-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.events-filters-content {
+  padding: 0;
+}
+
+:host ::ng-deep .events-filters-accordion .p-accordioncontent-content {
+  padding: 0;
+}
+
+:host ::ng-deep .events-filters-accordion .p-accordionpanel {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--ns-border);
+}
+
+:host ::ng-deep .events-filters-accordion .list-filter-panel.events-filter-panel {
+  border: none;
+  border-radius: 0;
+}
+
+/* ---- Filter panel (сетка: две строки полей + футер с кнопками) ---- */
+
+.list-filter-panel.events-filter-panel {
+  padding-top: 18px;
+  padding-bottom: 18px;
+}
+
+.events-filter-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.events-filter-row {
+  align-items: end;
+}
+
+/* Строка 1: статус (по ширине контента) | период | длительность — две последние делят оставшееся место на всю ширину */
+.events-filter-row-top {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px 20px;
+  align-items: end;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .events-filter-row-top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Строка 2: имя устройства | метрика | MAC — три равные колонки */
+.events-filter-row-bottom {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px 20px;
+}
+
+@media (max-width: 1100px) {
+  .events-filter-row-bottom {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .events-filter-row-bottom {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.events-filter-group {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.events-filter-label {
+  font-size: 12px;
+  color: var(--ns-text-muted);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.events-filter-input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.events-filter-group-status .p-selectbutton {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.events-filter-panel-footer {
+  justify-content: flex-end;
+  margin-top: 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ns-border);
+}
+
+.events-duration-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.events-p-input {
+  min-width: 0;
+  width: 100%;
+}
+
+:host ::ng-deep .events-filter-group-duration .p-inputnumber {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+:host ::ng-deep .events-filter-group-duration .p-inputnumber .p-inputtext {
+  width: 100%;
+}
+
+/* Status tabs */
+
+.events-status-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--ns-border);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.events-status-tab {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ns-text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.events-status-tab:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--ns-neutral-900);
+  transform: none;
+  box-shadow: none;
+}
+
+.events-status-tab-active {
+  background: var(--ns-surface);
+  color: var(--ns-neutral-900);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.events-status-tab-open.events-status-tab-active { color: var(--ep-disaster); }
+.events-status-tab-resolved.events-status-tab-active { color: #047857; }
+
+/* Date range */
+
+.events-date-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.events-filter-input-datetime,
+.events-date-range .events-filter-input-datetime {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.events-date-sep { color: #94a3b8; font-size: 13px; }
+
+.event-status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.event-status-open { background: #fef2f2; color: var(--ep-disaster); }
+.event-status-resolved { background: #ecfdf5; color: #047857; }
+
+/* Pagination */
+
+.events-pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+.pagination-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.pagination-pages {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.pagination-page-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 6px;
+  background: transparent;
+  border: 1px solid var(--ns-border);
+  border-radius: 8px;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.pagination-page-btn:not(:disabled):hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  transform: none;
+  box-shadow: none;
+}
+
+.pagination-page-active {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+  color: var(--ns-surface) !important;
+  font-weight: 700;
+}
+
+.pagination-ellipsis { color: #94a3b8; font-size: 14px; padding: 0 4px; }
+
+.pagination-info {
+  font-size: 13px;
+  color: var(--ns-text-muted);
+  margin-left: 8px;
+}
+
+/* Reuse preloader from monitoring */
+.monitoring-preloader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 0;
+  color: var(--ns-text-muted);
+  font-size: 14px;
+}
+.monitoring-preloader-spinner {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--ns-border);
+  border-top-color: #2563eb;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.events-columns-dialog-body {
+  display: grid;
+  gap: 12px;
+}
+
+.events-columns-dialog-hint {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ns-text-muted);
+}
+
+.monitoring-events-columns-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.monitoring-events-columns-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 6px;
+  border-radius: 6px;
+  background: var(--ns-surface);
+  border: 1px solid var(--ns-border);
+}
+
+.monitoring-events-columns-item.cdk-drag-preview {
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+}
+
+.monitoring-events-columns-item.cdk-drag-placeholder {
+  opacity: 0.35;
+}
+
+.monitoring-events-columns-drag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  flex-shrink: 0;
+  color: var(--ns-text-muted);
+  cursor: grab;
+  touch-action: none;
+  font-size: 16px;
+  line-height: 1;
+  user-select: none;
+}
+
+.monitoring-events-columns-drag:active {
+  cursor: grabbing;
+}
+
+.monitoring-events-columns-drag:focus-visible {
+  outline: 2px solid rgba(37, 99, 235, 0.7);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.monitoring-events-columns-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--ns-neutral-900);
+}
+
+.events-columns-dialog-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}

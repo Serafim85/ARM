@@ -1,0 +1,66 @@
+:host {
+  display: block;
+}
+
+.snapshot-table-toolbar {
+  display: flex;
+  justify-content: flex-start;
+  margin: 0 0 0.75rem 0;
+}
+
+.snapshot-metric-search {
+  width: min(100%, 20rem);
+}
+
+.snapshot-value-cell,
+.snapshot-thresholds-cell {
+  vertical-align: top;
+}
+
+.snapshot-threshold-list {
+  margin: 0;
+  padding-left: 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.snapshot-threshold-breached {
+  color: var(--p-red-600, #dc2626);
+  font-weight: 600;
+}
+
+.walk-json-wrap {
+  max-height: 22rem;
+  overflow: auto;
+}
+
+.walk-json-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
+.walk-json-table th,
+.walk-json-table td {
+  border: 1px solid var(--p-content-border-color, color-mix(in srgb, var(--p-text-color, #334155) 18%, transparent));
+  padding: 0.25rem 0.5rem;
+  text-align: left;
+}
+
+.walk-json-table td {
+  white-space: normal;
+  word-break: break-word;
+}
+
+.walk-json-table th {
+  font-weight: 600;
+  background: var(--p-content-hover-background, rgba(0, 0, 0, 0.04));
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.walk-json-table tbody tr:nth-child(even) {
+  background: var(--p-datatable-row-striped-background, rgba(0, 0, 0, 0.02));
+}

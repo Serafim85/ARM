@@ -1,0 +1,473 @@
+@import '../../../../shared-ui.css';
+
+.events-panel {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+}
+
+.events-mac {
+  font-size: 12px;
+  color: #475569;
+}
+
+.event-metric-name {
+  font-size: 13px;
+  color: #0f172a;
+}
+
+.event-level-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  box-sizing: border-box;
+}
+
+:host td .event-level-chip.event-level-not-classified,
+:host .device-events-timeline-marker.event-level-chip.event-level-not-classified,
+:host .device-events-timeline-card .event-level-chip.event-level-not-classified {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1px solid #cbd5e1;
+}
+:host td .event-level-chip.event-level-information,
+:host .device-events-timeline-marker.event-level-chip.event-level-information,
+:host .device-events-timeline-card .event-level-chip.event-level-information {
+  background-color: #e0f2fe !important;
+  color: #0369a1 !important;
+  border: 1px solid #7dd3fc;
+}
+:host td .event-level-chip.event-level-warning,
+:host .device-events-timeline-marker.event-level-chip.event-level-warning,
+:host .device-events-timeline-card .event-level-chip.event-level-warning {
+  background-color: #fffbeb !important;
+  color: #d97706 !important;
+  border: 1px solid #fcd34d;
+}
+:host td .event-level-chip.event-level-average,
+:host .device-events-timeline-marker.event-level-chip.event-level-average,
+:host .device-events-timeline-card .event-level-chip.event-level-average {
+  background-color: #ffedd5 !important;
+  color: #c2410c !important;
+  border: 1px solid #fdba74;
+}
+:host td .event-level-chip.event-level-high,
+:host .device-events-timeline-marker.event-level-chip.event-level-high,
+:host .device-events-timeline-card .event-level-chip.event-level-high {
+  background-color: #fef2f2 !important;
+  color: #dc2626 !important;
+  border: 1px solid #fca5a5;
+}
+:host td .event-level-chip.event-level-disaster,
+:host .device-events-timeline-marker.event-level-chip.event-level-disaster,
+:host .device-events-timeline-card .event-level-chip.event-level-disaster {
+  background-color: #450a0a !important;
+  color: #fecaca !important;
+  border: 1px solid #7f1d1d;
+}
+
+.event-status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.event-status-open {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.event-status-resolved {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+/* Как на /users и вкладке «Конфигурация»: поиск слева, селект справа */
+.device-events-toolbar {
+  grid-template-columns: minmax(200px, 1.35fr) minmax(150px, 1fr);
+}
+
+.device-events-metric-input {
+  width: 100%;
+  min-width: 0;
+}
+
+:host {
+  --device-events-filter-control-height: 2.5rem;
+}
+
+input.device-events-metric-input {
+  box-sizing: border-box;
+  block-size: var(--device-events-filter-control-height);
+  min-block-size: var(--device-events-filter-control-height);
+  line-height: 1.25;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+:host ::ng-deep .device-events-toolbar p-select .p-select {
+  min-height: var(--device-events-filter-control-height);
+}
+
+.device-events-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.device-events-view-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  min-width: 0;
+  margin-top: 4px;
+  margin-bottom: 2px;
+}
+
+:host ::ng-deep .device-events-view-selectbutton.p-selectbutton {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--ns-bg-muted, #f1f5f9);
+  border: 1px solid var(--ns-border, #e2e8f0);
+  gap: 4px;
+}
+
+:host ::ng-deep .device-events-view-selectbutton.p-selectbutton .p-togglebutton {
+  min-width: 2.35rem;
+  min-height: 2.35rem;
+  padding: 0.4rem 0.55rem;
+}
+
+:host ::ng-deep .device-events-view-selectbutton.p-selectbutton .p-togglebutton i {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* ---- Таймлайн ---- */
+.device-events-timeline-shell {
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #fafbfc 0%, #ffffff 48%);
+}
+
+.device-events-timeline-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 28px 20px;
+  color: #64748b;
+  font-size: 14px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.device-events-timeline-empty {
+  padding: 24px 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.device-events-timeline-inner {
+  padding: 20px 20px 8px 12px;
+}
+
+.device-events-timeline-marker.event-level-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  font-size: 0;
+  line-height: 0;
+  box-shadow:
+    0 0 0 2px #fff,
+    0 1px 4px rgba(15, 23, 42, 0.12);
+}
+
+.device-events-timeline-opposite {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  min-width: 5.5rem;
+  padding-top: 4px;
+  text-align: right;
+}
+
+.device-events-timeline-opposite-date {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: 0.02em;
+}
+
+.device-events-timeline-opposite-time {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
+}
+
+.device-events-timeline-card {
+  margin-bottom: 4px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid #e8ecf1;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.device-events-timeline-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.device-events-timeline-card-head-main {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.device-events-timeline-metric {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.device-events-timeline-mac-top {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #64748b;
+  letter-spacing: 0.02em;
+  word-break: break-all;
+}
+
+.device-events-timeline-level-chip {
+  flex: 0 0 auto;
+  align-self: flex-start;
+}
+
+.device-events-timeline-trigger-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+}
+
+.device-events-timeline-trigger-name {
+  font-size: 13px;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.device-events-timeline-recovery {
+  font-size: 12px;
+  color: #64748b;
+  word-break: break-word;
+}
+
+.device-events-timeline-card-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  padding-top: 8px;
+  border-top: 1px solid #f1f5f9;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.device-events-timeline-status-chip {
+  flex-shrink: 0;
+}
+
+.device-events-timeline-foot-sep {
+  color: #cbd5e1;
+  user-select: none;
+}
+
+.device-events-timeline-foot-normalized {
+  font-variant-numeric: tabular-nums;
+  color: #475569;
+}
+
+:host ::ng-deep .device-events-timeline.p-timeline {
+  margin: 0;
+}
+
+:host ::ng-deep .device-events-timeline.p-timeline .p-timeline-event-opposite {
+  flex: 0 0 auto;
+  padding-right: 8px;
+}
+
+:host ::ng-deep .device-events-timeline.p-timeline .p-timeline-event-separator {
+  flex: 0 0 auto;
+}
+
+:host ::ng-deep .device-events-timeline.p-timeline .p-timeline-event-connector {
+  width: 2px;
+  margin-inline: auto;
+  background: linear-gradient(180deg, #cbd5e1 0%, #e2e8f0 100%);
+  border-radius: 1px;
+}
+
+:host ::ng-deep .device-events-timeline.p-timeline .p-timeline-event-content {
+  padding-bottom: 18px;
+}
+
+:host ::ng-deep .device-events-timeline-paginator.p-paginator {
+  border-radius: 0;
+  border-width: 1px 0 0;
+  background: #f8fafc;
+}
+
+/* ---- Таймлайн: p-metergroup (start/end шаблоны; легенда Prime отключена) ---- */
+.device-events-timeline-meter-block {
+  display: grid;
+  gap: 0;
+  margin-bottom: 6px;
+}
+
+.device-events-meter-lbl {
+  box-sizing: border-box;
+}
+
+.device-events-meter-lbl-key {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.device-events-meter-lbl-num {
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #0f172a;
+  line-height: 1.15;
+}
+
+.device-events-meter-lbl-num--warn {
+  color: #ea580c;
+}
+
+.device-events-meter-lbl-num--over {
+  color: #dc2626;
+}
+
+.device-events-meter-lbl--top {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 5px;
+  margin-bottom: 4px;
+  padding: 0 1px;
+}
+
+.device-events-meter-lbl--bottom {
+  position: relative;
+  min-height: 1.2rem;
+  margin-top: 4px;
+  padding: 0 1px;
+}
+
+/* Правый край подписи совпадает с границей сегментов (позиция left = доля ширины трека). */
+.device-events-meter-threshold-pin {
+  position: absolute;
+  bottom: 0;
+  transform: translateX(-100%);
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.device-events-meter-threshold-right {
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 5px;
+  margin-left: auto;
+  width: fit-content;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .device-events-threshold-metergroup.p-metergroup {
+  --p-metergroup-gap: 4px;
+  width: 100%;
+}
+
+:host ::ng-deep .device-events-threshold-metergroup .p-metergroup-meters {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: var(--p-metergroup-gap);
+  width: 100%;
+  min-height: 6px;
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #e2e8f0;
+  box-shadow: inset 0 1px 1px rgba(15, 23, 42, 0.05);
+}
+
+:host ::ng-deep .device-events-threshold-metergroup .p-metergroup-meter {
+  min-height: 6px;
+  height: 6px;
+  border-radius: 0;
+  transition: width 0.2s ease;
+}
+
+:host ::ng-deep .device-events-threshold-metergroup .p-metergroup-meter:first-child {
+  border-radius: 999px 0 0 999px;
+}
+
+:host ::ng-deep .device-events-threshold-metergroup .p-metergroup-meter:last-child {
+  border-radius: 0 999px 999px 0;
+}
+
+:host ::ng-deep .device-events-threshold-metergroup .p-metergroup-meter:only-child {
+  border-radius: 999px;
+}
+
+:host ::ng-deep .device-events-threshold-metergroup .p-metergroup-label-list {
+  display: none !important;
+}
+

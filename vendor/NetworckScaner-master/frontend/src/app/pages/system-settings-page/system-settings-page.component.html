@@ -1,0 +1,1061 @@
+<section class="content-card list-page-card system-settings-card">
+  <div class="section-heading">
+    <div>
+      <h1>Настройка системы</h1>
+      <p>Параметры интеграции с Microsoft Active Directory, LDAP и LDAPS.</p>
+    </div>
+    @if (isAdmin()) {
+      <div class="list-page-heading-actions">
+        <p-button
+          label="Обновить"
+          styleClass="ns-action-blue"
+          [outlined]="true"
+          [disabled]="loading() || saving()"
+          (onClick)="refreshActiveTab()"
+        />
+        <p-button label="Сохранить" styleClass="ns-action-blue" [disabled]="loading() || saving()" (onClick)="save()" />
+      </div>
+    }
+  </div>
+
+  <div class="system-settings-tabs-root">
+  <p-tabs
+    [value]="activeTab()"
+    (valueChange)="activeTab.set(isAdmin() ? $any($event) : 'subscriptions')"
+  >
+    <p-tablist>
+      @if (isAdmin()) {
+        <p-tab value="accessProfiles">Профили доступа</p-tab>
+        <p-tab value="directory">Интеграция каталогов</p-tab>
+        <p-tab value="roleMapping">Соответствие ролей</p-tab>
+        <p-tab value="userCreate">Создание пользователя</p-tab>
+        <p-tab value="smtp">Почтовый сервер (SMTP)</p-tab>
+      }
+      <p-tab value="subscriptions">Подписки уведомлений</p-tab>
+    </p-tablist>
+    <p-tabpanels>
+      @if (isAdmin()) {
+      <p-tabpanel value="accessProfiles">
+        <app-access-profiles-tab />
+      </p-tabpanel>
+      <p-tabpanel value="directory">
+        <div class="settings-form-grid settings-form-grid--plain">
+          <label class="settings-field">
+            <span class="settings-label-with-help">
+              Тип каталога
+              <i
+                class="pi pi-question-circle settings-help-icon"
+                tabindex="0"
+                [pTooltip]="directoryFieldHints.directoryType"
+                tooltipPosition="bottom"
+                tooltipStyleClass="settings-field-tooltip"
+              ></i>
+            </span>
+            <input
+              pInputText
+              [ngModel]="form().directoryType"
+              (ngModelChange)="updateField('directoryType', $event)"
+              placeholder="LDAP или ACTIVE_DIRECTORY"
+            />
+          </label>
+          <label class="settings-field">
+            <span class="settings-label-with-help">
+              Протокол
+              <i
+                class="pi pi-question-circle settings-help-icon"
+                tabindex="0"
+                [pTooltip]="directoryFieldHints.protocol"
+                tooltipPosition="bottom"
+                tooltipStyleClass="settings-field-tooltip"
+              ></i>
+            </span>
+            <input
+              pInputText
+              [ngModel]="form().protocol"
+              (ngModelChange)="updateField('protocol', $event)"
+              placeholder="LDAP или LDAPS"
+            />
+          </label>
+          <label class="settings-field settings-field-wide">
+            <span class="settings-label-with-help">
+              Адрес сервера LDAP
+              <i
+                class="pi pi-question-circle settings-help-icon"
+                tabindex="0"
+                [pTooltip]="directoryFieldHints.serverHost"
+                tooltipPosition="bottom"
+                tooltipStyleClass="settings-field-tooltip"
+              ></i>
+            </span>
+            <input
+              pInputText
+              [ngModel]="form().serverHost"
+              (ngModelChange)="updateField('serverHost', $event)"
+              placeholder="ldap.company.local"
+            />
+          </label>
+          <label class="settings-field">
+            <span class="settings-label-with-help">
+              Порт LDAP
+              <i
+                class="pi pi-question-circle settings-help-icon"
+                tabindex="0"
+                [pTooltip]="directoryFieldHints.serverPort"
+                tooltipPosition="bottom"
+                tooltipStyleClass="settings-field-tooltip"
+              ></i>
+            </span>
+            <input
+              pInputText
+              type="number"
+              [ngModel]="form().serverPort"
+              (ngModelChange)="updateField('serverPort', +($event || 0))"
+              placeholder="389 / 636"
+            />
+          </label>
+          <label class="settings-field settings-field-span2">
+            <span class="settings-label-with-help">
+              Base DN
+              <i
+                class="pi pi-question-circle settings-help-icon"
+                tabindex="0"
+                [pTooltip]="directoryFieldHints.baseDn"
+                tooltipPosition="bottom"
+                tooltipStyleClass="settings-field-tooltip"
+              ></i>
+            </span>
+            <input
+              pInputText
+              [ngModel]="form().baseDn"
+              (ngModelChange)="updateField('baseDn', $event)"
+              placeholder="DC=company,DC=local"
+            />
+          </label>
+          <label class="settings-field">
+            <span class="settings-label-with-help">
+              Аутентификатор LDAP
+              <i
+                class="pi pi-question-circle settings-help-icon"
+                tabindex="0"
+                [pTooltip]="directoryFieldHints.authType"
+                tooltipPosition="bottom"
+                tooltipStyleClass="settings-field-tooltip"
+              ></i>
+            </span>
+            <input
+              pInputText
+              [ngModel]="form().authType"
+              (ngModelChange)="updateField('authType', $event)"
+              placeholder="ldapBindAuthenticator"
+            />
+          </label>
+          <label class="settings-field settings-field-span2">
+            <span class="settings-label-with-help">
+              Логин (bind DN)
+              <i
+                class="pi pi-question-circle settings-help-icon"
+                tabindex="0"
+                [pTooltip]="directoryFieldHints.bindDn"
+                tooltipPosition="bottom"
+                tooltipStyleClass="settings-field-tooltip"
+              ></i>
+            </span>
+            <input
+              pInputText
+              [ngModel]="form().bindDn"
+              (ngModelChange)="updateField('bindDn', $event)"
+              placeholder="CN=svc-ldap,OU=Service,DC=company,DC=local"
+            />
+          </label>
+          <label class="settings-field settings-field-span2">
+            <span class="settings-label-with-help">
+              Bind password @if (form().hasBindPassword) { <small>(установлен)</small> }
+              <i
+                class="pi pi-question-circle settings-help-icon"
+                tabindex="0"
+                [pTooltip]="directoryFieldHints.bindPassword"
+                tooltipPosition="bottom"
+                tooltipStyleClass="settings-field-tooltip"
+              ></i>
+            </span>
+            <p-password
+              class="w-full"
+              [feedback]="false"
+              [toggleMask]="true"
+              [ngModel]="form().bindPassword"
+              (ngModelChange)="updateField('bindPassword', $event)"
+              placeholder="Оставьте пустым, чтобы не менять"
+            />
+          </label>
+          <label class="settings-field settings-field-span2 settings-checkbox">
+            <p-checkbox
+              binary="true"
+              [ngModel]="clearBindPassword()"
+              (ngModelChange)="clearBindPassword.set(!!$event)"
+              inputId="clearBindPassword"
+            />
+            <span class="settings-label-with-help">
+              Очистить сохраненный bind password
+              <i
+                class="pi pi-question-circle settings-help-icon"
+                tabindex="0"
+                [pTooltip]="directoryFieldHints.clearBindPassword"
+                tooltipPosition="bottom"
+                tooltipStyleClass="settings-field-tooltip"
+              ></i>
+            </span>
+          </label>
+          <label class="settings-field settings-field-span2">
+            <span class="settings-label-with-help">
+              Идентификатор пользователя (фильтр)
+              <i
+                class="pi pi-question-circle settings-help-icon"
+                tabindex="0"
+                [pTooltip]="directoryFieldHints.userFilter"
+                tooltipPosition="bottom"
+                tooltipStyleClass="settings-field-tooltip"
+              ></i>
+            </span>
+            <input
+              pInputText
+              [ngModel]="form().userFilter"
+              (ngModelChange)="updateField('userFilter', $event)"
+              placeholder="(&(objectClass=user)(memberOf=CN=NOC,OU=Groups,DC=company,DC=local)(|(uid={login})(mail={login})))"
+            />
+          </label>
+          <label class="settings-field">
+            <span class="settings-label-with-help">
+              Атрибут для логина
+              <i
+                class="pi pi-question-circle settings-help-icon"
+                tabindex="0"
+                [pTooltip]="directoryFieldHints.loginAttribute"
+                tooltipPosition="bottom"
+                tooltipStyleClass="settings-field-tooltip"
+              ></i>
+            </span>
+            <input pInputText [ngModel]="form().loginAttribute" (ngModelChange)="updateField('loginAttribute', $event)" />
+          </label>
+          <label class="settings-field">
+            <span class="settings-label-with-help">
+              Почта
+              <i
+                class="pi pi-question-circle settings-help-icon"
+                tabindex="0"
+                [pTooltip]="directoryFieldHints.emailAttribute"
+                tooltipPosition="bottom"
+                tooltipStyleClass="settings-field-tooltip"
+              ></i>
+            </span>
+            <input pInputText [ngModel]="form().emailAttribute" (ngModelChange)="updateField('emailAttribute', $event)" />
+          </label>
+          <label class="settings-field settings-field-span2">
+            <span class="settings-label-with-help">
+              Атрибут полного имени
+              <i
+                class="pi pi-question-circle settings-help-icon"
+                tabindex="0"
+                [pTooltip]="directoryFieldHints.displayNameAttribute"
+                tooltipPosition="bottom"
+                tooltipStyleClass="settings-field-tooltip"
+              ></i>
+            </span>
+            <input
+              pInputText
+              [ngModel]="form().displayNameAttribute"
+              (ngModelChange)="updateField('displayNameAttribute', $event)"
+            />
+          </label>
+          <label class="settings-field settings-field-span2 settings-checkbox">
+            <p-checkbox
+              binary="true"
+              [ngModel]="form().enabled"
+              (ngModelChange)="updateField('enabled', !!$event)"
+              inputId="directoryEnabled"
+            />
+            <span class="settings-label-with-help">
+              Включить внешнюю LDAP/LDAPS аутентификацию
+              <i
+                class="pi pi-question-circle settings-help-icon"
+                tabindex="0"
+                [pTooltip]="directoryFieldHints.enabled"
+                tooltipPosition="bottom"
+                tooltipStyleClass="settings-field-tooltip"
+              ></i>
+            </span>
+          </label>
+          <label class="settings-field settings-field-span2 settings-checkbox">
+            <p-checkbox
+              binary="true"
+              [ngModel]="form().allowLocalFallback"
+              (ngModelChange)="updateField('allowLocalFallback', !!$event)"
+              inputId="localFallback"
+            />
+            <span class="settings-label-with-help">
+              Разрешить резервный локальный вход при недоступности каталога
+              <i
+                class="pi pi-question-circle settings-help-icon"
+                tabindex="0"
+                [pTooltip]="directoryFieldHints.allowLocalFallback"
+                tooltipPosition="bottom"
+                tooltipStyleClass="settings-field-tooltip"
+              ></i>
+            </span>
+          </label>
+        </div>
+      </p-tabpanel>
+      <p-tabpanel value="roleMapping">
+        <div class="role-mapping-header">
+          <p>
+            Загрузите группы из AD/LDAP и назначьте им роли системы. При входе через LDAP пользователю будут выданы роли
+            по его членству в группах.
+          </p>
+          <div class="list-page-heading-actions">
+            <p-button
+              label="Получить группы из каталога"
+              styleClass="ns-action-blue"
+              [outlined]="true"
+              [disabled]="loadingGroups() || savingMappings()"
+              (onClick)="discoverGroups()"
+            />
+            <p-button
+              label="Сохранить соответствие"
+              styleClass="ns-action-blue"
+              [disabled]="loadingGroups() || savingMappings()"
+              (onClick)="saveRoleMappings()"
+            />
+          </div>
+        </div>
+        @if (mappingRows().length === 0) {
+          <div class="empty-state">
+            <strong>Группы еще не загружены.</strong>
+            <span>Нажмите «Получить группы из каталога», затем назначьте роли.</span>
+          </div>
+        } @else {
+          <div class="role-mapping-table-wrap">
+            <table class="results-table compact-table">
+              <thead>
+                <tr>
+                  <th>Группа каталога</th>
+                  <th>DN</th>
+                  <th>Роль в системе</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of mappingRows(); track row.groupDn) {
+                  <tr>
+                    <td>{{ row.groupName }}</td>
+                    <td class="group-dn-cell">{{ row.groupDn }}</td>
+                    <td>
+                      <p-select
+                        [options]="roleOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        [ngModel]="row.role"
+                        (ngModelChange)="updateMappingRole(row.groupDn, $event)"
+                        [ngModelOptions]="{ standalone: true }"
+                        [appendTo]="'body'"
+                        placeholder="Выберите роль"
+                        styleClass="w-full"
+                      />
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </p-tabpanel>
+      <p-tabpanel value="userCreate">
+        <div class="role-mapping-header">
+          <p>
+            Отфильтруйте пользователей LDAP/AD, настройте маппинг атрибутов и создайте локального пользователя в системе.
+          </p>
+          <div class="list-page-heading-actions">
+            <p-button
+              label="Найти пользователей"
+              styleClass="ns-action-blue"
+              [outlined]="true"
+              [disabled]="loadingGroups() || savingMappings()"
+              (onClick)="searchDirectoryUsersForCreation()"
+            />
+            <p-button
+              label="Создать пользователя"
+              styleClass="ns-action-blue"
+              [disabled]="loadingGroups() || savingMappings()"
+              (onClick)="createSelectedDirectoryUser()"
+            />
+          </div>
+        </div>
+
+        <div class="settings-form-grid settings-form-grid--plain user-create-grid">
+          <label class="settings-field">
+            <span>LDAP-фильтр пользователей</span>
+            <input pInputText [ngModel]="directoryUserFilter()" (ngModelChange)="directoryUserFilter.set($event)" />
+          </label>
+          <label class="settings-field">
+            <span>Атрибут email</span>
+            <input pInputText [ngModel]="createEmailAttribute()" (ngModelChange)="createEmailAttribute.set($event)" />
+          </label>
+          <label class="settings-field">
+            <span>Атрибут ФИО</span>
+            <input pInputText [ngModel]="createDisplayNameAttribute()" (ngModelChange)="createDisplayNameAttribute.set($event)" />
+          </label>
+          <label class="settings-field">
+            <span>Роль при создании</span>
+            <p-select
+              [options]="createRoleOptions"
+              optionLabel="label"
+              optionValue="value"
+              [ngModel]="createDirectoryRole()"
+              (ngModelChange)="createDirectoryRole.set($event)"
+              [ngModelOptions]="{ standalone: true }"
+              [appendTo]="'body'"
+              styleClass="w-full"
+            />
+          </label>
+          <label class="settings-field settings-checkbox">
+            <p-checkbox
+              binary="true"
+              [ngModel]="createDirectoryUserEnabled()"
+              (ngModelChange)="createDirectoryUserEnabled.set(!!$event)"
+              inputId="createDirectoryEnabled"
+            />
+            <span>Создать активным</span>
+          </label>
+        </div>
+
+        @if (foundDirectoryUsers().length === 0) {
+          <div class="empty-state">
+            <strong>Пользователи не загружены.</strong>
+            <span>Нажмите «Найти пользователей», затем выберите запись для создания.</span>
+          </div>
+        } @else {
+          <div class="role-mapping-table-wrap">
+            <table class="results-table compact-table">
+              <thead>
+                <tr>
+                  <th>Выбор</th>
+                  <th>Логин</th>
+                  <th>Email</th>
+                  <th>ФИО</th>
+                  <th>DN</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (user of foundDirectoryUsers(); track user.directoryDn) {
+                  <tr>
+                    <td>
+                      <input
+                        type="radio"
+                        name="directoryUserSelect"
+                        [checked]="selectedDirectoryDn() === user.directoryDn"
+                        (change)="onSelectDirectoryUser(user.directoryDn)"
+                      />
+                    </td>
+                    <td>{{ user.login }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.displayName }}</td>
+                    <td class="group-dn-cell">{{ user.directoryDn }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </p-tabpanel>
+      }
+      @if (isAdmin()) {
+      <p-tabpanel value="smtp">
+        <div class="settings-form-grid settings-form-grid--plain">
+          <label class="settings-field settings-field-span2 settings-checkbox">
+            <p-checkbox binary="true" [ngModel]="smtpForm().enabled" (ngModelChange)="updateSmtpField('enabled', !!$event)" />
+            <span>Включить отправку уведомлений по SMTP</span>
+          </label>
+          <label class="settings-field settings-field-span2">
+            <span>SMTP-сервер</span>
+            <input pInputText [ngModel]="smtpForm().serverHost" (ngModelChange)="updateSmtpField('serverHost', $event)" />
+          </label>
+          <label class="settings-field">
+            <span>Порт</span>
+            <input
+              pInputText
+              type="number"
+              [ngModel]="smtpForm().serverPort"
+              (ngModelChange)="updateSmtpField('serverPort', +($event || 0))"
+            />
+          </label>
+          <label class="settings-field">
+            <span>Пользователь SMTP</span>
+            <input pInputText [ngModel]="smtpForm().username" (ngModelChange)="updateSmtpField('username', $event)" />
+          </label>
+          <label class="settings-field settings-field-span2">
+            <span>Пароль SMTP @if (smtpForm().hasPassword) { <small>(установлен)</small> }</span>
+            <p-password
+              class="w-full"
+              [feedback]="false"
+              [toggleMask]="true"
+              [ngModel]="smtpForm().password"
+              (ngModelChange)="updateSmtpField('password', $event)"
+              placeholder="Оставьте пустым, чтобы не менять"
+            />
+          </label>
+          <label class="settings-field settings-field-span2 settings-checkbox">
+            <p-checkbox binary="true" [ngModel]="clearSmtpPassword()" (ngModelChange)="clearSmtpPassword.set(!!$event)" />
+            <span>Очистить сохраненный SMTP-пароль</span>
+          </label>
+          <label class="settings-field settings-field-span2">
+            <span>Email отправителя</span>
+            <input pInputText [ngModel]="smtpForm().fromEmail" (ngModelChange)="updateSmtpField('fromEmail', $event)" />
+          </label>
+          <label class="settings-field settings-field-span2">
+            <span>Куда отправить тестовое письмо</span>
+            <input pInputText [ngModel]="testSmtpRecipient()" (ngModelChange)="testSmtpRecipient.set($event)" />
+          </label>
+          <div class="list-page-heading-actions">
+            <p-button
+              label="Отправить тестовое письмо"
+              styleClass="ns-action-blue"
+              [outlined]="true"
+              [disabled]="smtpTesting()"
+              (onClick)="sendTestSmtpEmail()"
+            />
+          </div>
+          <label class="settings-field settings-checkbox">
+            <p-checkbox binary="true" [ngModel]="smtpForm().auth" (ngModelChange)="updateSmtpField('auth', !!$event)" />
+            <span>SMTP AUTH</span>
+          </label>
+          <label class="settings-field settings-checkbox">
+            <p-checkbox binary="true" [ngModel]="smtpForm().starttls" (ngModelChange)="updateSmtpField('starttls', !!$event)" />
+            <span>STARTTLS</span>
+          </label>
+          <label class="settings-field settings-checkbox">
+            <p-checkbox binary="true" [ngModel]="smtpForm().ssl" (ngModelChange)="updateSmtpField('ssl', !!$event)" />
+            <span>SSL/TLS</span>
+          </label>
+        </div>
+        <div class="list-page-heading-actions panel-actions">
+          <p-button
+            label="Сохранить SMTP"
+            styleClass="ns-action-blue"
+            [disabled]="smtpSaving()"
+            (onClick)="saveSmtp()"
+          />
+        </div>
+      </p-tabpanel>
+      }
+      <p-tabpanel value="subscriptions">
+        <div class="role-mapping-header">
+          <p>
+            Канал первого этапа: SMTP. Операторские уведомления сейчас отправляются только при обнаружении новых устройств.
+            Административные уведомления формируются по событиям аудита системы.
+          </p>
+          <div class="list-page-heading-actions">
+            <p-button
+              label="Создать подписку на события"
+              styleClass="ns-action-blue"
+              (onClick)="openSubscriptionWizard()"
+            />
+          </div>
+        </div>
+
+        <p-dialog
+          header="Создание подписки на события"
+          [modal]="true"
+          [draggable]="false"
+          [resizable]="false"
+          [style]="{ width: '90vw', maxWidth: '1100px' }"
+          [visible]="subscriptionWizardOpen()"
+          (visibleChange)="subscriptionWizardOpen.set($event)"
+        >
+          @if (wizardNotificationKind() === 'ADMIN') {
+            <div class="subscription-stepper-header">
+              <strong>Административные уведомления</strong>
+            </div>
+            <div class="settings-form-grid settings-form-grid--plain user-create-grid">
+              <label class="settings-field">
+                <span>Email получателя</span>
+                <input
+                  pInputText
+                  [ngModel]="wizardRecipientEmail()"
+                  (ngModelChange)="wizardRecipientEmail.set($event)"
+                  placeholder="user@example.com или user1@example.com,user2@example.com"
+                />
+              </label>
+              <label class="settings-field settings-field-span2">
+                <span>События административных уведомлений</span>
+                <div class="settings-form-grid settings-form-grid--plain">
+                  @for (option of adminEventOptions; track option.value) {
+                    <label class="settings-field settings-checkbox">
+                      <p-checkbox
+                        [binary]="true"
+                        [ngModel]="wizardAdminEventCodes().includes(option.value)"
+                        (ngModelChange)="setAdminEventSelected(option.value, !!$event)"
+                        [ngModelOptions]="{ standalone: true }"
+                      />
+                      <span>{{ option.label }}</span>
+                    </label>
+                  }
+                </div>
+              </label>
+            </div>
+          } @else if (subscriptionWizardStep() === 1) {
+            <div class="subscription-stepper-header">
+              <span class="subscription-stepper-badge">Шаг 1 из 3</span>
+              <strong>Выберите устройства по фильтрам</strong>
+            </div>
+            <div class="monitoring-filters-content wizard-filters-content">
+              <div class="list-filter-panel monitoring-filter-panel">
+                <div class="monitoring-filter-rows">
+                  <div class="monitoring-filter-row monitoring-filter-row-top">
+                    <div class="p-input-container monitoring-filter-group-fill">
+                      <span>Поиск</span>
+                      <input pInputText class="monitoring-filter-input" [ngModel]="wizardSearchDraft()" (ngModelChange)="wizardSearchDraft.set($event)" placeholder="IP, имя, серийный номер, модель..." />
+                    </div>
+                    <div class="p-input-container monitoring-filter-group-fill">
+                      <span>Доступность</span>
+                      <p-select [options]="availabilityOptions" optionLabel="label" optionValue="value" [ngModel]="wizardAvailabilityDraft()" (ngModelChange)="wizardAvailabilityDraft.set($event)" [appendTo]="'body'" styleClass="w-full" />
+                    </div>
+                  </div>
+                  <div class="monitoring-filter-row monitoring-filter-row-bottom">
+                    <div class="p-input-container monitoring-filter-group-fill">
+                      <span>IP</span>
+                      <input pInputText class="monitoring-filter-input" [ngModel]="wizardIpDraft()" (ngModelChange)="wizardIpDraft.set($event)" />
+                    </div>
+                    <div class="p-input-container monitoring-filter-group-fill">
+                      <span>MAC</span>
+                      <input pInputText class="monitoring-filter-input" [ngModel]="wizardMacDraft()" (ngModelChange)="wizardMacDraft.set($event)" />
+                    </div>
+                    <div class="p-input-container monitoring-filter-group-fill">
+                      <span>Статус опроса</span>
+                      <input pInputText class="monitoring-filter-input" [ngModel]="wizardStatusDraft()" (ngModelChange)="wizardStatusDraft.set($event)" />
+                    </div>
+                    <div class="p-input-container monitoring-filter-group-fill">
+                      <span>Теги</span>
+                      <div class="monitoring-tag-filter">
+                        @if (wizardTagDraft().length > 0) {
+                          <div class="monitoring-tag-filter-chips">
+                            @for (t of wizardTagDraft(); track t) {
+                              <button type="button" class="monitoring-tag-chip-btn" (click)="removeWizardTag(t)">{{ t }} ×</button>
+                            }
+                          </div>
+                        }
+                        <input pInputText class="monitoring-filter-input" [ngModel]="wizardTagInputDraft()" (ngModelChange)="wizardTagInputDraft.set($event)" (keydown.enter)="addWizardTagFromInput($event)" placeholder="Введите тег и Enter" />
+                      </div>
+                    </div>
+                    <div class="p-input-container monitoring-filter-group-fill">
+                      <span>Состояние</span>
+                      <p-select [options]="healthStatusOptions" optionLabel="label" optionValue="value" [ngModel]="wizardHealthDraft()" (ngModelChange)="wizardHealthDraft.set($event)" [appendTo]="'body'" styleClass="w-full" />
+                    </div>
+                  </div>
+                </div>
+                <div class="list-filter-panel-actions monitoring-filter-panel-footer">
+                  <p-button label="Применить" styleClass="ns-action-blue" (onClick)="applyWizardFilters()" [disabled]="wizardDevicesLoading()" />
+                  <p-button label="Сбросить" [outlined]="true" styleClass="ns-action-blue" (onClick)="resetWizardFilters()" [disabled]="wizardDevicesLoading()" />
+                </div>
+              </div>
+            </div>
+            <div class="role-mapping-table-wrap">
+              <div class="wizard-select-all-row">
+                <label class="settings-field settings-checkbox wizard-select-all-control" style="margin: 0;">
+                  <span class="wizard-select-all-checkbox-cell">
+                    <p-checkbox
+                      [binary]="true"
+                      [ngModel]="areAllVisibleWizardDevicesSelected()"
+                      (ngModelChange)="setAllVisibleWizardDevicesSelected(!!$event)"
+                      [ngModelOptions]="{ standalone: true }"
+                    />
+                  </span>
+                  <span>Выбрать все устройства (по текущему фильтру)</span>
+                </label>
+              </div>
+              <table class="results-table compact-table wizard-devices-table">
+                <thead><tr><th>Выбор</th><th>IP</th><th>Имя</th><th>MAC</th><th>Статус</th><th>Состояние</th><th>Теги</th></tr></thead>
+                <tbody>
+                  @if (wizardDevicesLoading()) { <tr><td colspan="7">Загрузка устройств...</td></tr> }
+                  @else if (wizardDevices().length === 0) { <tr><td colspan="7">Устройства по фильтрам не найдены.</td></tr> }
+                  @else {
+                    @for (device of wizardDevices(); track device.id) {
+                      <tr>
+                        <td><p-checkbox [binary]="true" [ngModel]="isWizardDeviceSelected(device.id)" (ngModelChange)="setWizardDeviceSelected(device.id, !!$event)" [ngModelOptions]="{ standalone: true }" /></td>
+                        <td>{{ device.ip }}</td><td>{{ device.name }}</td><td>{{ device.macAddress }}</td><td>{{ device.status }}</td>
+                        <td>{{ monitoringHealthStatusLabel(device.healthStatus) }}</td><td>{{ (device.tags || []).join(', ') || '—' }}</td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else if (subscriptionWizardStep() === 2) {
+            <div class="subscription-stepper-header">
+              <span class="subscription-stepper-badge">Шаг 2 из 3</span>
+              <strong>Выберите метрики для выбранных устройств</strong>
+              <small class="muted">Если ничего не выбрать, будут использованы все метрики выбранных устройств.</small>
+            </div>
+            <div class="results-toolbar results-toolbar-prime wizard-metrics-toolbar">
+              <label class="results-filter p-input-container">
+                <span>Фильтр метрик</span>
+                <input
+                  pInputText
+                  type="search"
+                  [ngModel]="wizardMetricSearch()"
+                  (ngModelChange)="wizardMetricSearch.set($event)"
+                  placeholder="Устройство, метрика, item key, ID устройства"
+                  class="w-full"
+                />
+              </label>
+            </div>
+            <div class="role-mapping-table-wrap">
+              <div class="wizard-select-all-row">
+                <label class="settings-field settings-checkbox wizard-select-all-control" style="margin: 0;">
+                  <span class="wizard-select-all-checkbox-cell">
+                    <p-checkbox
+                      [binary]="true"
+                      [ngModel]="areAllFilteredWizardMetricsSelected()"
+                      (ngModelChange)="setAllFilteredWizardMetricsSelected(!!$event)"
+                      [ngModelOptions]="{ standalone: true }"
+                    />
+                  </span>
+                  <span>Выбрать все метрики (по текущему фильтру)</span>
+                </label>
+              </div>
+              <table class="results-table compact-table wizard-metrics-table">
+                <thead>
+                  <tr>
+                    <th>Выбор</th>
+                    <th>Устройство</th>
+                    <th>Метрика</th>
+                    <th>ID устройства</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @if (wizardMetricsLoading()) {
+                    <tr><td colspan="4">Загрузка метрик...</td></tr>
+                  } @else if (wizardFilteredMetricOptions().length === 0) {
+                    <tr><td colspan="4">Для выбранных устройств метрики не найдены.</td></tr>
+                  } @else {
+                    @for (metric of wizardFilteredMetricOptions(); track metric.id) {
+                      <tr>
+                        <td>
+                          <p-checkbox
+                            [binary]="true"
+                            [ngModel]="isWizardMetricSelected(metric.id)"
+                            (ngModelChange)="toggleWizardMetric(metric.id, !!$event)"
+                            [ngModelOptions]="{ standalone: true }"
+                          />
+                        </td>
+                        <td>{{ metric.deviceName }}</td>
+                        <td>{{ metric.metricName }}</td>
+                        <td>{{ metric.deviceId }}</td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else if (subscriptionWizardStep() === 3) {
+            <div class="subscription-stepper-header">
+              <span class="subscription-stepper-badge">Шаг 3 из 3</span>
+              <strong>Настройка уведомлений</strong>
+            </div>
+            <div class="settings-form-grid settings-form-grid--plain user-create-grid">
+              <label class="settings-field">
+                <span>Email получателя</span>
+                <input
+                  pInputText
+                  [ngModel]="wizardRecipientEmail()"
+                  (ngModelChange)="wizardRecipientEmail.set($event)"
+                  placeholder="user@example.com или user1@example.com,user2@example.com"
+                />
+              </label>
+              <label class="settings-field">
+                <span>События по степени критичности</span>
+                <p-multiselect
+                  [options]="severityFilterOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  [ngModel]="wizardSeveritySelection()"
+                  (ngModelChange)="wizardSeveritySelection.set($event || [])"
+                  [appendTo]="'body'"
+                  defaultLabel="Выберите критичность"
+                  styleClass="w-full"
+                />
+              </label>
+              <label class="settings-field settings-checkbox">
+                <p-checkbox
+                  [binary]="true"
+                  [ngModel]="wizardNotifyDeviceUnmonitored()"
+                  (ngModelChange)="wizardNotifyDeviceUnmonitored.set(!!$event)"
+                />
+                <span>Уведомлять при снятии устройства с мониторинга</span>
+              </label>
+              <label class="settings-field settings-checkbox">
+                <p-checkbox
+                  [binary]="true"
+                  [ngModel]="wizardNotifyConfigChanged()"
+                  (ngModelChange)="wizardNotifyConfigChanged.set(!!$event)"
+                />
+                <span>Уведомлять при изменении конфигурационного файла устройства</span>
+              </label>
+            </div>
+
+            <div class="role-mapping-header">
+              <p>Конструктор условий (составные выражения с `&&`, `||`, `!`).</p>
+              <div class="list-page-heading-actions">
+                <p-button label="Добавить условие" [outlined]="true" styleClass="ns-action-blue" (onClick)="addConditionRow()" />
+              </div>
+            </div>
+            @if (wizardConditionRows().length === 0) {
+              <div class="empty-state">
+                <strong>Условия не заданы.</strong>
+                <span>Если оставить пусто, будут применяться только события и фильтры выше.</span>
+              </div>
+            } @else {
+              <div class="role-mapping-table-wrap">
+                <table class="results-table compact-table">
+                  <thead>
+                    <tr>
+                      <th>НЕ</th>
+                      <th>Поле</th>
+                      <th>Значение</th>
+                      <th>Связка</th>
+                      <th>Действие</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of wizardConditionRows(); track $index) {
+                      <tr>
+                        <td>
+                          <p-checkbox
+                            [binary]="true"
+                            [ngModel]="row.negated"
+                            (ngModelChange)="updateConditionRowNegated($index, !!$event)"
+                            [ngModelOptions]="{ standalone: true }"
+                          />
+                        </td>
+                        <td>
+                          <p-select
+                            [options]="conditionFieldOptions"
+                            optionLabel="label"
+                            optionValue="value"
+                            [ngModel]="row.field"
+                            (ngModelChange)="updateConditionRowField($index, $event)"
+                            [appendTo]="'body'"
+                            [ngModelOptions]="{ standalone: true }"
+                            styleClass="w-full"
+                          />
+                        </td>
+                        <td>
+                          @if (conditionValueOptions($index).length > 0) {
+                            <p-select
+                              [options]="conditionValueOptions($index)"
+                              optionLabel="label"
+                              optionValue="value"
+                              [ngModel]="row.value"
+                              (ngModelChange)="updateConditionRowValue($index, $event)"
+                              [appendTo]="'body'"
+                              [ngModelOptions]="{ standalone: true }"
+                              [filter]="true"
+                              styleClass="w-full"
+                            />
+                          } @else {
+                            <input
+                              pInputText
+                              [ngModel]="row.value"
+                              (ngModelChange)="updateConditionRowValue($index, $event)"
+                              [ngModelOptions]="{ standalone: true }"
+                            />
+                          }
+                        </td>
+                        <td>
+                          <p-select
+                            [options]="[{ label: 'И (&&)', value: '&&' }, { label: 'ИЛИ (||)', value: '||' }]"
+                            optionLabel="label"
+                            optionValue="value"
+                            [ngModel]="row.joinWithNext"
+                            (ngModelChange)="updateConditionRowJoin($index, $event)"
+                            [appendTo]="'body'"
+                            [ngModelOptions]="{ standalone: true }"
+                            styleClass="w-full"
+                          />
+                        </td>
+                        <td>
+                          <p-button label="Удалить" severity="danger" [outlined]="true" (onClick)="removeConditionRow($index)" />
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <label class="settings-field settings-field-span2">
+                <span>Предпросмотр выражения (системный формат)</span>
+                <input pInputText [ngModel]="wizardConditionExpression()" readonly />
+              </label>
+            }
+          }
+
+          <ng-template pTemplate="footer">
+            <div class="list-page-heading-actions">
+              @if (wizardNotificationKind() === 'ADMIN') {
+                <span class="muted">Выбрано событий: {{ wizardAdminEventCodes().length }}</span>
+              } @else if (subscriptionWizardStep() === 1) {
+                <span class="muted">Выбрано устройств: {{ wizardSelectedDeviceIds().length }}</span>
+              } @else if (subscriptionWizardStep() === 2) {
+                <span class="muted">Выбрано метрик: {{ wizardSelectedMetricIds().length }}</span>
+              }
+              <p-button label="Отмена" [outlined]="true" styleClass="ns-action-blue" (onClick)="closeSubscriptionWizard()" />
+              @if (wizardNotificationKind() === 'ADMIN') {
+                <p-button label="Сохранить подписку" styleClass="ns-action-blue" [disabled]="subscriptionsSaving()" (onClick)="saveSubscriptionFromWizard()" />
+              } @else if (subscriptionWizardStep() === 1) {
+                <p-button label="Далее" styleClass="ns-action-blue" [disabled]="wizardSelectedDeviceIds().length === 0" (onClick)="goToWizardStep2()" />
+              } @else if (subscriptionWizardStep() === 2) {
+                <p-button label="Назад" [outlined]="true" styleClass="ns-action-blue" (onClick)="backToWizardStep1()" />
+                <p-button label="Далее" styleClass="ns-action-blue" (onClick)="goToWizardStep3()" />
+              } @else if (subscriptionWizardStep() === 3) {
+                <p-button label="Назад" [outlined]="true" styleClass="ns-action-blue" (onClick)="backToWizardStep2()" />
+                <p-button label="Сохранить подписку" styleClass="ns-action-blue" [disabled]="subscriptionsSaving()" (onClick)="saveSubscriptionFromWizard()" />
+              }
+            </div>
+          </ng-template>
+        </p-dialog>
+
+        <p-dialog
+          header="Отправка тестового события"
+          [modal]="true"
+          [draggable]="false"
+          [resizable]="false"
+          [style]="{ width: '720px', maxWidth: '95vw' }"
+          [visible]="testEventDialogOpen()"
+          (visibleChange)="testEventDialogOpen.set($event)"
+        >
+          <div class="settings-form-grid settings-form-grid--plain">
+            <label class="settings-field">
+              <span>Тип события</span>
+              <p-select
+                [options]="[{label: 'Операторское', value: 'OPERATOR'}, {label: 'Административное', value: 'ADMIN'}]"
+                optionLabel="label"
+                optionValue="value"
+                [ngModel]="testEventKind()"
+                (ngModelChange)="testEventKind.set($event); testEventCode.set($event === 'ADMIN' ? 'ADMIN_ANY' : 'MONITORING_EVENT_OPEN')"
+                [appendTo]="'body'"
+                styleClass="w-full"
+              />
+            </label>
+            <label class="settings-field">
+              <span>Код события</span>
+              <p-select
+                [options]="availableTestEventOptions()"
+                optionLabel="label"
+                optionValue="value"
+                [ngModel]="testEventCode()"
+                (ngModelChange)="testEventCode.set($event)"
+                [appendTo]="'body'"
+                styleClass="w-full"
+              />
+            </label>
+            @if (testEventKind() === 'OPERATOR') {
+              <label class="settings-field">
+                <span>IP устройства</span>
+                <input pInputText [ngModel]="testEventDeviceIp()" (ngModelChange)="testEventDeviceIp.set($event)" />
+              </label>
+              <label class="settings-field">
+                <span>Имя устройства</span>
+                <input pInputText [ngModel]="testEventDeviceName()" (ngModelChange)="testEventDeviceName.set($event)" />
+              </label>
+              <label class="settings-field">
+                <span>Критичность</span>
+                <p-select
+                  [options]="severityFilterOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  [ngModel]="testEventSeverity()"
+                  (ngModelChange)="testEventSeverity.set($event)"
+                  [appendTo]="'body'"
+                  styleClass="w-full"
+                />
+              </label>
+              <label class="settings-field">
+                <span>Метрика</span>
+                <input pInputText [ngModel]="testEventMetricName()" (ngModelChange)="testEventMetricName.set($event)" />
+              </label>
+              <label class="settings-field settings-field-span2">
+                <span>Теги устройства (через запятую)</span>
+                <input pInputText [ngModel]="testEventDeviceTags()" (ngModelChange)="testEventDeviceTags.set($event)" />
+              </label>
+            }
+            <label class="settings-field settings-field-span2">
+              <span>Детали</span>
+              <input pInputText [ngModel]="testEventDetails()" (ngModelChange)="testEventDetails.set($event)" />
+            </label>
+          </div>
+          <ng-template pTemplate="footer">
+            <div class="list-page-heading-actions">
+              <p-button label="Отмена" [outlined]="true" styleClass="ns-action-blue" (onClick)="testEventDialogOpen.set(false)" />
+              <p-button label="Отправить" styleClass="ns-action-blue" [disabled]="testEventSending()" (onClick)="sendTestEvent()" />
+            </div>
+          </ng-template>
+        </p-dialog>
+        @if (subscriptionRows().length === 0) {
+          <div class="empty-state">
+            <strong>Подписок пока нет.</strong>
+            <span>Создайте первую подписку на операторские или административные события.</span>
+          </div>
+        } @else {
+          <div class="role-mapping-table-wrap">
+            <table class="results-table compact-table">
+              <thead>
+                <tr>
+                  <th>Тип</th>
+                  <th>Тип подписки</th>
+                  <th>Событие</th>
+                  <th>Email</th>
+                  @if (!isAdmin()) {
+                    <th>Фильтр IP</th>
+                    <th>Фильтр тега</th>
+                  }
+                  <th>Статус</th>
+                  <th>Действия</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of subscriptionRows(); track row.id) {
+                  <tr>
+                    <td>{{ row.notificationKind === 'ADMIN' ? 'Административное' : 'Операторское' }}</td>
+                    <td>
+                      {{
+                        row.subscriptionType === 'SCAN_JOB'
+                          ? 'Работы сканирования'
+                          : row.subscriptionType === 'TAG_GROUP'
+                            ? 'Группа устройств (тег)'
+                            : row.subscriptionType === 'SYSTEM'
+                              ? 'Системная'
+                              : 'Устройство'
+                      }}
+                    </td>
+                    <td>{{ eventLabels(row.eventCodes) }}</td>
+                    <td>{{ row.recipientEmail }}</td>
+                    @if (!isAdmin()) {
+                      <td>{{ row.deviceIpFilter || '—' }}</td>
+                      <td>{{ row.deviceTagFilter || '—' }}</td>
+                    }
+                    <td>{{ row.enabled ? 'Активна' : 'Выключена' }}</td>
+                    <td>
+                      <div class="list-page-heading-actions in-row-actions">
+                        <p-button label="Изменить" [outlined]="true" styleClass="ns-action-blue" (onClick)="editSubscription(row)" />
+                        @if (debugMode()) {
+                          <p-button label="Тест по подписке" [outlined]="true" styleClass="ns-action-blue" (onClick)="openTestEventDialogForSubscription(row)" />
+                        }
+                        <p-button label="Удалить" severity="danger" [outlined]="true" (onClick)="removeSubscription(row.id)" />
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
+  </div>
+</section>

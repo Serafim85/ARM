@@ -1,0 +1,83 @@
+zabbix_export:
+  version: '8.0'
+  template_groups:
+    - uuid: d0e1f2a3b4c54601234567890abcdef6
+      name: 'Templates/WISLA ARM'
+  templates:
+    - uuid: e1f2a3b4c5d64701234567890abcdef7
+      template: 'WISLA ARM Windows'
+      name: 'WISLA ARM Windows'
+      description: |
+        WISLA ARM workstation monitoring (Windows). Metrics pushed by wisla-arm-agent.
+        Item keys must match agent JSON batch metrics.
+      groups:
+        - name: 'Templates/WISLA ARM'
+      macros:
+        - macro: '{$ARM.CPU.WARN}'
+          value: '80'
+        - macro: '{$ARM.CPU.CRIT}'
+          value: '90'
+        - macro: '{$ARM.DISK.WARN}'
+          value: '85'
+        - macro: '{$ARM.DISK.CRIT}'
+          value: '95'
+      items:
+        - uuid: f2a3b4c5d6e74801234567890abcdef8
+          name: 'CPU utilization'
+          type: ZABBIX_PASSIVE
+          key: arm.cpu.util
+          delay: '60s'
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU utilization in percent (agent key: arm.cpu.util).'
+          tags:
+            - tag: component
+              value: cpu
+          triggers:
+            - uuid: a3b4c5d6e7f84901234567890abcdef9
+              expression: 'min(/WISLA ARM Windows/arm.cpu.util,5m)>{$ARM.CPU.WARN}'
+              name: 'ARM Windows: High CPU utilization'
+              event_name: 'ARM Windows: High CPU utilization (over {$ARM.CPU.WARN}% for 5m)'
+              priority: WARNING
+              description: 'CPU utilization is too high.'
+            - uuid: b4c5d6e7f8a9401234567890abcdefa0
+              expression: 'min(/WISLA ARM Windows/arm.cpu.util,5m)>{$ARM.CPU.CRIT}'
+              name: 'ARM Windows: Critical CPU utilization'
+              event_name: 'ARM Windows: Critical CPU utilization (over {$ARM.CPU.CRIT}% for 5m)'
+              priority: HIGH
+              description: 'CPU utilization is critically high.'
+        - uuid: c5d6e7f8a9b041234567890abcdefa1
+          name: 'Memory used'
+          type: ZABBIX_PASSIVE
+          key: arm.mem.used
+          delay: '60s'
+          value_type: FLOAT
+          units: B
+          description: 'Used RAM in bytes (agent key: arm.mem.used).'
+          tags:
+            - tag: component
+              value: memory
+        - uuid: d6e7f8a9b0c14234567890abcdefa2
+          name: 'System drive used percent'
+          type: ZABBIX_PASSIVE
+          key: arm.disk.root.used_pct
+          delay: '300s'
+          value_type: FLOAT
+          units: '%'
+          description: 'System volume (C:) used space in percent (agent key: arm.disk.root.used_pct).'
+          tags:
+            - tag: component
+              value: storage
+          triggers:
+            - uuid: e7f8a9b0c1d2434567890abcdefa3
+              expression: 'last(/WISLA ARM Windows/arm.disk.root.used_pct)>{$ARM.DISK.WARN}'
+              name: 'ARM Windows: System drive space low'
+              event_name: 'ARM Windows: System drive usage over {$ARM.DISK.WARN}%'
+              priority: WARNING
+              description: 'System drive is running out of free space.'
+            - uuid: f8a9b0c1d2e344567890abcdefa4
+              expression: 'last(/WISLA ARM Windows/arm.disk.root.used_pct)>{$ARM.DISK.CRIT}'
+              name: 'ARM Windows: System drive space critical'
+              event_name: 'ARM Windows: System drive usage over {$ARM.DISK.CRIT}%'
+              priority: HIGH
+              description: 'System drive free space is critically low.'

@@ -1,0 +1,106 @@
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: networkscanner-timescaledb
+    command:
+      - postgres
+      - -c
+      - max_connections=250
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: networkscanner
+      POSTGRES_USER: networkscanner
+      POSTGRES_PASSWORD: networkscanner
+    ports:
+      - "5435:5432"
+    volumes:
+      - timescaledb-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U networkscanner -d networkscanner"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  zookeeper:
+    image: docker.io/bitnamilegacy/zookeeper:3.9
+    container_name: networkscanner-zookeeper
+    restart: unless-stopped
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+    volumes:
+      - zookeeper-data:/bitnami/zookeeper
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/bitnami/zookeeper/bin/zkServer.sh status"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  kafka:
+    image: docker.io/bitnamilegacy/kafka:3.7
+    container_name: networkscanner-kafka
+    restart: unless-stopped
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9094:9094"
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CFG_LISTENERS: INTERNAL://:9092,EXTERNAL://:9094
+      KAFKA_CFG_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:9094
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_CFG_NUM_PARTITIONS: 6
+      KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_CFG_MESSAGE_MAX_BYTES: "${KAFKA_MESSAGE_MAX_BYTES:-2097152}"
+      KAFKA_CFG_REPLICA_FETCH_MAX_BYTES: "${KAFKA_REPLICA_FETCH_MAX_BYTES:-2097152}"
+      KAFKA_CFG_SOCKET_REQUEST_MAX_BYTES: "${KAFKA_SOCKET_REQUEST_MAX_BYTES:-2097152}"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    volumes:
+      - kafka-data:/bitnami/kafka
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  kafka-ui:
+    image: docker.io/provectuslabs/kafka-ui:v0.7.2
+    container_name: networkscanner-kafka-ui
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+
+  ldap:
+    image: osixia/openldap:1.5.0
+    container_name: networkscanner-ldap
+    restart: unless-stopped
+    environment:
+      LDAP_ORGANISATION: NetworkScanner
+      LDAP_DOMAIN: networkscanner.local
+      LDAP_ADMIN_PASSWORD: admin
+      LDAP_CONFIG_PASSWORD: config
+      LDAP_TLS: "false"
+      LDAP_REMOVE_CONFIG_AFTER_SETUP: "false"
+    ports:
+      - "389:389"
+    volumes:
+      - ldap-data:/var/lib/ldap
+      - ldap-config:/etc/ldap/slapd.d
+      - ./ldap/bootstrap:/container/service/slapd/assets/config/bootstrap/ldif/custom
+
+volumes:
+  timescaledb-data:
+  zookeeper-data:
+  kafka-data:
+  ldap-data:
+  ldap-config:

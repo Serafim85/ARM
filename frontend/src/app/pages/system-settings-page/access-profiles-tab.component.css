@@ -1,0 +1,292 @@
+.access-profiles-tab {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.access-profiles-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.access-profiles-p-table {
+  --ap-col-select: 3.25rem;
+  --ap-col-name: 12%;
+  --ap-col-protocols: 28%;
+  --ap-col-description: 30%;
+  --ap-col-actions: 11rem;
+  margin-top: 4px;
+  width: 100%;
+  max-width: 100%;
+}
+
+:host ::ng-deep .access-profiles-p-table .p-datatable-table-container {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+:host ::ng-deep .access-profiles-p-table .p-datatable-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+:host ::ng-deep .access-profiles-p-table .p-datatable-thead > tr > th,
+:host ::ng-deep .access-profiles-p-table .p-datatable-tbody > tr > td {
+  vertical-align: middle;
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+}
+
+:host ::ng-deep .access-profiles-p-table .p-datatable-thead > tr > th {
+  background: #f8fafc;
+  color: #6b7280;
+  font-weight: 700;
+}
+
+:host ::ng-deep .access-profiles-p-table .col-select {
+  width: var(--ap-col-select);
+  min-width: var(--ap-col-select);
+  max-width: var(--ap-col-select);
+  padding-left: 0.65rem;
+  padding-right: 0.65rem;
+  text-align: center;
+}
+
+:host ::ng-deep .access-profiles-p-table .col-name {
+  width: var(--ap-col-name);
+  text-align: center;
+}
+
+:host ::ng-deep .access-profiles-p-table .col-protocols {
+  width: var(--ap-col-protocols);
+  min-width: 13.5rem;
+  overflow: visible;
+  white-space: normal;
+}
+
+:host ::ng-deep .access-profiles-p-table .col-description {
+  width: var(--ap-col-description);
+  min-width: 0;
+  padding-left: 0.75rem;
+}
+
+:host ::ng-deep .access-profiles-p-table .col-actions {
+  width: var(--ap-col-actions);
+  text-align: center;
+}
+
+.access-profiles-name {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.access-profiles-description {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #334155;
+}
+
+.access-profiles-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.access-profiles-protocol-chips {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  min-height: 1.5rem;
+}
+
+.access-profiles-protocol-chips--stacked {
+  align-items: center;
+}
+
+.access-profiles-protocol-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+  justify-content: flex-start;
+}
+
+.access-profiles-protocol-row--tail {
+  justify-content: center;
+  width: 100%;
+}
+
+.access-profiles-protocol-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.62rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  color: var(--ns-action-blue-outline-ink, #1d4ed8);
+  background: transparent;
+  border: 1px solid var(--ns-action-blue-border, rgba(37, 99, 235, 0.55));
+  white-space: nowrap;
+}
+
+.access-profiles-protocol-empty {
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+.access-profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.access-profile-field {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.access-profile-field > span {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.access-profile-field .muted {
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.3;
+}
+
+.access-profile-protocol {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem 0.85rem;
+  background: #fafbfc;
+}
+
+.access-profile-protocol-toggle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: none;
+  border: none;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0;
+  margin: 0 0 0.65rem;
+  text-align: left;
+  transition: color 0.15s ease;
+}
+
+.access-profile-protocol-toggle--on {
+  color: #1e40af;
+}
+
+.access-profile-protocol-body {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+  align-items: end;
+}
+
+.access-profile-span-2 {
+  grid-column: 1 / -1;
+}
+
+.access-profile-enable-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2rem;
+}
+
+.access-profile-enable-row span {
+  font-size: 13px;
+  color: #334155;
+  font-weight: 500;
+}
+
+.access-profile-params-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(5.5rem, 7rem);
+  gap: 1rem;
+  align-items: end;
+}
+
+.access-profile-field--port {
+  max-width: 7rem;
+}
+
+.access-profile-port-only {
+  justify-self: start;
+}
+
+:host ::ng-deep .access-profile-form :is(input.p-inputtext, .p-password-input, textarea.p-textarea) {
+  width: 100%;
+  border: none;
+  border-radius: 0;
+  border-bottom: 1px solid #d1d5db;
+  padding: 7px 0 6px;
+  background: transparent;
+  font-size: 14px;
+  color: #111827;
+  box-shadow: none;
+}
+
+:host ::ng-deep .access-profile-form :is(input.p-inputtext, .p-password-input, textarea.p-textarea):focus {
+  border-bottom-color: #2563eb;
+  outline: none;
+  box-shadow: none;
+}
+
+:host ::ng-deep .access-profile-form p-password,
+:host ::ng-deep .access-profile-form p-select {
+  width: 100%;
+}
+
+:host ::ng-deep .access-profile-form p-password .p-password,
+:host ::ng-deep .access-profile-form p-password .p-password-input {
+  width: 100%;
+}
+
+:host ::ng-deep .access-profile-form textarea.p-textarea {
+  min-height: 5.5rem;
+  resize: vertical;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.5rem 0.65rem;
+  background: #fff;
+}
+
+:host ::ng-deep .access-profile-form textarea.p-textarea:focus {
+  border-color: #2563eb;
+}
+
+@media (max-width: 560px) {
+  .access-profile-protocol-body,
+  .access-profile-params-row {
+    grid-template-columns: 1fr;
+  }
+
+  .access-profile-field--port {
+    max-width: none;
+  }
+}

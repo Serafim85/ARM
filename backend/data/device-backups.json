@@ -1,0 +1,41 @@
+{
+  "192.168.176.194" : {
+    "deviceIp" : "192.168.176.194",
+    "baseline" : {
+      "fileName" : "running-config.cfg",
+      "configuredAt" : "2026-04-01 15:34",
+      "source" : "Выбран из существующего бэкапа",
+      "content" : "! device=Siska\n! ip=192.168.176.194\n! backup=running-config\nhostname Siska\nsnmp-server community public RO\ninterface Vlan10\n description Users-VLAN\n ip address 192.168.159.59 255.255.255.0\n no shutdown\ninterface Loopback0\n ip address 10.5.19.39 255.255.255.255\nline vty 0 4\n login local\n transport input ssh\n"
+    },
+    "lastAutoComparisonAt" : null,
+    "backups" : [ {
+      "id" : "b162063e-7878-4b8f-aa15-501c6096f26e",
+      "name" : "running-config",
+      "createdAt" : "2026-04-01 15:20",
+      "source" : "Автосъем при постановке на мониторинг",
+      "size" : "1 KB",
+      "status" : "Успешно",
+      "baselineStatus" : "Совпадает",
+      "comparisonSummary" : "Отличий от эталонной конфигурации не найдено.",
+      "comparedAt" : "2026-04-01 15:34",
+      "content" : "! device=Siska\n! ip=192.168.176.194\n! backup=running-config\nhostname Siska\nsnmp-server community public RO\ninterface Vlan10\n description Users-VLAN\n ip address 192.168.159.59 255.255.255.0\n no shutdown\ninterface Loopback0\n ip address 10.5.19.39 255.255.255.255\nline vty 0 4\n login local\n transport input ssh\n"
+    } ]
+  },
+  "192.168.176.186" : {
+    "deviceIp" : "192.168.176.186",
+    "baseline" : null,
+    "lastAutoComparisonAt" : null,
+    "backups" : [ {
+      "id" : "75cd465d-7ffe-4c33-891b-9dd8adea2f1f",
+      "name" : "running-config",
+      "createdAt" : "2026-04-01 15:20",
+      "source" : "Автосъем при постановке на мониторинг",
+      "size" : "1 KB",
+      "status" : "Успешно",
+      "baselineStatus" : "Эталон не задан",
+      "comparisonSummary" : "Эталонный конфиг еще не задан.",
+      "comparedAt" : null,
+      "content" : "! device=S002-0135\n! ip=192.168.176.186\n! backup=running-config\nhostname S002-0135\nsnmp-server community public RO\ninterface Vlan10\n description Users-VLAN\n ip address 192.168.160.60 255.255.255.0\n no shutdown\ninterface Loopback0\n ip address 10.6.20.40 255.255.255.255\nline vty 0 4\n login local\n transport input ssh\n"
+    } ]
+  }
+}

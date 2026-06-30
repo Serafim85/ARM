@@ -1,0 +1,185 @@
+<section
+  class="content-card backup-config-card"
+  [class.backup-config-card-embedded]="embedded()"
+  [attr.data-expanded]="embedded() || expanded() ? 'true' : 'false'"
+>
+  @if (!embedded()) {
+    <button
+      type="button"
+      class="backup-config-toggle"
+      [attr.aria-expanded]="expanded()"
+      aria-controls="backup-config-panel"
+      (click)="toggleExpanded()"
+    >
+      <span class="backup-chevron" aria-hidden="true">▶</span>
+      <div class="backup-toggle-text">
+        <h2 id="backup-config-title">Бэкапы конфигурации</h2>
+        <p>
+          Разверните блок, чтобы управлять эталоном и списком бэкапов.
+        </p>
+      </div>
+    </button>
+  } @else {
+    <div class="backup-config-embedded-header">
+      <h2 id="backup-config-title">Управление конфигурацией</h2>
+      <p>Эталонная конфигурация, снимки и сравнение с эталоном.</p>
+    </div>
+  }
+
+  @if (embedded() || expanded()) {
+    <div
+      class="backup-config-body"
+      [class.backup-config-body-embedded]="embedded()"
+      id="backup-config-panel"
+      role="region"
+      aria-labelledby="backup-config-title"
+    >
+      @if (snapshotLoading() && !snapshot()) {
+        <div class="backup-body-preloader">
+          <span class="backup-body-preloader-spinner" aria-hidden="true"></span>
+          <span>Загрузка данных о бэкапах…</span>
+        </div>
+      } @else {
+        <div class="backup-config-body-inner">
+          <div class="backup-config-header">
+            <div class="backup-header-actions">
+              <p-button
+                label="Сделать текущий эталоном"
+                [outlined]="true"
+                [disabled]="actionInProgress() || !canManageBaselines()"
+                (onClick)="setCurrentConfigAsBaseline()"
+              />
+              <label
+                class="backup-upload-button-prime"
+                [class.backup-upload-button-disabled]="!canManageBaselines() || actionInProgress()"
+              >
+                <p-button label="Загрузить эталон" [outlined]="true" styleClass="backup-upload-trigger" />
+                <input
+                  type="file"
+                  accept=".cfg,.txt,.conf"
+                  [disabled]="!canManageBaselines() || actionInProgress()"
+                  (change)="uploadBaselineFile($event)"
+                />
+              </label>
+            </div>
+          </div>
+
+          @if (snapshot(); as snap) {
+            <div class="list-summary-grid backup-list-summary">
+              <div class="list-summary-tile">
+                <span>Эталон</span>
+                <strong>{{ snap.baseline?.fileName ?? 'Не задан' }}</strong>
+              </div>
+              <div class="list-summary-tile">
+                <span>Расписание</span>
+                <strong class="backup-summary-schedule">{{ snap.autoCompareSchedule }}</strong>
+              </div>
+              <div class="list-summary-tile">
+                <span>Бэкапов всего</span>
+                <strong>{{ snap.backups.length }}</strong>
+              </div>
+              <div class="list-summary-tile">
+                <span>Отличия от эталона</span>
+                <strong>{{ backupBaselineDiffCount() }}</strong>
+              </div>
+            </div>
+            <p class="backup-summary-meta">
+              @if (snap.baseline) {
+                <span>Источник эталона: {{ snap.baseline.source }} · {{ snap.baseline.configuredAt }}</span>
+              }
+              <span>Последний автозапуск: {{ snap.lastAutoComparisonAt ?? 'ещё не выполнялся' }}</span>
+            </p>
+          }
+
+          @if (backupLoading()) {
+            <p class="backup-helper-text">Загрузка и обработка конфигураций...</p>
+          }
+          @if (snapshot()) {
+            <div class="list-filters backup-table-filters">
+              <label class="users-field backup-search-field">
+                <span>Поиск</span>
+                <input
+                  pInputText
+                  type="search"
+                  [ngModel]="backupSearch()"
+                  (ngModelChange)="backupSearch.set($event)"
+                  [ngModelOptions]="{ standalone: true }"
+                  placeholder="Имя, источник, статус, дата…"
+                  class="w-full"
+                />
+              </label>
+            </div>
+          }
+
+          <p-table
+            [value]="filteredBackups()"
+            [paginator]="true"
+            [rows]="10"
+            [rowsPerPageOptions]="[5, 10, 25]"
+            [showCurrentPageReport]="true"
+            [alwaysShowPaginator]="false"
+            currentPageReportTemplate="{first}–{last} из {totalRecords}"
+            dataKey="id"
+            stripedRows
+            [tableStyle]="{ 'min-width': '72rem' }"
+            class="p-datatable-sm netscan-p-table backup-p-table"
+          >
+            <ng-template #header>
+              <tr>
+                <th pSortableColumn="name">Имя бэкапа <p-sortIcon field="name" /></th>
+                <th pSortableColumn="createdAt">Дата создания <p-sortIcon field="createdAt" /></th>
+                <th pSortableColumn="source">Источник <p-sortIcon field="source" /></th>
+                <th pSortableColumn="size">Размер <p-sortIcon field="size" /></th>
+                <th pSortableColumn="status">Статус <p-sortIcon field="status" /></th>
+                <th pSortableColumn="baselineStatus">Эталон <p-sortIcon field="baselineStatus" /></th>
+                <th pSortableColumn="comparedAt">Последнее сравнение <p-sortIcon field="comparedAt" /></th>
+                <th>Действия</th>
+              </tr>
+            </ng-template>
+            <ng-template #body let-backup>
+              <tr>
+                <td>{{ backup.name }}</td>
+                <td>{{ backup.createdAt }}</td>
+                <td>{{ backup.source }}</td>
+                <td>{{ backup.size }}</td>
+                <td>
+                  <span
+                    class="backup-status-text"
+                    [class.backup-status-warning]="backup.status === 'Предупреждение'"
+                    >{{ backup.status }}</span
+                  >
+                </td>
+                <td>
+                  <span
+                    class="backup-baseline-chip"
+                    [class.backup-baseline-diff]="backup.baselineStatus === 'Есть отличия'"
+                    >{{ backup.baselineStatus }}</span
+                  >
+                </td>
+                <td>{{ backup.comparedAt ?? '-' }}</td>
+                <td>
+                  <div class="backup-actions">
+                    <p-button label="Скачать" [text]="true" size="small" (onClick)="downloadBackup(backup)" />
+                    <p-button
+                      label="Эталоном"
+                      [text]="true"
+                      size="small"
+                      [disabled]="!canManageBaselines()"
+                      (onClick)="useBackupAsBaseline(backup)"
+                    />
+                    <p-button label="Сравнить" [text]="true" size="small" (onClick)="compareBackupWithBaseline(backup)" />
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage>
+              <tr>
+                <td colspan="8">Нет сохранённых бэкапов.</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      }
+    </div>
+  }
+</section>

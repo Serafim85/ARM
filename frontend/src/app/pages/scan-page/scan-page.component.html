@@ -1,0 +1,393 @@
+<section class="content-card list-page-card">
+  <div>
+    <h1>Сканирование сети</h1>
+    <p>
+      Задайте диапазон, выберите один или несколько методов обнаружения и запустите опрос. Блок с результатами появится после первого успешного сканирования; если найдены устройства,
+      форма параметров сворачивается — остаётся кнопка повторного запуска и ссылка «Все параметры».
+    </p>
+  </div>
+
+  <section [class.scan-section-params--collapsed-bar]="scan.scanParamsCollapsed() && canRunScan()">
+    <div class="scan-section-head">
+      <div class="scan-section-titles">
+        <h2>Параметры сканирования</h2>
+        <p>
+          @if (scan.scanParamsCollapsed() && canRunScan()) {
+            <strong class="scan-params-summary">{{ scan.subnetRange() }}</strong>
+            · {{ scan.probesSummary() }}
+          } @else {
+            Подсеть, методы обнаружения и параметры опроса (таймаут, повторы, учётные данные SNMP при необходимости).
+          }
+        </p>
+      </div>
+    </div>
+
+    @if (scan.scanParamsCollapsed() && canRunScan()) {
+      <div class="scan-params-compact">
+        <p-button
+          type="button"
+          styleClass="ns-action-blue"
+          [label]="scan.scanLoading() ? 'Сканирование...' : 'Запустить сканирование'"
+          [disabled]="scan.scanLoading()"
+          (onClick)="scan.startScan()"
+        />
+        <p-button
+          type="button"
+          [outlined]="true"
+          severity="danger"
+          label="Остановить сканирование"
+          [disabled]="!scan.scanLoading() || scan.scanStopping()"
+          (onClick)="scan.stopScan()"
+        />
+        <p-button
+          type="button"
+          [outlined]="true"
+          label="Создать задачу автосканирования"
+          styleClass="ns-action-blue"
+          [disabled]="scan.scanLoading()"
+          (onClick)="openCreateScanJobDialog()"
+        />
+        <button type="button" class="scan-params-expand-link" (click)="scan.expandScanParams()">
+          Все параметры
+        </button>
+      </div>
+    } @else {
+    <form class="scan-form" (ngSubmit)="scan.startScan()">
+      <app-discovery-probes-form />
+
+      <div class="form-actions scan-form-actions">
+        <p-button
+          type="submit"
+          styleClass="ns-action-blue"
+          [label]="scan.scanLoading() ? 'Сканирование...' : 'Запустить сканирование'"
+          [disabled]="scan.scanLoading() || !canRunScan()"
+        />
+        <p-button
+          type="button"
+          [outlined]="true"
+          severity="danger"
+          label="Остановить сканирование"
+          [disabled]="!scan.scanLoading() || scan.scanStopping() || !canRunScan()"
+          (onClick)="scan.stopScan()"
+        />
+        <p-button
+          type="button"
+          [outlined]="true"
+          label="Создать задачу автосканирования"
+          styleClass="ns-action-blue"
+          [disabled]="scan.scanLoading() || !canRunScan()"
+          (onClick)="openCreateScanJobDialog()"
+        />
+      </div>
+    </form>
+    }
+
+    @if (!canRunScan()) {
+      <p class="scan-hint scan-hint-warn">
+        Роль VIEWER не позволяет запускать сканирование — доступен только просмотр страницы.
+      </p>
+    }
+    @if (scan.scanLoading()) {
+      <div class="scan-progress-block">
+        <div class="scan-progress-row">
+          @if (scan.scanStopping()) {
+            <p-progressBar
+              mode="indeterminate"
+              [showValue]="false"
+              [style]="{ height: '8px' }"
+              styleClass="ns-progressbar-blue"
+            />
+            <span class="scan-progress-percent scan-progress-percent--stopping">…</span>
+          } @else {
+            <p-progressBar
+              [value]="scan.displayProgressPercent()"
+              [showValue]="false"
+              [style]="{ height: '8px' }"
+              styleClass="ns-progressbar-blue ns-progressbar-blue-determinate"
+            />
+            <span class="scan-progress-percent">{{ scan.displayProgressPercent() }}%</span>
+          }
+        </div>
+        <p class="scan-progress-text">
+          @if (scan.scanStopping()) {
+            Останавливаем сканирование ({{ scan.probesSummary() }})…
+          } @else {
+            Идёт опрос диапазона ({{ scan.probesSummary() }}):
+            {{ scan.displayScannedAddresses() }} из {{ scan.displayTotalAddresses() }} адресов.
+          }
+        </p>
+      </div>
+    }
+  </section>
+
+  @if (scan.scanCompletedAtLeastOnce()) {
+  <section
+    class="content-card scan-section scan-section-results list-page-card"
+    [class.scan-section-results--empty]="scan.scanResults().length === 0"
+  >
+    <div class="scan-section-head scan-section-head-results">
+      <div class="scan-section-titles">
+        <h2>Результаты</h2>
+        <p>
+          @if (scan.scanResults().length === 0) {
+            Последнее сканирование не вернуло устройств. Измените параметры сканирования и запустите снова.
+          } @else {
+            Отметьте строки в таблице. Шаблон мониторинга и кнопки постановки — под таблицей. Поиск учитывает все поля строки и подписи доступности.
+          }
+        </p>
+      </div>
+      @if (scan.scanResults().length > 0) {
+        <div class="scan-results-heading-actions">
+          <p-button
+            label="Очистить результаты"
+            [outlined]="true"
+            [disabled]="scan.scanResults().length === 0"
+            (onClick)="scan.clearResults()"
+          />
+        </div>
+      }
+    </div>
+
+    @if (scan.scanResults().length === 0) {
+      <div class="scan-results-placeholder">
+        <p class="scan-results-placeholder-title">Устройства не найдены</p>
+        <p class="scan-results-placeholder-text">
+          При необходимости разверните «Все параметры», скорректируйте диапазон или SNMP и выполните сканирование снова.
+        </p>
+      </div>
+    } @else {
+      <div class="results-toolbar results-toolbar-prime">
+        <label class="results-filter p-input-container">
+          <span>Поиск по результатам</span>
+          <input
+            pInputText
+            type="search"
+            name="resultFilter"
+            [ngModel]="scan.resultFilter()"
+            (ngModelChange)="scan.resultFilter.set($event)"
+            placeholder="IP, вендор, модель, SNMP, ICMP…"
+            class="w-full"
+          />
+        </label>
+      </div>
+
+      @if (scan.filteredScanResults().length === 0) {
+        <div class="empty-state">
+          <strong>Совпадений нет</strong>
+          <p>Измените строку поиска — фильтр проходит по всем полям устройства и доступности.</p>
+        </div>
+      } @else {
+        <app-scan-results-table
+          [devices]="scan.filteredScanResults()"
+          [showSelection]="true"
+          [selectionDisabled]="!canManageMonitoring()"
+          [selectedIps]="scan.selectedResultIps()"
+          (selectionChange)="onResultSelectionChange($event)"
+          [showMonitoring]="true"
+        />
+
+        <div class="scan-results-monitoring-footer">
+          <label class="p-input-container template-select-wrap">
+            <p-button
+              label="Выбрать шаблоны мониторинга"
+              styleClass="ns-action-blue w-full"
+              [outlined]="true"
+              [disabled]="!canManageMonitoring()"
+              (onClick)="openMonitoringTemplatePicker()"
+            />
+            <span class="muted">
+              @if (mon.monitoringTemplateAutoDetection()) {
+                Автоопределение
+              } @else if (selectedMonitoringTemplateNames().length === 0) {
+                Шаблоны не выбраны
+              } @else {
+                Выбрано: {{ selectedMonitoringTemplateNames().join(', ') }}
+              }
+            </span>
+          </label>
+          <div class="scan-results-monitoring-actions">
+            <p-button
+              label="Поставить на мониторинг отмеченные"
+              styleClass="ns-action-blue"
+              [outlined]="false"
+              [disabled]="scan.selectedResultIps().length === 0 || !canManageMonitoring() || !hasMonitoringTemplateSelection()"
+              (onClick)="setMonitoringForSelected(true)"
+            />
+            <p-button
+              label="Снять с мониторинга отмеченные"
+              [outlined]="true"
+              severity="danger"
+              [disabled]="scan.selectedResultIps().length === 0 || !canManageMonitoring()"
+              (onClick)="setMonitoringForSelected(false)"
+            />
+          </div>
+        </div>
+      }
+    }
+  </section>
+  }
+</section>
+
+<p-dialog
+  header="Новая задача автосканирования"
+  [modal]="true"
+  [closable]="true"
+  [dismissableMask]="true"
+  styleClass="scan-job-dialog dashboards-dialog"
+  [style]="{ width: '67.2rem', maxWidth: '98vw', maxHeight: '70vh' }"
+  [contentStyle]="{ overflow: 'auto' }"
+  [visible]="createJobDialogOpen()"
+  (visibleChange)="createJobDialogOpen.set($event)"
+  (onHide)="createJobDialogOpen.set(false)"
+>
+  <div class="form-grid form-grid-wide scan-form-prime scan-job-top-grid">
+    <label class="span-2 p-input-container">
+      <span>Название</span>
+      <input
+        pInputText
+        type="text"
+        [ngModel]="jobName()"
+        (ngModelChange)="jobName.set($event)"
+        [ngModelOptions]="{ standalone: true }"
+        placeholder="Например: Автосканирование офиса"
+        class="w-full"
+      />
+    </label>
+    <label class="span-2 p-input-container">
+      <span class="scan-label-with-help">
+        Интервал запуска
+        <i
+          class="pi pi-question-circle scan-help-icon"
+          tabindex="0"
+          pTooltip="Запуск будет по расписанию, привязанному к времени на часах. Например, «каждые 30 минут» — в начале часа и в середине часа."
+          tooltipPosition="bottom"
+        ></i>
+      </span>
+      <app-device-option-select
+        [options]="jobIntervalOptions"
+        optionValueKey="value"
+        [value]="jobIntervalPreset()"
+        (valueChange)="onJobIntervalPresetChangeFromSelect($event)"
+        panelStyleClass="scan-select-panel-tall"
+        placeholder="Выберите интервал"
+        styleClass="w-full"
+      />
+    </label>
+    <label class="span-2 p-input-container">
+      <span>Статус</span>
+      <div class="checkbox-row">
+        <p-checkbox
+          [binary]="true"
+          [ngModel]="jobEnabled()"
+          (ngModelChange)="jobEnabled.set($event)"
+          [ngModelOptions]="{ standalone: true }"
+        />
+        <span>Включена</span>
+      </div>
+    </label>
+    <label class="span-2 p-input-container">
+      <span>Мониторинг</span>
+      <div class="checkbox-row">
+        <p-checkbox
+          [binary]="true"
+          [ngModel]="jobAutoMonitoringEnabled()"
+          (ngModelChange)="jobAutoMonitoringEnabled.set($event)"
+          [ngModelOptions]="{ standalone: true }"
+        />
+        <span>Автоматически ставить найденные устройства на мониторинг</span>
+      </div>
+    </label>
+    @if (jobAutoMonitoringEnabled()) {
+      <label class="span-2 p-input-container">
+        <span>Режим выбора шаблона</span>
+        <div class="auto-monitoring-mode">
+          <div class="auto-monitoring-mode-item">
+            <p-radioButton
+              name="jobAutoMonitoringMode"
+              value="AUTO"
+              [ngModel]="jobAutoMonitoringMode()"
+              (ngModelChange)="setJobAutoMonitoringMode($event)"
+              [ngModelOptions]="{ standalone: true }"
+              inputId="jobAutoMonitoringModeAuto"
+            />
+            <label for="jobAutoMonitoringModeAuto">Подбирать шаблон автоматически</label>
+            <i
+              class="pi pi-question-circle scan-help-icon"
+              tabindex="0"
+              [pTooltip]="autoMonitoringModeAutoTooltip"
+              tooltipPosition="top"
+              [attr.aria-label]="autoMonitoringModeAutoTooltip"
+            ></i>
+          </div>
+          <div class="auto-monitoring-mode-item">
+            <p-radioButton
+              name="jobAutoMonitoringMode"
+              value="MANUAL"
+              [ngModel]="jobAutoMonitoringMode()"
+              (ngModelChange)="setJobAutoMonitoringMode($event)"
+              [ngModelOptions]="{ standalone: true }"
+              inputId="jobAutoMonitoringModeManual"
+            />
+            <label for="jobAutoMonitoringModeManual">Выбрать шаблоны вручную</label>
+          </div>
+        </div>
+      </label>
+      <label class="span-2 p-input-container" [class.hidden-keep-space]="jobAutoMonitoringMode() !== 'MANUAL'">
+        <p-button
+          label="Выбрать шаблоны мониторинга"
+          styleClass="ns-action-blue w-full"
+          [outlined]="true"
+          (onClick)="openJobMonitoringTemplatePicker()"
+        />
+        <span class="muted">
+          @if (selectedJobMonitoringTemplateNames().length === 0) {
+            Шаблоны не выбраны
+          } @else {
+            Выбрано: {{ selectedJobMonitoringTemplateNames().join(', ') }}
+          }
+        </span>
+      </label>
+    }
+  </div>
+
+  <div class="dialog-section-sep"></div>
+
+  <div class="dialog-section-head">
+    <strong>Параметры сканирования</strong>
+    <p class="muted">Будут сохранены в задаче и использованы при каждом запуске.</p>
+  </div>
+
+  <app-discovery-probes-form />
+
+  <ng-template pTemplate="footer">
+    <div class="scan-job-dialog-footer">
+      <p-button label="Создать" styleClass="ns-action-blue" (onClick)="createScanJob()" />
+      <p-button
+        label="Отмена"
+        [outlined]="true"
+        styleClass="ns-action-blue"
+        (onClick)="createJobDialogOpen.set(false)"
+      />
+    </div>
+  </ng-template>
+</p-dialog>
+
+<app-monitoring-template-picker-dialog
+  [visible]="monitoringTemplatePickerOpen()"
+  (visibleChange)="monitoringTemplatePickerOpen.set($event)"
+  [templates]="mon.monitoringTemplates()"
+  [templatesLoading]="mon.templatesLoading()"
+  [selectedTemplateIds]="mon.selectedMonitoringTemplateIds()"
+  [autoDetectionEnabled]="true"
+  [autoDetection]="mon.monitoringTemplateAutoDetection()"
+  (selectionChange)="onMonitoringTemplateSelectionChange($event)"
+/>
+
+<app-monitoring-template-picker-dialog
+  [visible]="jobMonitoringTemplatePickerOpen()"
+  (visibleChange)="jobMonitoringTemplatePickerOpen.set($event)"
+  [templates]="mon.monitoringTemplates()"
+  [templatesLoading]="mon.templatesLoading()"
+  [selectedTemplateIds]="jobMonitoringTemplateIds()"
+  (selectedTemplateIdsChange)="jobMonitoringTemplateIds.set($event)"
+/>

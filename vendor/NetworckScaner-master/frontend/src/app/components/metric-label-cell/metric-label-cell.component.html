@@ -1,0 +1,10 @@
+<div class="metric-label-cell">
+  @if (titleLink()) {
+    <button type="button" class="metric-label-cell__title metric-label-cell__title-link" (click)="onTitleClick()">
+      {{ title() }}
+    </button>
+  } @else {
+    <span class="metric-label-cell__title">{{ title() }}</span>
+  }
+  <span class="metric-label-cell__key">{{ technicalKey() }}</span>
+</div>

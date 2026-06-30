@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://networkscanner.local/contracts/wisla/schemas/probe-availability-update.schema.json",
+  "title": "ProbeAvailabilityUpdate",
+  "description": "NS -> Wisla availability event payload (§8.3)",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "eventId",
+    "sourceSystem",
+    "externalDeviceId",
+    "availability",
+    "checkedAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "eventId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceSystem": {
+      "type": "string",
+      "minLength": 1
+    },
+    "externalDeviceId": {
+      "type": "integer"
+    },
+    "availability": {
+      "type": "string",
+      "enum": [
+        "AVAILABLE",
+        "NOT_AVAILABLE",
+        "UNDEFINED"
+      ]
+    },
+    "checkedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

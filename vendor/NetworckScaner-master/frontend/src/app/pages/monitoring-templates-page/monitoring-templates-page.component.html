@@ -1,0 +1,469 @@
+<section class="content-card templates-card list-page-card">
+  <div class="section-heading">
+    <div>
+      <h1>Шаблоны мониторинга</h1>
+      <p>Загрузка зашифрованных файлов шаблонов (.template), просмотр доступных пакетов и удаление пользовательских шаблонов.</p>
+    </div>
+    <div class="list-page-heading-actions">
+      <input #archiveInput type="file" accept=".template" hidden (change)="onArchiveSelected($event)" />
+      <p-button
+        styleClass="ns-action-blue"
+        label="Настроить столбцы"
+        icon="pi pi-cog"
+        [outlined]="true"
+        (onClick)="openColumnsDialog()"
+        aria-label="Настроить ширину столбцов таблицы шаблонов"
+      />
+      <p-button
+        styleClass="ns-action-blue"
+        [label]="mon.templatesMutationLoading() ? 'Загрузка...' : 'Загрузить шаблон'"
+        [disabled]="mon.templatesMutationLoading()"
+        (onClick)="openArchivePicker(archiveInput)"
+      />
+      <p-button
+        label="Обновить"
+        styleClass="ns-action-blue"
+        [outlined]="true"
+        [disabled]="mon.templatesLoading() || mon.templatesMutationLoading()"
+        (onClick)="mon.loadMonitoringTemplates()"
+      />
+      <p-button
+        label="Удалить"
+        severity="danger"
+        [outlined]="true"
+        [disabled]="selectedTemplateIds().length === 0 || mon.templatesMutationLoading()"
+        (onClick)="deleteSelectedTemplates()"
+      />
+    </div>
+  </div>
+
+  <div class="list-summary-grid">
+    <div class="list-summary-tile">
+      <span>Всего шаблонов</span>
+      <strong>{{ mon.monitoringTemplates().length }}</strong>
+    </div>
+    <div class="list-summary-tile">
+      <span>Системные</span>
+      <strong>{{ mon.systemMonitoringTemplatesCount() }}</strong>
+    </div>
+    <div class="list-summary-tile">
+      <span>Загруженные</span>
+      <strong>{{ mon.uploadedMonitoringTemplatesCount() }}</strong>
+    </div>
+    <div class="list-summary-tile">
+      <span>По поиску</span>
+      <strong>{{ mon.filteredMonitoringTemplates().length }}</strong>
+    </div>
+    <div class="list-summary-tile">
+      <span>Предпросмотр</span>
+      <strong>{{ mon.templateImportPreview()?.details?.summary?.id || '—' }}</strong>
+    </div>
+  </div>
+
+  @if (mon.templateImportPreview(); as preview) {
+    <p-dialog
+      header="Предпросмотр импорта"
+      [modal]="true"
+      [style]="{ width: 'min(980px, 96vw)' }"
+      styleClass="template-import-dialog"
+      [visible]="previewOpen()"
+      (visibleChange)="previewOpen.set($event)"
+      (onHide)="closePreview()"
+    >
+      <p class="template-dialog-lead">Пробный импорт файла шаблона перед сохранением в БД.</p>
+      <div class="template-import-form">
+        <label class="p-input-container">
+          <span>Вендор *</span>
+          <input
+            pInputText
+            type="text"
+            [ngModel]="importVendor()"
+            (ngModelChange)="importVendor.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="Cisco"
+            class="w-full"
+            autocomplete="off"
+          />
+        </label>
+        <label class="p-input-container">
+          <span>Модель</span>
+          <input
+            pInputText
+            type="text"
+            [ngModel]="importModel()"
+            (ngModelChange)="importModel.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="9300"
+            class="w-full"
+            autocomplete="off"
+          />
+        </label>
+        <label class="p-input-container">
+          <span>Прошивка</span>
+          <input
+            pInputText
+            type="text"
+            [ngModel]="importFirmware()"
+            (ngModelChange)="importFirmware.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="IOS_15.0(2)SE11"
+            class="w-full"
+            autocomplete="off"
+          />
+        </label>
+      </div>
+      <div class="list-summary-grid">
+        <div class="list-summary-tile"><span>ID шаблона</span><strong>{{ preview.details.summary.id }}</strong></div>
+        <div class="list-summary-tile"><span>Элементы</span><strong>{{ preview.details.items.length }}</strong></div>
+        <div class="list-summary-tile"><span>Правила обнаружения</span><strong>{{ preview.details.discoveryRules.length }}</strong></div>
+        <div class="list-summary-tile"><span>Триггеры</span><strong>{{ preview.details.triggers.length }}</strong></div>
+        <div class="list-summary-tile"><span>Изменения</span><strong>{{ preview.diff.itemDelta }}</strong></div>
+      </div>
+      @if (preview.details.coverage.warnings.length > 0) {
+        <div class="template-warning-list">
+          @for (warning of preview.details.coverage.warnings; track warning) {
+            <div class="template-warning-item">{{ warning }}</div>
+          }
+        </div>
+      }
+      <ng-template pTemplate="footer">
+        <div class="template-dialog-footer">
+          <p-button
+            label="Отмена"
+            styleClass="ns-action-blue"
+            [outlined]="true"
+            (onClick)="closePreview()"
+          />
+          <p-button
+            label="Загрузить"
+            styleClass="ns-action-blue"
+            [disabled]="!importFormValid() || mon.templatesMutationLoading()"
+            [loading]="mon.templatesMutationLoading()"
+            (onClick)="uploadFromPreview()"
+          />
+        </div>
+      </ng-template>
+    </p-dialog>
+  }
+
+  @if (editingTemplate(); as template) {
+    <p-dialog
+      header="Редактирование шаблона"
+      [modal]="true"
+      [style]="{ width: 'min(980px, 96vw)' }"
+      styleClass="template-import-dialog"
+      [visible]="editDialogOpen()"
+      (visibleChange)="onEditDialogVisibleChange($event)"
+    >
+      <p class="template-dialog-lead">
+        @if (editIsUploaded()) {
+          Изменения вступят в силу после нажатия «Сохранить».
+        } @else {
+          Для системных шаблонов можно изменить только приоритет.
+        }
+      </p>
+      <div class="template-import-form">
+        @if (editIsUploaded()) {
+          <label class="p-input-container">
+            <span>Вендор *</span>
+            <input
+              pInputText
+              type="text"
+              [ngModel]="editVendor()"
+              (ngModelChange)="editVendor.set($event)"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="Cisco"
+              class="w-full"
+              autocomplete="off"
+            />
+          </label>
+          <label class="p-input-container">
+            <span>Модель</span>
+            <input
+              pInputText
+              type="text"
+              [ngModel]="editModel()"
+              (ngModelChange)="editModel.set($event)"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="9300"
+              class="w-full"
+              autocomplete="off"
+            />
+          </label>
+          <label class="p-input-container">
+            <span>Прошивка</span>
+            <input
+              pInputText
+              type="text"
+              [ngModel]="editFirmware()"
+              (ngModelChange)="editFirmware.set($event)"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="IOS_15.0(2)SE11"
+              class="w-full"
+              autocomplete="off"
+            />
+          </label>
+        }
+        <label class="p-input-container template-priority-field">
+          <span>Приоритет *</span>
+          <p-inputNumber
+            [ngModel]="editPriority()"
+            (ngModelChange)="editPriority.set($event ?? 0)"
+            [ngModelOptions]="{ standalone: true }"
+            [min]="0"
+            [max]="100"
+            [useGrouping]="false"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+          />
+          <small class="template-field-hint">
+            При автоматическом выборе шаблона для устройства применяются шаблоны с наивысшим приоритетом (от 0 до 100).
+          </small>
+          @if (!editPriorityValid()) {
+            <small class="template-field-error">Укажите целое число от 0 до 100.</small>
+          }
+        </label>
+      </div>
+      <div class="list-summary-grid">
+        <div class="list-summary-tile"><span>ID</span><strong>{{ template.id }}</strong></div>
+        <div class="list-summary-tile"><span>Название</span><strong>{{ template.name }}</strong></div>
+        <div class="list-summary-tile"><span>Источник</span><strong>{{ sourceLabel(template) }}</strong></div>
+      </div>
+      <ng-template pTemplate="footer">
+        <div class="template-dialog-footer">
+          <p-button
+            label="Отмена"
+            styleClass="ns-action-blue"
+            [outlined]="true"
+            [disabled]="mon.templatesMutationLoading()"
+            (onClick)="closeEditDialog()"
+          />
+          <p-button
+            label="Сохранить"
+            styleClass="ns-action-blue"
+            [disabled]="!editFormValid() || mon.templatesMutationLoading()"
+            [loading]="mon.templatesMutationLoading()"
+            (onClick)="saveEdit()"
+          />
+        </div>
+      </ng-template>
+    </p-dialog>
+  }
+
+  <div class="list-filter-panel">
+    <div class="list-filters templates-list-filters">
+      <label class="p-input-container">
+        <span>Поиск</span>
+        <input
+          pInputText
+          type="text"
+          [ngModel]="mon.templatesSearch()"
+          (ngModelChange)="mon.templatesSearch.set($event)"
+          [ngModelOptions]="{ standalone: true }"
+          placeholder="ID, название, vendor, источник..."
+          class="w-full"
+        />
+      </label>
+    </div>
+  </div>
+
+  @if (mon.templatesLoading()) {
+    <div class="empty-state">
+      <strong>Загрузка шаблонов...</strong>
+      <p>Получаем актуальный список шаблонов мониторинга.</p>
+    </div>
+  } @else if (mon.filteredMonitoringTemplates().length === 0) {
+    <div class="empty-state">
+      <strong>Шаблоны не найдены</strong>
+      <p>Попробуйте изменить поисковый запрос или загрузите новый файл шаблона (.template).</p>
+    </div>
+  } @else {
+    <p-table
+      #templatesTableWidths="nsTableColumnWidths"
+      nsTableColumnWidths="templates"
+      [nsTableColumnDefs]="templatesTableColumns"
+      [nsTableColumnOrder]="templatesTableColumnOrder"
+      [nsTableColumnWidthsMap]="templatesTableColumnWidthsMap()"
+      [value]="mon.filteredMonitoringTemplates()"
+      [paginator]="true"
+      [rows]="15"
+      [rowsPerPageOptions]="[10, 15, 25, 50]"
+      [showCurrentPageReport]="true"
+      [alwaysShowPaginator]="false"
+      currentPageReportTemplate="{first}–{last} из {totalRecords}"
+      dataKey="id"
+      stripedRows
+      [resizableColumns]="true"
+      columnResizeMode="fit"
+      [tableStyle]="{ width: '100%' }"
+      class="p-datatable-sm netscan-p-table templates-p-table"
+    >
+      <ng-template #header>
+        <tr>
+          <th [ngStyle]="columnBoundsStyle(templatesTableColumnBounds, '_select')">
+            <p-checkbox
+              [binary]="true"
+              [ngModel]="areAllUploadedSelected()"
+              (ngModelChange)="toggleAllUploadedSelection($event)"
+              [ngModelOptions]="{ standalone: true }"
+            />
+          </th>
+          <th
+            class="col-id"
+            pResizableColumn
+            [ngStyle]="columnBoundsStyle(templatesTableColumnBounds, 'id')"
+          >
+            ID
+          </th>
+          <th
+            class="col-name"
+            pResizableColumn
+            [ngStyle]="columnBoundsStyle(templatesTableColumnBounds, 'name')"
+          >
+            Название
+          </th>
+          <th
+            class="col-source"
+            pResizableColumn
+            [ngStyle]="columnBoundsStyle(templatesTableColumnBounds, 'source')"
+          >
+            Источник
+          </th>
+          <th pResizableColumn [ngStyle]="columnBoundsStyle(templatesTableColumnBounds, 'uploadedBy')">
+            Имя пользователя
+          </th>
+          <th
+            class="col-vendor"
+            pResizableColumn
+            [ngStyle]="columnBoundsStyle(templatesTableColumnBounds, 'vendor')"
+          >
+            Вендор / модель
+          </th>
+          <th
+            class="col-versions"
+            pResizableColumn
+            [ngStyle]="columnBoundsStyle(templatesTableColumnBounds, 'versions')"
+          >
+            Версии
+          </th>
+          <th
+            class="col-priority"
+            pResizableColumn
+            [ngStyle]="columnBoundsStyle(templatesTableColumnBounds, 'priority')"
+          >
+            Приоритет
+          </th>
+          <th class="col-actions" [ngStyle]="columnBoundsStyle(templatesTableColumnBounds, 'actions')">
+            Действия
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-template>
+        <tr>
+          <td>
+            @if (template.source === 'UPLOADED') {
+              <p-checkbox
+                [binary]="true"
+                [ngModel]="isTemplateSelected(template)"
+                (ngModelChange)="toggleTemplateSelection(template, $event)"
+                [ngModelOptions]="{ standalone: true }"
+              />
+            } @else {
+              <!-- системный шаблон – невыбираемый, без чекбокса -->
+            }
+          </td>
+          <td class="col-id">
+            <div class="template-id-cell">
+              <strong>{{ template.id }}</strong>
+              @if (template.extendsTemplate) {
+                <small>extends {{ template.extendsTemplate }}</small>
+              }
+            </div>
+          </td>
+          <td class="col-name">
+            <div class="template-main-cell">
+              <strong>{{ template.name }}</strong>
+              <small
+                class="template-muted clamp-2"
+                [nsOverflowTooltip]="template.description || 'Без описания'"
+              >
+                {{ template.description || 'Без описания' }}
+              </small>
+            </div>
+          </td>
+          <td class="col-source">
+            <span
+              class="ns-chip ns-chip--blue"
+              [class.ns-chip--green]="template.source === 'UPLOADED'"
+            >
+              {{ sourceLabel(template) }}
+            </span>
+          </td>
+          <td>{{ template.uploadedByDisplayName || template.uploadedBy || '-' }}</td>
+          <td class="col-vendor">
+            <div class="template-meta-cell">
+              <strong>{{ template.vendor || '-' }}</strong>
+              <small class="template-muted clamp-1">
+                {{ template.model || template.modelRegex || '-' }}
+              </small>
+            </div>
+          </td>
+          <td class="col-versions">
+            <div class="template-meta-cell">
+              <strong>pack {{ template.packVersion || '-' }}</strong>
+              <small>tpl {{ template.templateVersion || '-' }} / schema {{ template.schemaVersion || '-' }}</small>
+              <small class="template-muted clamp-1">fw {{ template.firmware || '-' }}</small>
+            </div>
+          </td>
+          <td class="col-priority">{{ template.priority }}</td>
+          <td class="col-actions">
+            <div class="templates-row-actions">
+              <p-button
+                icon="pi pi-ellipsis-v"
+                [text]="true"
+                [rounded]="true"
+                severity="secondary"
+                (onClick)="openTemplatesRowMenu($event, template)"
+                [attr.aria-label]="'Действия: ' + template.name"
+              />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+</section>
+<p-confirmDialog />
+<p-menu #templatesRowMenu [popup]="true" [model]="templatesRowMenuItems()" appendTo="body" />
+
+<p-dialog
+  header="Настройка столбцов"
+  [modal]="true"
+  [style]="{ width: 'min(420px, 94vw)' }"
+  styleClass="templates-columns-dialog"
+  [visible]="columnsDialogOpen()"
+  (visibleChange)="columnsDialogOpen.set($event)"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <p class="templates-columns-dialog-hint">
+    Потяните разделитель между заголовками колонок в таблице, чтобы изменить ширину. При наведении на границу
+    появится маркер изменения размера.
+  </p>
+  <ng-template #footer>
+    <div class="templates-columns-dialog-footer">
+      <p-button
+        label="Закрыть"
+        styleClass="ns-action-blue"
+        [outlined]="true"
+        (onClick)="closeColumnsDialog()"
+      />
+      <p-button
+        label="Сбросить ширину колонок"
+        styleClass="ns-action-blue"
+        [text]="true"
+        (onClick)="resetTemplatesTableColumnWidths()"
+      />
+    </div>
+  </ng-template>
+</p-dialog>

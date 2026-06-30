@@ -1,0 +1,58 @@
+{
+  "snmp_unavailable" : {
+    "description" : "SNMP agent unavailable",
+    "expressionContains" : "zabbix[host,snmp,available]",
+    "metricOverrides" : {
+      "zabbix[host,snmp,available]" : [ 0.0 ]
+    },
+    "expectBreached" : true
+  },
+  "ens18_link_down" : {
+    "lldRule" : "net.if.discovery",
+    "instanceKey" : "2",
+    "macros" : {
+      "{#SNMPINDEX}" : "2",
+      "{#IFNAME}" : "ens18"
+    },
+    "triggerNameContains" : "Link down",
+    "metricOverrides" : {
+      "net.if.status[ifOperStatus.2]" : [ 2.0 ]
+    },
+    "templateMacroOverrides" : {
+      "{$IFCONTROL:\"{#IFNAME}\"}" : "1"
+    },
+    "expectBreached" : true
+  },
+  "ens18_link_down_recovery" : {
+    "lldRule" : "net.if.discovery",
+    "instanceKey" : "2",
+    "macros" : {
+      "{#SNMPINDEX}" : "2",
+      "{#IFNAME}" : "ens18"
+    },
+    "triggerNameContains" : "Link down",
+    "evaluateRecovery" : true,
+    "metricOverrides" : {
+      "net.if.status[ifOperStatus.2]" : [ 1.0 ]
+    },
+    "templateMacroOverrides" : {
+      "{$IFCONTROL:\"{#IFNAME}\"}" : "1"
+    },
+    "expectBreached" : false
+  },
+  "ens18_high_bandwidth" : {
+    "lldRule" : "net.if.discovery",
+    "instanceKey" : "2",
+    "macros" : {
+      "{#SNMPINDEX}" : "2",
+      "{#IFNAME}" : "ens18"
+    },
+    "triggerNameContains" : "High bandwidth",
+    "historyOverrides" : {
+      "net.if.speed[ifHighSpeed.2]" : [ 1000.0, 1000.0, 1000.0 ],
+      "net.if.in[ifHCInOctets.2]" : [ 9.0E9, 9.0E9, 9.0E9 ],
+      "net.if.out[ifHCOutOctets.2]" : [ 9.0E9, 9.0E9, 9.0E9 ]
+    },
+    "expectBreached" : true
+  }
+}

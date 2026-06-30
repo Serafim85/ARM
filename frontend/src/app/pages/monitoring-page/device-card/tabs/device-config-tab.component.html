@@ -1,0 +1,104 @@
+<section class="content-card configuration-panel list-page-card">
+  <div class="section-heading">
+    <div>
+      <h2>Порты и интерфейсы</h2>
+      <p>Снимок конфигурации с устройства: фильтр по типу и поиск по полям строки таблицы.</p>
+    </div>
+  </div>
+
+  <div class="list-summary-grid">
+    <div class="list-summary-tile"><span>Всего в опросе</span><strong>{{ totalPortsCount() }}</strong></div>
+    <div class="list-summary-tile"><span>Oper UP</span><strong>{{ operUpTotalCount() }}</strong></div>
+    <div class="list-summary-tile"><span>Логических</span><strong>{{ logicalPortsTotalCount() }}</strong></div>
+    <div class="list-summary-tile"><span>Показано в таблице</span><strong>{{ filteredPorts().length }}</strong></div>
+  </div>
+
+  <div class="list-filters config-ports-filters">
+    <label class="users-search users-field p-input-container">
+      <span>Поиск</span>
+      <input
+        pInputText
+        type="search"
+        [ngModel]="portsSearch()"
+        (ngModelChange)="portsSearch.set($event)"
+        [ngModelOptions]="{ standalone: true }"
+        placeholder="Имя, описание, статусы, назначение…"
+        class="w-full config-port-search-input"
+      />
+    </label>
+    <label class="users-field">
+      <span>Показать</span>
+      <app-device-option-select
+        styleClass="w-full"
+        [options]="portFilterOptions"
+        optionValueKey="value"
+        [value]="portFilter()"
+        (valueChange)="onPortFilterChange($event)"
+      />
+    </label>
+  </div>
+
+  <p-table
+    stripedRows
+    сlass="p-datatable-sm netscan-p-table"
+    currentPageReportTemplate="{first}–{last} из {totalRecords}"
+    dataKey="name"
+    [value]="filteredPorts()"
+    [paginator]="true"
+    [rows]="15"
+    [rowsPerPageOptions]="[10, 15, 25, 50]"
+    [showCurrentPageReport]="true"
+    [alwaysShowPaginator]="false"
+    [tableStyle]="{ 'min-width': '72rem' }"
+  >
+    <ng-template #header>
+      <tr>
+        <th pSortableColumn="name">
+          Наименование
+          <p-sortIcon field="name" />
+        </th>
+        <th pSortableColumn="description">
+          Описание
+          <p-sortIcon field="description" />
+        </th>
+        <th pSortableColumn="adminStatus">Admin Status <p-sortIcon field="adminStatus" /></th>
+        <th pSortableColumn="operStatus">Oper Status <p-sortIcon field="operStatus" /></th>
+        <th pSortableColumn="lost">Утерян <p-sortIcon field="lost" /></th>
+        <th pSortableColumn="nominalSpeed">Скорость ном. <p-sortIcon field="nominalSpeed" /></th>
+        <th pSortableColumn="activeSpeed">Скорость акт. <p-sortIcon field="activeSpeed" /></th>
+        <th pSortableColumn="purpose">Назначение <p-sortIcon field="purpose" /></th>
+        <th pSortableColumn="mode">Режим <p-sortIcon field="mode" /></th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-port>
+      <tr>
+        <td>
+          @if (canOpenInterfaceMetrics(port.name)) {
+            <button type="button" class="port-name-link" (click)="openInterfaceMetrics(port.name)">
+              {{ port.name }}
+            </button>
+          } @else {
+            <span>{{ port.name }}</span>
+          }
+        </td>
+        <td>{{ port.description }}</td>
+        <td>
+          <span class="port-state-text" [class.port-state-up]="port.adminStatus === 'UP'" [class.port-state-down]="port.adminStatus === 'DOWN'">{{ port.adminStatus }}</span>
+        </td>
+        <td>
+          <span class="port-state-text" [class.port-state-up]="port.operStatus === 'UP'" [class.port-state-down]="port.operStatus === 'DOWN'">{{ port.operStatus }}</span>
+        </td>
+        <td>{{ port.lost }}</td>
+        <td>{{ port.nominalSpeed }}</td>
+        <td>{{ port.activeSpeed }}</td>
+        <td>{{ port.purpose }}</td>
+        <td>{{ port.mode }}</td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="9">Нет данных по портам.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</section>

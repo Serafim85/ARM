@@ -1,0 +1,40 @@
+<section class="workstation-metrics-section content-card">
+  <div class="workstation-metrics-toolbar">
+    <div>
+      <h2>Метрики</h2>
+      <p>CPU, память и диск за выбранный период.</p>
+    </div>
+    <p-selectButton
+      [options]="periodOptions"
+      [ngModel]="period()"
+      (ngModelChange)="onPeriodChange($event)"
+      optionLabel="label"
+      optionValue="value"
+    />
+  </div>
+
+  @if (hasChartData()) {
+    <div class="workstation-metrics-grid" [class.is-loading]="ws.metricsLoading()">
+      @for (chart of chartOptions(); track chart.key) {
+        <article class="workstation-metric-card">
+          <header class="workstation-metric-card-header">
+            <strong>{{ chart.title }}</strong>
+            <span>{{ chart.latest }}</span>
+          </header>
+          <div class="workstation-metric-chart" echarts [options]="chart.option"></div>
+        </article>
+      }
+    </div>
+  } @else if (ws.metricsLoading()) {
+    <div class="workstation-metrics-grid workstation-metrics-skeleton" aria-hidden="true">
+      @for (placeholder of [1, 2, 3]; track placeholder) {
+        <article class="workstation-metric-card workstation-metric-card--skeleton">
+          <div class="workstation-metric-skeleton-header"></div>
+          <div class="workstation-metric-skeleton-chart"></div>
+        </article>
+      }
+    </div>
+  } @else {
+    <p class="workstation-metrics-empty">Нет данных. Запустите агент или выполните ingest.</p>
+  }
+</section>

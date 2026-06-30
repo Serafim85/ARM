@@ -1,0 +1,145 @@
+<div class="login-page-root">
+  <main class="login-layout">
+    <aside class="login-visual" aria-label="О платформе">
+      <div class="login-visual-top">
+        <p class="login-brand-badge">Платформа для корпоративных сетей</p>
+        <h2 class="login-brand-title">Обнаружение, инвентаризация и мониторинг сетевой инфраструктуры</h2>
+      </div>
+
+      <div class="login-visual-media">
+        <img src="/nsLogo.png" alt="WiSLA NS" class="login-visual-img" />
+      </div>
+
+      <div class="login-visual-bottom">
+        <p class="login-brand-lead">Единая платформа WISLA для сетевых инженеров: поиск устройств, фильтрация по характеристикам и подготовка к централизованному мониторингу.</p>
+      </div>
+    </aside>
+
+    <section class="login-main" aria-labelledby="login-title">
+      <div class="login-main-inner">
+      <div class="login-form-box">
+        <header class="login-header">
+          <h1 id="login-title">Вход в систему</h1>
+          <p class="login-header-desc">Учётные данные для доступа к рабочей панели</p>
+        </header>
+
+        <form (ngSubmit)="auth.login()" class="login-form">
+          <fieldset class="login-mode">
+            <legend class="visually-hidden">Способ входа</legend>
+            <div class="login-mode-track" role="radiogroup" aria-label="Способ входа">
+              <label class="login-mode-btn">
+                <input
+                  type="radio"
+                  name="loginMode"
+                  [ngModel]="auth.loginMode()"
+                  (ngModelChange)="auth.loginMode.set($event)"
+                  value="LOCAL"
+                />
+                <span>Локальный</span>
+              </label>
+              <label class="login-mode-btn">
+                <input
+                  type="radio"
+                  name="loginMode"
+                  [ngModel]="auth.loginMode()"
+                  (ngModelChange)="auth.loginMode.set($event)"
+                  value="LDAP"
+                />
+                <span>LDAP</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <label class="p-input-container login-field">
+            <span>Логин / Email</span>
+            <input
+              pInputText
+              type="text"
+              name="email"
+              [ngModel]="auth.email()"
+              (ngModelChange)="auth.email.set($event)"
+              [placeholder]="
+                auth.loginMode() === 'LDAP'
+                  ? 'uid пользователя'
+                  : 'admin@example.com'
+              "
+              class="w-full login-input"
+              autocomplete="username"
+            />
+          </label>
+
+          <label class="p-input-container login-field">
+            <span>Пароль</span>
+            <p-password
+              name="password"
+              [ngModel]="auth.password()"
+              (ngModelChange)="auth.password.set($event)"
+              placeholder="Введите пароль"
+              [toggleMask]="true"
+              [feedback]="false"
+              class="w-full login-password"
+              inputStyleClass="w-full login-input"
+            />
+          </label>
+
+          <div class="login-submit-wrap">
+            <p-button
+              type="submit"
+              [label]="auth.loading() ? 'Входим…' : 'Войти'"
+              [disabled]="auth.loading()"
+              styleClass="login-submit ns-action-blue w-full"
+            />
+          </div>
+        </form>
+
+        <div class="login-hint-wrap">
+          <button
+            type="button"
+            class="login-hint-trigger"
+            (click)="testAccountsPopover.toggle($event)"
+            [attr.aria-expanded]="false"
+          >
+            {{ testAccountsLabel() }}
+          </button>
+          <p-popover
+            #testAccountsPopover
+            styleClass="login-test-accounts-popover"
+            [dismissable]="true"
+            [attr.aria-label]="testAccountsLabel()"
+          >
+            <ul class="login-hint-list">
+              @for (account of testAccounts(); track account.login) {
+                <li>
+                  <button
+                    type="button"
+                    class="login-hint-item"
+                    (click)="applyTestAccount(account)"
+                  >
+                    <code>{{ account.login }}</code>
+                  </button>
+                </li>
+              }
+            </ul>
+          </p-popover>
+        </div>
+      </div>
+      </div>
+
+      <app-version-info class="login-footer" />
+    </section>
+  </main>
+
+  @if (debugMode()) {
+    <div class="login-demo-seed">
+      <p-button
+        type="button"
+        label="Загрузить демо-данные мониторинга"
+        [outlined]="true"
+        [disabled]="demoSeedUsed() || demoSeedLoading()"
+        [loading]="demoSeedLoading()"
+        styleClass="login-demo-seed-btn"
+        (onClick)="seedDemoMonitoring()"
+      />
+    </div>
+  }
+</div>

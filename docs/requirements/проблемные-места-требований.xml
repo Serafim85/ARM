@@ -1,0 +1,734 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <meta>
+    <title>Сводная таблица проблемных мест ТЗ «WISLA АРМ»</title>
+    <source>требования-мониторинг-АРМ.docx</source>
+    <created>2026-06-10</created>
+    <updated>2026-06-10</updated>
+    <version>2.0</version>
+    <description>
+      Перечень разделов и формулировок документа требований, по которым
+      требуется уточнение, согласование или фиксация допущений перед проектированием.
+      Версия 2.0: добавлены поля согласования, ответа заказчика, фазирования и журнал обсуждений.
+    </description>
+  </meta>
+
+  <tracking_schema>
+    <field name="agreement_status" type="enum" required="true">
+      <values>open | in_review | agreed | rejected | deferred | waived</values>
+      <description>Текущий статус согласования по пункту</description>
+    </field>
+    <field name="customer_response" type="text" required="false">
+      <description>Ответ или решение заказчика / стейкхолдера</description>
+    </field>
+    <field name="decided_solution" type="text" required="false">
+      <description>Зафиксированное решение для включения в ТЗ или архитектуру</description>
+    </field>
+    <field name="responsible" type="enum" required="true">
+      <description>Кто должен дать ответ или принять решение</description>
+    </field>
+    <field name="deadline" type="date" required="false">
+      <description>Целевая дата закрытия вопроса (YYYY-MM-DD)</description>
+    </field>
+    <field name="resolution_phase" type="enum" required="true">
+      <description>На каком этапе должно быть решено</description>
+    </field>
+    <field name="blocks_design" type="boolean" required="true">
+      <description>Блокирует ли вопрос старт проектирования</description>
+    </field>
+    <field name="mvp_impact" type="enum" required="true">
+      <values>none | low | medium | high</values>
+      <description>Влияние на объём и сроки MVP</description>
+    </field>
+    <field name="related_issues" type="id_list" required="false">
+      <description>Связанные пункты таблицы (перекрёстные зависимости)</description>
+    </field>
+  </tracking_schema>
+
+  <summary>
+    <total_issues>22</total_issues>
+    <by_agreement_status>
+      <status code="open" count="22"/>
+      <status code="in_review" count="0"/>
+      <status code="agreed" count="0"/>
+      <status code="rejected" count="0"/>
+      <status code="deferred" count="0"/>
+      <status code="waived" count="0"/>
+    </by_agreement_status>
+    <by_severity>
+      <critical count="4"/>
+      <high count="9"/>
+      <medium count="7"/>
+      <low count="2"/>
+    </by_severity>
+    <blocks_design count="6"/>
+    <by_category>
+      <category name="Нефункциональные требования" count="1"/>
+      <category name="Размытая обязательность" count="1"/>
+      <category name="Аудит и персональные данные" count="2"/>
+      <category name="Логи и события" count="2"/>
+      <category name="Интеграция WISLA" count="3"/>
+      <category name="Безопасность" count="2"/>
+      <category name="Интерфейс и приёмка" count="1"/>
+      <category name="Масштаб и архитектура" count="2"/>
+      <category name="Отчёты и бизнес-правила" count="2"/>
+      <category name="Агент и развёртывание" count="3"/>
+      <category name="Scope и приоритизация" count="1"/>
+      <category name="Мониторинг служб" count="1"/>
+      <category name="Информирование" count="1"/>
+    </by_category>
+  </summary>
+
+  <issues>
+
+    <issue id="001">
+      <section>Общий документ</section>
+      <requirement_ref>—</requirement_ref>
+      <problem>Отсутствуют нефункциональные требования (NFR)</problem>
+      <severity>critical</severity>
+      <category>Нефункциональные требования</category>
+      <questions>
+        <question>Каков целевой масштаб: число АРМ (500 / 5 000 / 50 000)?</question>
+        <question>Какая ожидаемая частота опроса и объём метрик на одно АРМ?</question>
+        <question>Какие SLA доступности модуля WISLA АРМ?</question>
+        <question>Требуется ли отказоустойчивость (HA, кластер) или допустим одиночный сервер?</question>
+        <question>Каковы RPO/RTO при сбое сервера или потере данных?</question>
+      </questions>
+      <risk>Невозможно обоснованно выбрать стек хранения, архитектуру ingestion и оценить сроки/бюджет.</risk>
+      <recommendation>Добавить приложение «Нефункциональные требования» с целевыми показателями нагрузки и доступности.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>заказчик</responsible>
+        <deadline/>
+        <resolution_phase>before_design</resolution_phase>
+        <blocks_design>true</blocks_design>
+        <mvp_impact>high</mvp_impact>
+        <related_issues>012,013,018</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="002">
+      <section>§1.4.3, §3.2–3.5, §2.2, §4.2, §5.6, §10.1</section>
+      <requirement_ref>«при технической возможности»</requirement_ref>
+      <problem>Размытая обязательность требований</problem>
+      <severity>high</severity>
+      <category>Размытая обязательность</category>
+      <questions>
+        <question>Какие пункты обязательны в MVP, а какие — опциональны?</question>
+        <question>S.M.A.R.T., задержки диска, серийные номера, сетевая активность по службе — must или nice-to-have?</question>
+        <question>Инвентаризация ПО (§10.1) — полный список или только ключевые приложения?</question>
+        <question>Тип сессии RDP/SSH (§5.6) — обязателен на обеих платформах?</question>
+      </questions>
+      <risk>Споры при приёмке: заказчик ожидает полный объём, исполнитель реализует «по возможности».</risk>
+      <recommendation>Составить матрицу Must / Should / Could для каждого функционального пункта.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>заказчик</responsible>
+        <deadline/>
+        <resolution_phase>before_design</resolution_phase>
+        <blocks_design>true</blocks_design>
+        <mvp_impact>high</mvp_impact>
+        <related_issues>018,019</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="003">
+      <section>§5. Аудит использования ПК</section>
+      <requirement_ref>§5.1–5.6</requirement_ref>
+      <problem>Аудит сессий — высокая сложность и разная семантика Windows/Linux</problem>
+      <severity>critical</severity>
+      <category>Аудит и персональные данные</category>
+      <questions>
+        <question>Какая точность учёта входа/выхода допустима (секунды, минуты, «приблизительно»)?</question>
+        <question>Как фиксировать выход при аварийном завершении сессии, BSoD, принудительном отключении?</question>
+        <question>Нужен ли учёт нескольких одновременных сессий на одном АРМ (RDP + локальная)?</question>
+        <question>Какие права агенту на Windows (Security log) и Linux (PAM, wtmp) согласованы с ИБ?</question>
+        <question>Достаточно ли «last seen» вместо полного аудита для части сценариев?</question>
+      </questions>
+      <risk>Реализация может не совпасть с ожиданиями; на Linux данные часто неполные без глубокой интеграции.</risk>
+      <recommendation>Описать допущения точности аудита и минимальный набор событий для каждой ОС отдельно.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>заказчик, ИБ</responsible>
+        <deadline/>
+        <resolution_phase>mvp</resolution_phase>
+        <blocks_design>false</blocks_design>
+        <mvp_impact>high</mvp_impact>
+        <related_issues>004,009,010</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="004">
+      <section>§5, §9.2, §10.2</section>
+      <requirement_ref>Учётная запись пользователя, история сессий</requirement_ref>
+      <problem>Персональные данные без правовой и организационной рамки</problem>
+      <severity>high</severity>
+      <category>Аудит и персональные данные</category>
+      <questions>
+        <question>Подпадают ли логины, IP, история входов под 152-ФЗ / политику ПДн организации?</question>
+        <question>Какой срок хранения персональных данных и кто субъект ответственности?</question>
+        <question>Нужно ли маскирование или ограничение видимости логинов для роли «просмотр»?</question>
+        <question>Требуется ли согласие пользователя на сбор данных аудита?</question>
+      </questions>
+      <risk>Блокировка развёртывания со стороны ИБ или юридического отдела.</risk>
+      <recommendation>Добавить раздел о соответствии ПДн и согласовать с ИБ до проектирования хранилища.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>ИБ, юридический отдел</responsible>
+        <deadline/>
+        <resolution_phase>before_design</resolution_phase>
+        <blocks_design>true</blocks_design>
+        <mvp_impact>medium</mvp_impact>
+        <related_issues>003,009</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="005">
+      <section>§3.7, §4.7, §4.8</section>
+      <requirement_ref>Метрики по журналам, просмотр логов, журнал аварийных</requirement_ref>
+      <problem>Функциональность близка к mini-SIEM без лимитов объёма данных</problem>
+      <severity>critical</severity>
+      <category>Логи и события</category>
+      <questions>
+        <question>Максимальное число событий логов в сутки на одно АРМ?</question>
+        <question>Максимальная длина текста события и политика усечения?</question>
+        <question>Нужна ли дедупликация повторяющихся событий?</question>
+        <question>Какой срок хранения отобранных записей логов (§9.2) по умолчанию?</question>
+        <question>Сколько настраиваемых правил по логам допустимо на парк / на АРМ?</question>
+      </questions>
+      <risk>Непредсказуемый рост объёма БД, деградация производительности UI и ingestion.</risk>
+      <recommendation>Зафиксировать квоты, TTL и стратегию агрегации/сэмплирования для логов.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>заказчик, архитектор</responsible>
+        <deadline/>
+        <resolution_phase>v1</resolution_phase>
+        <blocks_design>false</blocks_design>
+        <mvp_impact>medium</mvp_impact>
+        <related_issues>006,012,013</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="006">
+      <section>§4.7, §4.8, §8.4</section>
+      <requirement_ref>Переход от аварийной записи к строке в просмотре логов</requirement_ref>
+      <problem>Связность событий между журналами не определена технически</problem>
+      <severity>medium</severity>
+      <category>Логи и события</category>
+      <questions>
+        <question>Какой уникальный идентификатор связывает запись в журнале аварийных с событием в хранилище логов?</question>
+        <question>Что делать, если исходная запись лога уже удалена по TTL?</question>
+        <question>Обязателен ли переход в обе стороны (лог → аварийный журнал и обратно)?</question>
+      </questions>
+      <risk>Реализация навигации «при наличии в хранилище» может оказаться нестабильной для пользователя.</risk>
+      <recommendation>Описать модель связи событий (correlation_id, fingerprint) в схеме данных API.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>архитектор</responsible>
+        <deadline/>
+        <resolution_phase>v1</resolution_phase>
+        <blocks_design>false</blocks_design>
+        <mvp_impact>low</mvp_impact>
+        <related_issues>005</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="007">
+      <section>§1.7</section>
+      <requirement_ref>Интеграция модуля WISLA АРМ с центральной системой WISLA</requirement_ref>
+      <problem>Интеграция описана концептуально, без технического контракта</problem>
+      <severity>critical</severity>
+      <category>Интеграция WISLA</category>
+      <questions>
+        <question>Существует ли уже API WISLA для приёма объектов, метрик и событий?</question>
+        <question>Push или pull: кто инициирует передачу данных?</question>
+        <question>Какой формат обмена (REST, gRPC, message bus)?</question>
+        <question>Кто владелец master-идентификатора АРМ — WISLA АРМ или WISLA?</question>
+        <question>Что происходит при рассинхроне статусов и дубликатах объектов?</question>
+        <question>Обязательна ли интеграция в первой версии или может быть отложена?</question>
+      </questions>
+      <risk>Главный источник задержек: без контракта с командой WISLA сроки интеграции не оценить.</risk>
+      <recommendation>Вынести контракт интеграции в отдельный документ и согласовать с владельцами WISLA.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>команда WISLA, заказчик</responsible>
+        <deadline/>
+        <resolution_phase>before_design</resolution_phase>
+        <blocks_design>true</blocks_design>
+        <mvp_impact>medium</mvp_impact>
+        <related_issues>008,020,018</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="008">
+      <section>§1.7.5–1.7.6, §7.1–7.3</section>
+      <requirement_ref>Разделение оповещений между WISLA АРМ и WISLA</requirement_ref>
+      <problem>Дублирование или пропуск уведомлений при интеграции</problem>
+      <severity>high</severity>
+      <category>Интеграция WISLA</category>
+      <questions>
+        <question>Кто является единственным источником алертов для инженера — WISLA АРМ или WISLA?</question>
+        <question>Должны ли события дублироваться в WISLA по умолчанию или только по политике?</question>
+        <question>Как избежать двойных Email/Telegram при срабатывании одного правила в обеих системах?</question>
+      </questions>
+      <risk>Шум для техподдержки или, наоборот, потеря критичных событий.</risk>
+      <recommendation>Зафиксировать матрицу: какие типы событий где обрабатываются и кто шлёт уведомления.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>команда WISLA, заказчик</responsible>
+        <deadline/>
+        <resolution_phase>v1</resolution_phase>
+        <blocks_design>false</blocks_design>
+        <mvp_impact>low</mvp_impact>
+        <related_issues>007,022</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="009">
+      <section>§1.5.2, §1.4.9, §8.5</section>
+      <requirement_ref>Аутентификация агента, роли пользователей</requirement_ref>
+      <problem>Безопасность описана фрагментарно</problem>
+      <severity>high</severity>
+      <category>Безопасность</category>
+      <questions>
+        <question>Какой механизм аутентификации агента выбран: mTLS, JWT, API-key, сертификат от внутреннего CA?</question>
+        <question>Как выполняется ротация и отзыв учётных данных агента?</question>
+        <question>Нужен ли аудит действий администраторов в UI (кто менял правила, профили, получателей)?</question>
+        <question>Требуется ли шифрование данных в БД at rest?</question>
+      </questions>
+      <risk>Несоответствие требованиям ИБ организации на этапе внедрения.</risk>
+      <recommendation>Добавить раздел «Безопасность» с моделью угроз и процедурами управления секретами.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>ИБ, архитектор</responsible>
+        <deadline/>
+        <resolution_phase>before_design</resolution_phase>
+        <blocks_design>true</blocks_design>
+        <mvp_impact>high</mvp_impact>
+        <related_issues>004,010,017</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="010">
+      <section>§1.9, §1.4.7</section>
+      <requirement_ref>Ограниченный безагентный режим; права агента</requirement_ref>
+      <problem>Границы безагентного режима и требуемых привилегий не детализированы</problem>
+      <severity>medium</severity>
+      <category>Безопасность</category>
+      <questions>
+        <question>Какой именно поднабор метрик доступен без агента (WinRM/SSH)?</question>
+        <question>Допустим ли безагентный режим в production или только для пилота?</question>
+        <question>Какие учётные записи и права нужны для WinRM/WMI и SSH-сбора?</question>
+      </questions>
+      <risk>ИБ может запретить безагентный опрос или агент с избыточными правами.</risk>
+      <recommendation>Описать матрицу «метрика → способ сбора → требуемые права» и согласовать с ИБ.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>ИБ</responsible>
+        <deadline/>
+        <resolution_phase>mvp</resolution_phase>
+        <blocks_design>false</blocks_design>
+        <mvp_impact>low</mvp_impact>
+        <related_issues>003,009</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="011">
+      <section>§1.6.6, §8</section>
+      <requirement_ref>«веб или иной согласованный UI»</requirement_ref>
+      <problem>UI/UX недостаточно детализирован для приёмки</problem>
+      <severity>medium</severity>
+      <category>Интерфейс и приёмка</category>
+      <questions>
+        <question>Веб — единственный вариант или допустим desktop/thick client?</question>
+        <question>Нужна ли локализация (русский / английский)?</question>
+        <question>Требуется ли адаптация под мобильные устройства?</question>
+        <question>Есть ли корпоративный UI-kit или дизайн-система WISLA для единообразия?</question>
+        <question>Какие критерии приёмки по каждому блоку карточки АРМ (§8.1)?</question>
+      </questions>
+      <risk>Субъективная приёмка интерфейса, переделки после демо.</risk>
+      <recommendation>Добавить wireframes или чек-лист экранов и сценариев для роли инженера ТП.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>заказчик, команда WISLA</responsible>
+        <deadline/>
+        <resolution_phase>mvp</resolution_phase>
+        <blocks_design>false</blocks_design>
+        <mvp_impact>medium</mvp_impact>
+        <related_issues>020</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="012">
+      <section>§9.1–9.3</section>
+      <requirement_ref>Хранение истории метрик и агрегирование</requirement_ref>
+      <problem>Политика хранения и ретенции задана частично</problem>
+      <severity>high</severity>
+      <category>Масштаб и архитектура</category>
+      <questions>
+        <question>30 суток — минимум или типовое значение по умолчанию?</question>
+        <question>Нужно ли хранение сырья (raw) дольше суток при агрегации по дням?</question>
+        <question>Какая гранулярность метрик: 1 мин, 5 мин, настраиваемая?</question>
+        <question>Какой целевой объём диска на сервере при N АРМ и выбранных сроках?</question>
+      </questions>
+      <risk>Неверный выбор TSDB/PostgreSQL и неожиданные затраты на инфраструктуру.</risk>
+      <recommendation>Зафиксировать политику tiered storage: raw → hourly → daily с конкретными сроками.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>заказчик, архитектор</responsible>
+        <deadline/>
+        <resolution_phase>before_design</resolution_phase>
+        <blocks_design>true</blocks_design>
+        <mvp_impact>high</mvp_impact>
+        <related_issues>001,005,013</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="013">
+      <section>§1.6.1, §1.4.4</section>
+      <requirement_ref>Приём данных от агентов; интервал опроса 1–5 минут</requirement_ref>
+      <problem>Нагрузка ingestion не оценена относительно масштаба парка</problem>
+      <severity>high</severity>
+      <category>Масштаб и архитектура</category>
+      <questions>
+        <question>Сколько метрик передаётся за один цикл опроса на АРМ?</question>
+        <question>Допустима ли батч-отправка или только по одному сообщению?</question>
+        <question>Нужна ли горизонтальная масштабируемость приёма (несколько ingest-нод)?</question>
+        <question>Какое максимальное отставание (lag) допустимо при пиковой нагрузке?</question>
+      </questions>
+      <risk>Узкое место на сервере при тысячах АРМ с интервалом 1–5 минут.</risk>
+      <recommendation>Провести расчёт RPS и объёма данных на основе числа АРМ и набора метрик.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>архитектор</responsible>
+        <deadline/>
+        <resolution_phase>before_design</resolution_phase>
+        <blocks_design>false</blocks_design>
+        <mvp_impact>high</mvp_impact>
+        <related_issues>001,012</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="014">
+      <section>§6.4–6.5</section>
+      <requirement_ref>Отчёты на модернизацию/замену с выводами и рекомендациями</requirement_ref>
+      <problem>Бизнес-правила «рекомендаций» не формализованы</problem>
+      <severity>high</severity>
+      <category>Отчёты и бизнес-правила</category>
+      <questions>
+        <question>Что считается «устойчивой перегрузкой» CPU/RAM (порог, длительность, период)?</question>
+        <question>Критерий «нехватки места на диске» — абсолютный (ГБ) или процентный порог?</question>
+        <question>Кто формулирует рекомендации — автоматические шаблоны или свободный текст инженера?</question>
+        <question>Нужны ли разные шаблоны отчётов по типам рабочих мест (§10.4)?</question>
+      </questions>
+      <risk>Отчёты будут либо слишком общими, либо спорными при обосновании закупок.</risk>
+      <recommendation>Описать набор правил генерации рекомендаций с числовыми порогами и примерами PDF.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>заказчик</responsible>
+        <deadline/>
+        <resolution_phase>v1</resolution_phase>
+        <blocks_design>false</blocks_design>
+        <mvp_impact>medium</mvp_impact>
+        <related_issues>015</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="015">
+      <section>§6.3, §10.4</section>
+      <requirement_ref>Экспорт PDF/CSV/XLSX; шаблоны отчётов</requirement_ref>
+      <problem>Формат и состав экспортируемых отчётов не стандартизированы</problem>
+      <severity>medium</severity>
+      <category>Отчёты и бизнес-правила</category>
+      <questions>
+        <question>Обязателен ли XLSX или достаточно CSV?</question>
+        <question>Есть ли утверждённый корпоративный шаблон PDF (логотип, реквизиты)?</question>
+        <question>Нужна ли подпись/штамп или версионирование отчёта?</question>
+      </questions>
+      <risk>Доработки шаблонов после первой приёмки.</risk>
+      <recommendation>Приложить образец целевого отчёта и минимальный набор полей для каждого типа.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>заказчик</responsible>
+        <deadline/>
+        <resolution_phase>v1</resolution_phase>
+        <blocks_design>false</blocks_design>
+        <mvp_impact>low</mvp_impact>
+        <related_issues>014</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="016">
+      <section>§1.8.2, §1.4.8</section>
+      <requirement_ref>Обновление агента; установка MSI/deb/rpm</requirement_ref>
+      <problem>Стратегия массового развёртывания и обновления не определена</problem>
+      <severity>medium</severity>
+      <category>Агент и развёртывание</category>
+      <questions>
+        <question>Кто отвечает за раскатку: GPO/SCCM/Ansible или встроенный механизм из WISLA АРМ?</question>
+        <question>Нужно ли поэтапное обновление (canary) и откат версии агента?</question>
+        <question>Как обрабатываются конфликты с антивирусом и политиками AppLocker?</question>
+        <question>Требуется ли подпись бинарников агента корпоративным или публичным сертификатом?</question>
+      </questions>
+      <risk>Развёртывание на парк может занять больше времени, чем разработка серверной части.</risk>
+      <recommendation>Зафиксировать целевой канал доставки агента и требования к code signing.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>заказчик, ИБ</responsible>
+        <deadline/>
+        <resolution_phase>mvp</resolution_phase>
+        <blocks_design>false</blocks_design>
+        <mvp_impact>high</mvp_impact>
+        <related_issues>009,017,021</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="017">
+      <section>§2.7, §1.4.12</section>
+      <requirement_ref>Регистрация агента; отклонение неавторизованных</requirement_ref>
+      <problem>Модель онбординга новых АРМ описана альтернативами без выбора</problem>
+      <severity>medium</severity>
+      <category>Агент и развёртывание</category>
+      <questions>
+        <question>Регистрация автоматическая или с подтверждением администратором — что по умолчанию?</question>
+        <question>Нужен ли pre-provisioning (whitelist hostname/серийник до установки агента)?</question>
+        <question>Как обрабатывается переустановка ОС на том же железе (тот же или новый АРМ)?</question>
+        <question>Процедура списания: деактивация в UI достаточна или нужна блокировка на уровне сети?</question>
+      </questions>
+      <risk>«Зоопарк» неучтённых хостов или ложные отказы легитимных агентов.</risk>
+      <recommendation>Выбрать и описать один основной сценарий онбординга и исключения.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>заказчик, архитектор</responsible>
+        <deadline/>
+        <resolution_phase>mvp</resolution_phase>
+        <blocks_design>false</blocks_design>
+        <mvp_impact>medium</mvp_impact>
+        <related_issues>009,016</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="018">
+      <section>§1–§10 (весь документ)</section>
+      <requirement_ref>Функциональный объём первой поставки</requirement_ref>
+      <problem>Отсутствует приоритизация и фазирование (MVP / v1 / v2)</problem>
+      <severity>high</severity>
+      <category>Scope и приоритизация</category>
+      <questions>
+        <question>Какой минимальный набор функций нужен для пилота?</question>
+        <question>Что можно отложить: логи, аудит сессий, интеграция WISLA, отчёты PDF, Telegram?</question>
+        <question>Есть ли жёсткий дедлайн и бюджет первой версии?</question>
+        <question>Критерий успеха пилота — количество АРМ, сценарии, SLA?</question>
+      </questions>
+      <risk>Scope creep: документ описывает зрелый enterprise-продукт без этапности.</risk>
+      <recommendation>Разбить требования на фазы с явным MVP и критериями выхода на каждый этап.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>заказчик</responsible>
+        <deadline/>
+        <resolution_phase>before_design</resolution_phase>
+        <blocks_design>true</blocks_design>
+        <mvp_impact>high</mvp_impact>
+        <related_issues>001,002,007</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="019">
+      <section>§4.2–4.4</section>
+      <requirement_ref>Метрики потребления ресурсов службами</requirement_ref>
+      <problem>Кроссплатформенный сбор ресурсов по службе технически неоднороден</problem>
+      <severity>high</severity>
+      <category>Мониторинг служб</category>
+      <questions>
+        <question>На Windows: CPU/RAM по службе через SCM или по процессу-владельцу?</question>
+        <question>На Linux: cgroup v1/v2, systemd — какой механизм является целевым?</question>
+        <question>Диск/сеть по службе — обязательны или только CPU/RAM?</question>
+        <question>Как обрабатывать службы с несколькими процессами или перезапусками PID?</question>
+      </questions>
+      <risk>Несопоставимые метрики Win/Linux в единых графиках и ложные алерты.</risk>
+      <recommendation>Описать нормализованную модель «служба → метрики» с допущениями по каждой ОС.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>архитектор</responsible>
+        <deadline/>
+        <resolution_phase>mvp</resolution_phase>
+        <blocks_design>false</blocks_design>
+        <mvp_impact>high</mvp_impact>
+        <related_issues>002</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="020">
+      <section>§10.6</section>
+      <requirement_ref>Единый вход через WISLA (SSO)</requirement_ref>
+      <problem>SSO описан как опциональный, без протокола и ответственного</problem>
+      <severity>medium</severity>
+      <category>Интеграция WISLA</category>
+      <questions>
+        <question>Какой протокол SSO: SAML, OIDC, Kerberos, проприетарный WISLA?</question>
+        <question>Обязателен ли SSO в MVP или допустима локальная аутентификация?</question>
+        <question>Как маппятся роли WISLA на роли WISLA АРМ (просмотр / администрирование)?</question>
+        <question>Нужен ли переход из общего меню WISLA без повторного логина?</question>
+      </questions>
+      <risk>Двойная реализация аутентификации или блокировка внедрения без IdP.</risk>
+      <recommendation>Согласовать с командой WISLA минимальный контракт SSO до проектирования UI.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>команда WISLA, ИБ</responsible>
+        <deadline/>
+        <resolution_phase>mvp</resolution_phase>
+        <blocks_design>false</blocks_design>
+        <mvp_impact>medium</mvp_impact>
+        <related_issues>007,011</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="021">
+      <section>§1.5.6</section>
+      <requirement_ref>Работа через корпоративный прокси</requirement_ref>
+      <problem>Требование к прокси без деталей аутентификации и сертификатов</problem>
+      <severity>medium</severity>
+      <category>Агент и развёртывание</category>
+      <questions>
+        <question>Какой тип прокси: HTTP, HTTPS, SOCKS, PAC-файл?</question>
+        <question>Нужна ли аутентификация на прокси (NTLM, Kerberos, basic)?</question>
+        <question>Корпоративный CA для TLS inspection — как агенту доверять подменённым сертификатам?</question>
+        <question>Настройка прокси — через конфиг агента, переменные окружения или GPO?</question>
+      </questions>
+      <risk>Агенты не смогут отправлять данные в изолированных сегментах сети.</risk>
+      <recommendation>Добавить матрицу поддерживаемых сценариев прокси и способ настройки для Win/Linux.</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>ИБ, заказчик</responsible>
+        <deadline/>
+        <resolution_phase>mvp</resolution_phase>
+        <blocks_design>false</blocks_design>
+        <mvp_impact>medium</mvp_impact>
+        <related_issues>009,016</related_issues>
+      </tracking>
+    </issue>
+
+    <issue id="022">
+      <section>§7.2–7.3, §7.6</section>
+      <requirement_ref>Email и Telegram; настройка получателей</requirement_ref>
+      <problem>Каналы оповещения без инфраструктурных и организационных требований</problem>
+      <severity>low</severity>
+      <category>Информирование</category>
+      <questions>
+        <question>Корпоративный SMTP или внешний relay — кто предоставляет?</question>
+        <question>Telegram: корпоративный бот, личные чаты инженеров или канал — что допустимо по ИБ?</question>
+        <question>Нужна ли эскалация (повтор уведомления, эскалация по таймауту)?</question>
+        <question>Тихие часы / расписание доставки алертов?</question>
+      </questions>
+      <risk>Блокировка Telegram ИБ; ненадёжная доставка Email без согласованного SMTP.</risk>
+      <recommendation>Зафиксировать разрешённые каналы и минимальный набор для MVP (например, только Email).</recommendation>
+      <tracking>
+        <agreement_status>open</agreement_status>
+        <customer_response/>
+        <decided_solution/>
+        <responsible>заказчик, ИБ</responsible>
+        <deadline/>
+        <resolution_phase>mvp</resolution_phase>
+        <blocks_design>false</blocks_design>
+        <mvp_impact>low</mvp_impact>
+        <related_issues>008</related_issues>
+      </tracking>
+    </issue>
+
+  </issues>
+
+  <review_log>
+    <entry id="log-001">
+      <date>2026-06-10</date>
+      <author>аналитик</author>
+      <issue_ref>все</issue_ref>
+      <action>created</action>
+      <comment>Первичная версия таблицы: 18 проблемных мест по результатам анализа ТЗ.</comment>
+    </entry>
+    <entry id="log-002">
+      <date>2026-06-10</date>
+      <author>аналитик</author>
+      <issue_ref>все</issue_ref>
+      <action>updated</action>
+      <comment>Версия 2.0: добавлены поля согласования, 4 новых пункта (019–022), журнал обсуждений.</comment>
+    </entry>
+  </review_log>
+
+  <legend>
+    <severity_levels>
+      <level code="critical">Блокирует проектирование или оценку сроков без ответа</level>
+      <level code="high">Существенный риск перерасхода, споров при приёмке или отказа ИБ</level>
+      <level code="medium">Требует уточнения до реализации соответствующего модуля</level>
+      <level code="low">Желательно уточнить, но не блокирует старт архитектуры</level>
+    </severity_levels>
+    <agreement_statuses>
+      <status code="open">Вопрос открыт, ответа нет</status>
+      <status code="in_review">Ответ получен, на согласовании</status>
+      <status code="agreed">Решение принято и зафиксировано</status>
+      <status code="rejected">Предложенное решение отклонено, нужна новая итерация</status>
+      <status code="deferred">Отложено на следующую фазу (указать в resolution_phase)</status>
+      <status code="waived">Сознательно снято с требований / не актуально</status>
+    </agreement_statuses>
+    <resolution_phases>
+      <phase code="before_design">До начала проектирования архитектуры</phase>
+      <phase code="mvp">До завершения MVP / пилота</phase>
+      <phase code="v1">До релиза v1 (после пилота)</phase>
+      <phase code="v2">До релиза v2 или последующих версий</phase>
+    </resolution_phases>
+    <responsible_parties>
+      <party code="заказчик">Владелец продукта / представитель заказчика</party>
+      <party code="архитектор">Команда проектирования WISLA АРМ</party>
+      <party code="ИБ">Информационная безопасность организации</party>
+      <party code="команда WISLA">Владельцы центральной системы WISLA</party>
+      <party code="юридический отдел">Правовое сопровождение (ПДн, лицензии)</party>
+    </responsible_parties>
+    <mvp_impact_levels>
+      <level code="none">Не влияет на состав MVP</level>
+      <level code="low">Незначительное влияние на сроки MVP</level>
+      <level code="medium">Может изменить объём или сроки MVP</level>
+      <level code="high">Критично для определения границ и оценки MVP</level>
+    </mvp_impact_levels>
+  </legend>
+</document>

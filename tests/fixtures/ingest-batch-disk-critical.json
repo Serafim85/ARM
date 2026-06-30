@@ -1,0 +1,21 @@
+{
+  "hostname": "pilot-linux-01",
+  "timestamp": "2026-06-24T12:00:00Z",
+  "agent_version": "0.1.0-dev",
+  "os_type": "linux",
+  "primary_ip": "192.168.64.11",
+  "metrics": [
+    { "key": "arm.cpu.util", "value": 15.0, "clock": "2026-06-24T12:00:00Z" },
+    { "key": "arm.mem.used", "value": 4294967296, "clock": "2026-06-24T12:00:00Z" },
+    { "key": "arm.disk.root.used_pct", "value": 96.5, "clock": "2026-06-24T12:00:00Z" }
+  ],
+  "logs": [
+    {
+      "level": "warning",
+      "message": "DEMO: root filesystem usage critical (>95%)",
+      "clock": "2026-06-24T12:00:00Z",
+      "source": "wisla-arm-demo"
+    }
+  ],
+  "events": []
+}

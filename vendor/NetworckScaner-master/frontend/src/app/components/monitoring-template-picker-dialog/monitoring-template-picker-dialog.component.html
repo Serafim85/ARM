@@ -1,0 +1,214 @@
+<p-dialog
+  [header]="title"
+  [modal]="true"
+  [dismissableMask]="true"
+  [closable]="true"
+  [style]="{ width: '72rem', maxWidth: '98vw' }"
+  [contentStyle]="{ overflow: 'hidden' }"
+  [visible]="visible"
+  (visibleChange)="onVisibleChange($event)"
+>
+  <div class="mtpd-grid" [class.mtpd-grid--auto]="manualSelectionBlocked()">
+    <section class="mtpd-pane" [class.mtpd-pane--disabled]="manualSelectionBlocked()">
+      <div class="mtpd-pane-head">
+        <div class="mtpd-head-text">
+          <strong>Доступные шаблоны</strong>
+          <span class="muted">Найдено: {{ filteredAvailableViews().length }}</span>
+        </div>
+      </div>
+
+      <label class="p-input-container mtpd-search">
+        <span>Поиск</span>
+        <input
+          pInputText
+          type="search"
+          [ngModel]="query()"
+          (ngModelChange)="query.set($event)"
+          [ngModelOptions]="{ standalone: true }"
+          placeholder="ID, название или описание…"
+          class="w-full"
+          [disabled]="manualSelectionBlocked()"
+        />
+      </label>
+
+      <div
+        class="mtpd-list"
+        role="list"
+        [class.mtpd-list--empty]="filteredAvailableViews().length === 0 && !templatesLoading()"
+      >
+        @if (templatesLoading() && templates().length === 0 && !query().trim()) {
+          <div class="mtpd-empty mtpd-empty--center">
+            <strong>Загрузка шаблонов…</strong>
+            <p class="muted">Подождите, список обновится автоматически.</p>
+          </div>
+        } @else if (filteredAvailableViews().length === 0) {
+          <div class="mtpd-empty mtpd-empty--center">
+            <strong>Ничего не найдено</strong>
+            <p class="muted">Попробуйте изменить запрос или уберите фильтр.</p>
+          </div>
+        } @else {
+          @for (t of filteredAvailableViews(); track t.id) {
+            <button
+              type="button"
+              class="mtpd-item"
+              role="listitem"
+              (click)="addTemplate(t.id)"
+              [disabled]="manualSelectionBlocked()"
+              [attr.aria-label]="'Добавить шаблон: ' + t.name"
+            >
+              <div class="mtpd-item-main">
+                <div class="mtpd-item-toprow">
+                  @if (t.vendor || t.type) {
+                    <span class="mtpd-badges" aria-hidden="true">
+                      @if (t.vendor) {
+                        <span class="mtpd-badge">{{ t.vendor }}</span>
+                      }
+                      @if (t.type) {
+                        <span class="mtpd-badge mtpd-badge--secondary">{{ t.type }}</span>
+                      }
+                    </span>
+                  }
+                  <span
+                    class="mtpd-item-title"
+                    [pTooltip]="t.name"
+                    tooltipPosition="right"
+                    [showDelay]="120"
+                    nsTooltipOnOverflow
+                  >
+                    {{ t.name }}
+                  </span>
+                </div>
+                @if (t.description) {
+                  <span
+                    class="mtpd-item-sub muted"
+                    [pTooltip]="t.description"
+                    tooltipPosition="right"
+                    [showDelay]="120"
+                    nsTooltipOnOverflow
+                  >
+                    {{ t.description }}
+                  </span>
+                }
+              </div>
+              <span class="mtpd-item-action" aria-hidden="true">+</span>
+            </button>
+          }
+        }
+      </div>
+    </section>
+
+    <section class="mtpd-pane" [class.mtpd-pane--disabled]="manualSelectionBlocked()">
+      <div class="mtpd-pane-head">
+        <div class="mtpd-head-text">
+          <strong>Выбранные шаблоны</strong>
+          <span class="muted">Выбрано: {{ selectedViews().length }}</span>
+        </div>
+      </div>
+
+      <label class="p-input-container mtpd-search mtpd-search--right">
+        <span>&nbsp;</span>
+        <input
+          pInputText
+          type="text"
+          class="w-full mtpd-hint-input"
+          disabled
+          [placeholder]="manualSelectionBlocked() ? '' : (canRemoveSelected() ? 'Двойной клик по выбранному шаблону удаляет его.' : '')"
+        />
+      </label>
+
+      <div
+        class="mtpd-list mtpd-list--selected"
+        role="list"
+        [class.mtpd-list--empty]="selectedViews().length === 0 || manualSelectionBlocked()"
+      >
+        @if (manualSelectionBlocked()) {
+          <div class="mtpd-empty mtpd-empty--center">
+            <strong>Включено автоопределение</strong>
+            <p class="muted">Подходящий шаблон будет автоматически назначен каждому из выбранных устройств.</p>
+          </div>
+        } @else if (selectedViews().length === 0) {
+          <div class="mtpd-empty mtpd-empty--center">
+            <strong>Шаблоны не выбраны</strong>
+            <p class="muted">Добавьте шаблоны слева, затем нажмите «Сохранить».</p>
+          </div>
+        } @else {
+          @for (t of selectedViews(); track t.id) {
+            <div class="mtpd-item mtpd-item--selected" role="listitem">
+              <button
+                type="button"
+                class="mtpd-item-body"
+                (dblclick)="canRemoveSelected() && removeTemplate(t.id)"
+                [attr.aria-label]="canRemoveSelected() ? ('Двойной клик: удалить шаблон ' + t.name) : t.name"
+              >
+                <i class="pi pi-file mtpd-selected-icon" aria-hidden="true"></i>
+                <span
+                  class="mtpd-item-title"
+                  [pTooltip]="t.name"
+                  tooltipPosition="right"
+                  [showDelay]="120"
+                  nsTooltipOnOverflow
+                >
+                  {{ t.name }}
+                </span>
+                @if (t.description) {
+                  <span
+                    class="mtpd-item-sub muted"
+                    [pTooltip]="t.description"
+                    tooltipPosition="right"
+                    [showDelay]="120"
+                    nsTooltipOnOverflow
+                  >
+                    {{ t.description }}
+                  </span>
+                }
+              </button>
+              @if (canRemoveSelected()) {
+                <button
+                  type="button"
+                  class="mtpd-remove"
+                  (click)="removeTemplate(t.id)"
+                  [attr.aria-label]="'Удалить шаблон: ' + t.name"
+                  title="Удалить"
+                >
+                  ×
+                </button>
+              }
+            </div>
+          }
+        }
+      </div>
+    </section>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="mtpd-footer">
+      @if (autoDetectionEnabled) {
+        <div class="mtpd-auto-detection-row">
+          <p-checkbox
+            [binary]="true"
+            [ngModel]="draftAutoDetection()"
+            (ngModelChange)="onAutoDetectionChange($event)"
+            [ngModelOptions]="{ standalone: true }"
+            inputId="mtpdAutoDetection"
+          />
+          <label for="mtpdAutoDetection">Автоопределение</label>
+          <i
+            class="pi pi-question-circle mtpd-help-icon"
+            tabindex="0"
+            [pTooltip]="autoDetectionTooltip"
+            tooltipPosition="top"
+            [attr.aria-label]="autoDetectionTooltip"
+          ></i>
+        </div>
+      }
+      <div class="mtpd-footer-actions">
+        <p-button label="Отмена" [outlined]="true" styleClass="ns-action-blue" (onClick)="onCancel()" />
+        <p-button
+          label="Сохранить"
+          styleClass="ns-action-blue"
+          (onClick)="onSave()"
+        />
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>

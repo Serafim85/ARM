@@ -1,0 +1,379 @@
+<div class="access-profiles-tab">
+  <div class="access-profiles-toolbar">
+    <p-button label="Добавить профиль" styleClass="ns-action-blue" (onClick)="openCreate()" />
+    @if (selectedRows().length > 0) {
+      <p-button
+        [label]="'Удалить (' + selectedRows().length + ')'"
+        severity="danger"
+        [outlined]="true"
+        [disabled]="deleting()"
+        (onClick)="deleteSelected()"
+      />
+    }
+  </div>
+
+  <p-table
+    stripedRows
+    class="p-datatable-sm netscan-p-table access-profiles-p-table"
+    [value]="rows()"
+    [loading]="loading()"
+    dataKey="id"
+    selectionMode="multiple"
+    [selection]="selectedRows()"
+    (selectionChange)="selectedRows.set($event)"
+  >
+    <ng-template #header>
+      <tr>
+        <th class="col-select" scope="col" aria-label="Выбор">
+          <p-tableHeaderCheckbox />
+        </th>
+        <th class="col-name" scope="col">Имя</th>
+        <th class="col-protocols" scope="col">Протоколы</th>
+        <th class="col-description" scope="col">Описание</th>
+        <th class="col-actions" scope="col">Действия</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-row>
+      <tr>
+        <td class="col-select">
+          <p-tableCheckbox [value]="row" />
+        </td>
+        <td class="col-name">
+          <span class="access-profiles-name">{{ row.name }}</span>
+        </td>
+        <td class="col-protocols">
+          @if (protocolChips(row).length === 0) {
+            <span class="access-profiles-protocol-empty">—</span>
+          } @else {
+            <div
+              class="access-profiles-protocol-chips"
+              [class.access-profiles-protocol-chips--stacked]="protocolChips(row).length > 3"
+            >
+              @for (chipRow of protocolChipRows(row); track $index) {
+                <div
+                  class="access-profiles-protocol-row"
+                  [class.access-profiles-protocol-row--tail]="$index > 0"
+                >
+                  @for (chip of chipRow; track chip) {
+                    <span class="access-profiles-protocol-chip">{{ chip }}</span>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </td>
+        <td class="col-description">
+          <span class="access-profiles-description">{{ row.description || '—' }}</span>
+        </td>
+        <td class="col-actions">
+          <div class="access-profiles-actions">
+            <p-button label="Изменить" [text]="true" styleClass="ns-action-blue" (onClick)="openEdit(row)" />
+            <p-button label="Удалить" [text]="true" severity="danger" (onClick)="deleteRow(row)" />
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="5">Профили доступа не созданы.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  [header]="form().editingId == null ? 'Новый профиль доступа' : 'Редактирование профиля'"
+  [modal]="true"
+  [closable]="true"
+  [dismissableMask]="true"
+  [style]="{ width: '44rem', maxWidth: '96vw' }"
+  [visible]="dialogOpen()"
+  (visibleChange)="dialogOpen.set($event)"
+>
+  <div class="access-profile-form">
+    <label class="access-profile-field access-profile-span-2">
+      <span>Имя</span>
+      <input pInputText class="w-full" [ngModel]="form().name" (ngModelChange)="updateForm('name', $event)" />
+    </label>
+    <label class="access-profile-field access-profile-span-2">
+      <span>Описание</span>
+      <input
+        pInputText
+        class="w-full"
+        [ngModel]="form().description ?? ''"
+        (ngModelChange)="updateForm('description', $event)"
+      />
+    </label>
+
+    <section class="access-profile-protocol access-profile-span-2">
+      <button
+        type="button"
+        class="access-profile-protocol-toggle"
+        [class.access-profile-protocol-toggle--on]="form().snmpV1Enabled"
+        (click)="snmpV1Expanded.set(!snmpV1Expanded())"
+      >
+        SNMPv1 {{ snmpV1Expanded() ? '▾' : '▸' }}
+      </button>
+      @if (snmpV1Expanded()) {
+        <div class="access-profile-protocol-body">
+          <div class="access-profile-enable-row access-profile-span-2">
+            <p-checkbox [binary]="true" [ngModel]="form().snmpV1Enabled" (ngModelChange)="updateForm('snmpV1Enabled', $event)" />
+            <span>Включить SNMPv1</span>
+          </div>
+          <label class="access-profile-field access-profile-field--port access-profile-span-2 access-profile-port-only">
+            <span>Порт</span>
+            <input pInputText type="number" class="w-full" [ngModel]="form().snmpV1Port" (ngModelChange)="updateForm('snmpV1Port', +$event)" />
+          </label>
+          <label class="access-profile-field access-profile-span-2">
+            <span>Community string</span>
+            <input pInputText class="w-full" [ngModel]="form().snmpV1Community ?? ''" (ngModelChange)="updateForm('snmpV1Community', $event)" />
+            @if (editingRow()?.hasSnmpV1Community) {
+              <span class="muted">Задан. Оставьте пустым, чтобы не менять.</span>
+            }
+          </label>
+        </div>
+      }
+    </section>
+
+    <section class="access-profile-protocol access-profile-span-2">
+      <button
+        type="button"
+        class="access-profile-protocol-toggle"
+        [class.access-profile-protocol-toggle--on]="form().snmpV2Enabled"
+        (click)="snmpV2Expanded.set(!snmpV2Expanded())"
+      >
+        SNMPv2 {{ snmpV2Expanded() ? '▾' : '▸' }}
+      </button>
+      @if (snmpV2Expanded()) {
+        <div class="access-profile-protocol-body">
+          <div class="access-profile-enable-row access-profile-span-2">
+            <p-checkbox [binary]="true" [ngModel]="form().snmpV2Enabled" (ngModelChange)="updateForm('snmpV2Enabled', $event)" />
+            <span>Включить SNMPv2</span>
+          </div>
+          <label class="access-profile-field access-profile-field--port access-profile-span-2 access-profile-port-only">
+            <span>Порт</span>
+            <input pInputText type="number" class="w-full" [ngModel]="form().snmpV2Port" (ngModelChange)="updateForm('snmpV2Port', +$event)" />
+          </label>
+          <label class="access-profile-field access-profile-span-2">
+            <span>Community string</span>
+            <input pInputText class="w-full" [ngModel]="form().snmpV2Community ?? ''" (ngModelChange)="updateForm('snmpV2Community', $event)" />
+            @if (editingRow()?.hasSnmpV2Community) {
+              <span class="muted">Задан. Оставьте пустым, чтобы не менять.</span>
+            }
+          </label>
+        </div>
+      }
+    </section>
+
+    <section class="access-profile-protocol access-profile-span-2">
+      <button
+        type="button"
+        class="access-profile-protocol-toggle"
+        [class.access-profile-protocol-toggle--on]="form().snmpV3Enabled"
+        (click)="snmpV3Expanded.set(!snmpV3Expanded())"
+      >
+        SNMPv3 {{ snmpV3Expanded() ? '▾' : '▸' }}
+      </button>
+      @if (snmpV3Expanded()) {
+        <div class="access-profile-protocol-body">
+          <div class="access-profile-enable-row access-profile-span-2">
+            <p-checkbox [binary]="true" [ngModel]="form().snmpV3Enabled" (ngModelChange)="updateForm('snmpV3Enabled', $event)" />
+            <span>Включить SNMPv3</span>
+          </div>
+          <label class="access-profile-field access-profile-field--port access-profile-span-2 access-profile-port-only">
+            <span>Порт</span>
+            <input pInputText type="number" class="w-full" [ngModel]="form().snmpV3Port" (ngModelChange)="updateForm('snmpV3Port', +$event)" />
+          </label>
+          <label class="access-profile-field access-profile-span-2">
+            <span>Пользователь</span>
+            <input pInputText class="w-full" [ngModel]="form().snmpV3SecurityUsername ?? ''" (ngModelChange)="updateForm('snmpV3SecurityUsername', $event)" />
+          </label>
+          <label class="access-profile-field">
+            <span>Auth protocol</span>
+            <p-select class="w-full" [options]="snmpAuthProtocolOptions" optionLabel="label" optionValue="value" [ngModel]="form().snmpV3AuthProtocol ?? 'SHA'" (ngModelChange)="updateForm('snmpV3AuthProtocol', $event)" />
+          </label>
+          <label class="access-profile-field access-profile-span-2">
+            <span>Auth password</span>
+            <p-password class="w-full" [feedback]="false" [toggleMask]="true" [ngModel]="form().snmpV3AuthPassword ?? ''" (ngModelChange)="updateForm('snmpV3AuthPassword', $event)" />
+            @if (editingRow()?.hasSnmpV3AuthPassword) {
+              <span class="muted">Пароль задан.</span>
+            }
+          </label>
+          <label class="access-profile-field">
+            <span>Privacy protocol</span>
+            <p-select class="w-full" [options]="snmpPrivacyProtocolOptions" optionLabel="label" optionValue="value" [ngModel]="form().snmpV3PrivacyProtocol ?? 'AES'" (ngModelChange)="updateForm('snmpV3PrivacyProtocol', $event)" />
+          </label>
+          <label class="access-profile-field">
+            <span>Priv. password</span>
+            <p-password class="w-full" [feedback]="false" [toggleMask]="true" [ngModel]="form().snmpV3PrivacyPassword ?? ''" (ngModelChange)="updateForm('snmpV3PrivacyPassword', $event)" />
+            @if (editingRow()?.hasSnmpV3PrivacyPassword) {
+              <span class="muted">Пароль задан.</span>
+            }
+          </label>
+        </div>
+      }
+    </section>
+
+    <section class="access-profile-protocol access-profile-span-2">
+      <button
+        type="button"
+        class="access-profile-protocol-toggle"
+        [class.access-profile-protocol-toggle--on]="form().sshEnabled"
+        (click)="sshExpanded.set(!sshExpanded())"
+      >
+        SSH {{ sshExpanded() ? '▾' : '▸' }}
+      </button>
+      @if (sshExpanded()) {
+        <div class="access-profile-protocol-body">
+          <div class="access-profile-enable-row access-profile-span-2">
+            <p-checkbox [binary]="true" [ngModel]="form().sshEnabled" (ngModelChange)="updateForm('sshEnabled', $event)" />
+            <span>Включить SSH</span>
+          </div>
+
+          <label class="access-profile-field access-profile-field--port access-profile-span-2 access-profile-port-only">
+            <span>Порт</span>
+            <input
+              pInputText
+              type="number"
+              class="w-full"
+              [ngModel]="form().sshPort"
+              (ngModelChange)="updateForm('sshPort', +$event)"
+            />
+          </label>
+
+          <label class="access-profile-field">
+            <span>Логин</span>
+            <input pInputText class="w-full" [ngModel]="form().sshUsername ?? ''" (ngModelChange)="updateForm('sshUsername', $event)" />
+          </label>
+          <label class="access-profile-field">
+            <span>Пароль</span>
+            <p-password
+              class="w-full"
+              [feedback]="false"
+              [toggleMask]="true"
+              [ngModel]="form().sshPassword ?? ''"
+              (ngModelChange)="updateForm('sshPassword', $event)"
+            />
+            @if (editingRow()?.hasSshPassword) {
+              <span class="muted">Пароль задан.</span>
+            }
+          </label>
+
+          <label class="access-profile-field access-profile-span-2">
+            <span>Приватный ключ (PEM)</span>
+            <textarea
+              pTextarea
+              rows="4"
+              class="w-full"
+              [ngModel]="form().sshPrivateKeyPem ?? ''"
+              (ngModelChange)="updateForm('sshPrivateKeyPem', $event)"
+            ></textarea>
+            @if (editingRow()?.hasSshPrivateKey) {
+              <span class="muted">Ключ задан.</span>
+            }
+          </label>
+
+          <label class="access-profile-field access-profile-span-2">
+            <span>Passphrase ключа</span>
+            <p-password
+              class="w-full"
+              [feedback]="false"
+              [toggleMask]="true"
+              [ngModel]="form().sshPassphrase ?? ''"
+              (ngModelChange)="updateForm('sshPassphrase', $event)"
+            />
+          </label>
+        </div>
+      }
+    </section>
+
+    <section class="access-profile-protocol access-profile-span-2">
+      <button
+        type="button"
+        class="access-profile-protocol-toggle"
+        [class.access-profile-protocol-toggle--on]="form().httpsEnabled"
+        (click)="httpsExpanded.set(!httpsExpanded())"
+      >
+        HTTPS {{ httpsExpanded() ? '▾' : '▸' }}
+      </button>
+      @if (httpsExpanded()) {
+        <div class="access-profile-protocol-body">
+          <div class="access-profile-enable-row access-profile-span-2">
+            <p-checkbox
+              [binary]="true"
+              [ngModel]="form().httpsEnabled"
+              (ngModelChange)="updateForm('httpsEnabled', $event)"
+            />
+            <span>Включить HTTPS</span>
+          </div>
+
+          <label class="access-profile-field access-profile-field--port access-profile-span-2 access-profile-port-only">
+            <span>Порт</span>
+            <input
+              pInputText
+              type="number"
+              class="w-full"
+              [ngModel]="form().httpsPort"
+              (ngModelChange)="updateForm('httpsPort', +$event)"
+            />
+          </label>
+
+          <label class="access-profile-field">
+            <span>Логин</span>
+            <input
+              pInputText
+              class="w-full"
+              [ngModel]="form().httpsUsername ?? ''"
+              (ngModelChange)="updateForm('httpsUsername', $event)"
+            />
+          </label>
+          <label class="access-profile-field">
+            <span>Пароль</span>
+            <p-password
+              class="w-full"
+              [feedback]="false"
+              [toggleMask]="true"
+              [ngModel]="form().httpsPassword ?? ''"
+              (ngModelChange)="updateForm('httpsPassword', $event)"
+            />
+          </label>
+
+          <label class="access-profile-field access-profile-span-2">
+            <span>Клиентский сертификат (PEM)</span>
+            <textarea
+              pTextarea
+              rows="3"
+              class="w-full"
+              [ngModel]="form().httpsClientCertPem ?? ''"
+              (ngModelChange)="updateForm('httpsClientCertPem', $event)"
+            ></textarea>
+          </label>
+          <label class="access-profile-field access-profile-span-2">
+            <span>Клиентский ключ (PEM)</span>
+            <textarea
+              pTextarea
+              rows="3"
+              class="w-full"
+              [ngModel]="form().httpsClientKeyPem ?? ''"
+              (ngModelChange)="updateForm('httpsClientKeyPem', $event)"
+            ></textarea>
+          </label>
+
+          <div class="access-profile-enable-row access-profile-span-2">
+            <p-checkbox
+              [binary]="true"
+              [ngModel]="form().httpsInsecureSkipVerify"
+              (ngModelChange)="updateForm('httpsInsecureSkipVerify', $event)"
+            />
+            <span>Не проверять сертификат сервера</span>
+          </div>
+        </div>
+      }
+    </section>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Сохранить" styleClass="ns-action-blue" [disabled]="saving()" (onClick)="save()" />
+    <p-button label="Отмена" [outlined]="true" styleClass="ns-action-blue" (onClick)="dialogOpen.set(false)" />
+  </ng-template>
+</p-dialog>

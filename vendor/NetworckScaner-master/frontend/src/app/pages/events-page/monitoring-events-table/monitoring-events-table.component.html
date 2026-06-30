@@ -1,0 +1,304 @@
+<div class="monitoring-events-table-root">
+  <p-table
+    #eventsTableWidths="nsTableColumnWidths"
+    nsTableColumnWidths="events"
+    [nsTableColumnDefs]="tableWidthColumnDefs()"
+    [nsTableColumnOrder]="tableWidthColumnOrder()"
+    [nsTableColumnWidthsMap]="columnWidthsMap()"
+    [value]="events()"
+    [lazy]="lazy()"
+    (onLazyLoad)="onLazyLoad($event)"
+    [loading]="loading()"
+    [paginator]="paginator()"
+    [rows]="rows()"
+    [totalRecords]="totalRecords()"
+    [first]="first()"
+    [rowsPerPageOptions]="rowsPerPageOptions()"
+    [showCurrentPageReport]="showCurrentPageReport()"
+    [alwaysShowPaginator]="alwaysShowPaginator()"
+    [currentPageReportTemplate]="currentPageReportTemplate()"
+    [sortField]="sortField() ?? undefined"
+    [sortOrder]="sortOrder()"
+    dataKey="id"
+    stripedRows
+    [resizableColumns]="true"
+    columnResizeMode="fit"
+    [tableStyle]="tableStyle()"
+    class="p-datatable-sm netscan-p-table"
+  >
+    <ng-template #header>
+      <tr>
+        @for (col of displayedColumns(); track col.id) {
+          @switch (col.id) {
+            @case ('breachStartedAt') {
+              <th
+                [class]="col.headerClass"
+                pResizableColumn
+                pSortableColumn="breachStartedAt"
+                [ngStyle]="columnBoundsStyle(tableColumnBounds(), col.id)"
+              >
+                Начало <p-sortIcon field="breachStartedAt" />
+              </th>
+            }
+            @case ('duration') {
+              <th
+                [class]="col.headerClass"
+                pResizableColumn
+                pSortableColumn="normalizedAt"
+                [ngStyle]="columnBoundsStyle(tableColumnBounds(), col.id)"
+              >
+                Продолжительность <p-sortIcon field="normalizedAt" />
+              </th>
+            }
+            @case ('thresholdLevel') {
+              <th
+                [class]="col.headerClass"
+                pResizableColumn
+                pSortableColumn="thresholdLevel"
+                [ngStyle]="columnBoundsStyle(tableColumnBounds(), col.id)"
+              >
+                Критичность <p-sortIcon field="thresholdLevel" />
+              </th>
+            }
+            @case ('status') {
+              <th
+                [class]="col.headerClass"
+                pResizableColumn
+                pSortableColumn="status"
+                [ngStyle]="columnBoundsStyle(tableColumnBounds(), col.id)"
+              >
+                Статус <p-sortIcon field="status" />
+              </th>
+            }
+            @case ('deviceName') {
+              <th
+                [class]="col.headerClass"
+                pResizableColumn
+                pSortableColumn="deviceName"
+                [ngStyle]="columnBoundsStyle(tableColumnBounds(), col.id)"
+              >
+                Устройство <p-sortIcon field="deviceName" />
+              </th>
+            }
+            @case ('deviceHostName') {
+              <th
+                [class]="col.headerClass"
+                pResizableColumn
+                pSortableColumn="deviceHostName"
+                [ngStyle]="columnBoundsStyle(tableColumnBounds(), col.id)"
+              >
+                Имя хоста <p-sortIcon field="deviceHostName" />
+              </th>
+            }
+            @case ('metricName') {
+              <th
+                [class]="col.headerClass"
+                pResizableColumn
+                pSortableColumn="metricName"
+                [ngStyle]="columnBoundsStyle(tableColumnBounds(), col.id)"
+              >
+                Метрика <p-sortIcon field="metricName" />
+              </th>
+            }
+            @case ('thresholdValue') {
+              <th
+                [class]="col.headerClass"
+                pResizableColumn
+                pSortableColumn="thresholdValue"
+                [ngStyle]="columnBoundsStyle(tableColumnBounds(), col.id)"
+              >
+                Порог <p-sortIcon field="thresholdValue" />
+              </th>
+            }
+            @case ('actualValue') {
+              <th
+                [class]="col.headerClass"
+                pResizableColumn
+                pSortableColumn="actualValue"
+                [ngStyle]="columnBoundsStyle(tableColumnBounds(), col.id)"
+              >
+                Значение <p-sortIcon field="actualValue" />
+              </th>
+            }
+          }
+        }
+      </tr>
+    </ng-template>
+    <ng-template #body let-event>
+      <tr [ngClass]="{ 'events-row-highlight': highlightRow() }">
+        @for (col of displayedColumns(); track col.id) {
+          @switch (col.id) {
+            @case ('breachStartedAt') {
+              <td [class]="col.bodyClass">{{ formatDate(event.breachStartedAt) }}</td>
+            }
+            @case ('duration') {
+              <td [class]="col.bodyClass">
+                <strong>{{ formatDuration(event.breachStartedAt, event.normalizedAt) }}</strong>
+                @if (showTimeline()) {
+                  <div class="events-cell-subtle" title="Время окончания">
+                    {{ formatDate(event.normalizedAt) }}
+                  </div>
+                }
+              </td>
+            }
+            @case ('thresholdLevel') {
+              <td [class]="col.bodyClass">
+                <button
+                  type="button"
+                  class="events-cell-link events-tag-button"
+                  (click)="onLevelClick(event.thresholdLevel, true)"
+                  [attr.aria-label]="
+                    'Фильтр по критичности: ' + monitoringEventLevelLabel(event.thresholdLevel)
+                  "
+                >
+                  <p-tag
+                    [value]="monitoringEventLevelLabel(event.thresholdLevel)"
+                    [severity]="monitoringEventLevelTagSeverity(event.thresholdLevel)"
+                    class="events-tag events-tag--left events-level-tag"
+                    [attr.data-level]="normalizeMonitoringEventLevel(event.thresholdLevel)"
+                  />
+                </button>
+              </td>
+            }
+            @case ('status') {
+              <td [class]="col.bodyClass">
+                <button
+                  type="button"
+                  class="events-cell-link events-tag-button"
+                  (click)="onStatusClick(event.status, true)"
+                  [attr.aria-label]="
+                    'Фильтр по статусу: ' + monitoringEventStatusLabel(event.status)
+                  "
+                >
+                  <p-tag
+                    [value]="monitoringEventStatusLabel(event.status)"
+                    [severity]="monitoringEventStatusTagSeverity(event.status)"
+                    class="events-tag events-tag--right"
+                  />
+                </button>
+              </td>
+            }
+            @case ('deviceName') {
+              <td [class]="col.bodyClass">
+                @if (cellLinksEnabled()) {
+                  <button
+                    type="button"
+                    class="events-cell-link events-node-name"
+                    (click)="onDeviceNameClick(event.deviceName, true)"
+                    [attr.aria-label]="'Фильтр по имени устройства: ' + event.deviceName"
+                    [pTooltip]="event.deviceName"
+                    [tooltipDisabled]="deviceNameTooltipDisabled(event.deviceName)"
+                    tooltipPosition="top"
+                  >
+                    <strong>{{ deviceNameDisplay(event.deviceName) }}</strong>
+                  </button>
+                } @else {
+                  <strong
+                    class="events-node-name events-node-name--plain"
+                    [pTooltip]="event.deviceName"
+                    [tooltipDisabled]="deviceNameTooltipDisabled(event.deviceName)"
+                    tooltipPosition="top"
+                    >{{ deviceNameDisplay(event.deviceName) }}</strong
+                  >
+                }
+                <div class="events-node-meta">
+                  @if (cellLinksEnabled()) {
+                    <button
+                      type="button"
+                      class="events-cell-link events-ip"
+                      (click)="onDeviceIpClick(event.deviceIp, true)"
+                      title="IP устройства"
+                      [attr.aria-label]="'Фильтр по IP-адресу: ' + event.deviceIp"
+                    >
+                      {{ event.deviceIp }}
+                    </button>
+                  } @else {
+                    <span class="events-ip events-ip--plain" title="IP устройства">{{
+                      event.deviceIp
+                    }}</span>
+                  }
+                  <span class="events-node-sep" aria-hidden="true">·</span>
+                  @if (cellLinksEnabled()) {
+                    <button
+                      type="button"
+                      class="events-cell-link events-mac"
+                      (click)="onMacClick(event.deviceMacAddress, true)"
+                      title="MAC адрес устройства"
+                      [attr.aria-label]="'Фильтр по MAC-адресу: ' + event.deviceMacAddress"
+                    >
+                      {{ event.deviceMacAddress }}
+                    </button>
+                  } @else {
+                    <span class="events-mac events-mac--plain" title="MAC адрес устройства">{{
+                      event.deviceMacAddress
+                    }}</span>
+                  }
+                </div>
+              </td>
+            }
+            @case ('deviceHostName') {
+              <td [class]="col.bodyClass">
+                <span
+                  class="events-host-name"
+                  [pTooltip]="event.deviceHostName"
+                  [tooltipDisabled]="deviceNameTooltipDisabled(event.deviceHostName)"
+                  tooltipPosition="top"
+                  >{{ deviceNameDisplay(event.deviceHostName) }}</span
+                >
+              </td>
+            }
+            @case ('metricName') {
+              <td [class]="col.bodyClass">
+                @if (cellLinksEnabled()) {
+                  <button
+                    type="button"
+                    class="events-cell-link event-metric-name"
+                    (click)="onMetricClick(event.metricName, true)"
+                    [attr.title]="event.metricName"
+                    [attr.aria-label]="'Фильтр по метрике: ' + event.metricName"
+                  >
+                    {{ resolveMetricDisplayLabel(event.metricName, event.metricDisplayName) }}
+                  </button>
+                } @else {
+                  <span
+                    class="event-metric-name event-metric-name--plain"
+                    [attr.title]="event.metricName"
+                    >{{
+                      resolveMetricDisplayLabel(event.metricName, event.metricDisplayName)
+                    }}</span
+                  >
+                }
+              </td>
+            }
+            @case ('thresholdValue') {
+              <td [class]="col.bodyClass">{{ event.thresholdValue | number: '1.0-5' }}</td>
+            }
+            @case ('actualValue') {
+              <td [class]="col.bodyClass">
+                <strong>{{ event.actualValue | number: '1.0-5' }}</strong>
+              </td>
+            }
+          }
+        }
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr>
+        <td [attr.colspan]="emptyColspan()">
+          @if (!loading()) {
+            <div class="empty-state empty-state-inline">
+              <strong>Событий не найдено</strong>
+              <p>
+                @if (emptySecondaryText() != null) {
+                  {{ emptySecondaryText() }}
+                } @else {
+                  Попробуйте изменить параметры фильтрации или сбросить их.
+                }
+              </p>
+            </div>
+          }
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

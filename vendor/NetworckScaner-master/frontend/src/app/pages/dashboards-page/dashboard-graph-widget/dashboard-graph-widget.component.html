@@ -1,0 +1,32 @@
+<div class="dashboard-graph-widget">
+  @if (!hasSeries()) {
+    <p class="dashboard-graph-widget-hint">Добавьте хотя бы один ряд (устройство + метрика) в настройках виджета.</p>
+  } @else {
+    @if (error()) {
+      <p class="dashboard-graph-widget-error" role="alert">{{ error() }}</p>
+    }
+    @if (loading()) {
+      <p class="dashboard-graph-widget-hint">Загрузка данных графика…</p>
+    } @else if (chartOption()) {
+      @let option = chartOption();
+      <div [class]="'dashboard-graph-widget-chart chart-legend-layout ' + legendLayoutClass()">
+        @if (showLegendPanel() && legendPanelBefore()) {
+          <app-chart-legend-stats-panel [rows]="legendStatRows()" [placement]="legendPlacement()" />
+        }
+        <div
+          #chartHost
+          class="chart-legend-layout__chart"
+          echarts
+          [options]="option!"
+          (wheel)="onChartTooltipWheel($event)"
+          (chartInit)="onChartInit($event)"
+        ></div>
+        @if (showLegendPanel() && !legendPanelBefore()) {
+          <app-chart-legend-stats-panel [rows]="legendStatRows()" [placement]="legendPlacement()" />
+        }
+      </div>
+    } @else if (!error()) {
+      <p class="dashboard-graph-widget-hint">Нет данных за выбранный период.</p>
+    }
+  }
+</div>

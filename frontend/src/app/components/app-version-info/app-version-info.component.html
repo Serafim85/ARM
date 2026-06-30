@@ -1,0 +1,26 @@
+@if (compact()) {
+  <button
+    type="button"
+    class="app-version-info__icon-btn"
+    [pTooltip]="compactTooltip()"
+    tooltipPosition="right"
+    tooltipStyleClass="app-build-tooltip"
+    appendTo="body"
+    aria-label="О приложении"
+  >
+    <i class="pi pi-info-circle app-version-info__icon" aria-hidden="true"></i>
+  </button>
+} @else {
+  <p class="app-version-info">
+    © Wellink, {{ copyrightYear }} |
+    <span
+      class="app-version-info__version"
+      [class.app-version-info__version--has-tooltip]="!!buildTimeTooltip()"
+      [pTooltip]="buildTimeTooltip()"
+      [tooltipDisabled]="!buildTimeTooltip()"
+      tooltipPosition="top"
+      tooltipStyleClass="app-build-tooltip"
+      appendTo="body"
+    >v.{{ displayVersion() }}</span>
+  </p>
+}

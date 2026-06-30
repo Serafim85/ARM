@@ -1,0 +1,83 @@
+zabbix_export:
+  version: '8.0'
+  template_groups:
+    - uuid: a1b2c3d4e5f6478990abcdef01234567
+      name: 'Templates/WISLA ARM'
+  templates:
+    - uuid: b2c3d4e5f6a748990abcdef012345678
+      template: 'WISLA ARM Linux'
+      name: 'WISLA ARM Linux'
+      description: |
+        WISLA ARM workstation monitoring (Linux). Metrics pushed by wisla-arm-agent.
+        Item keys must match agent JSON batch metrics.
+      groups:
+        - name: 'Templates/WISLA ARM'
+      macros:
+        - macro: '{$ARM.CPU.WARN}'
+          value: '80'
+        - macro: '{$ARM.CPU.CRIT}'
+          value: '90'
+        - macro: '{$ARM.DISK.WARN}'
+          value: '85'
+        - macro: '{$ARM.DISK.CRIT}'
+          value: '95'
+      items:
+        - uuid: c3d4e5f6a7b849901234567890abcde
+          name: 'CPU utilization'
+          type: ZABBIX_PASSIVE
+          key: arm.cpu.util
+          delay: '60s'
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU utilization in percent (agent key: arm.cpu.util).'
+          tags:
+            - tag: component
+              value: cpu
+          triggers:
+            - uuid: d4e5f6a7b8c94001234567890abcdef0
+              expression: 'min(/WISLA ARM Linux/arm.cpu.util,5m)>{$ARM.CPU.WARN}'
+              name: 'ARM Linux: High CPU utilization'
+              event_name: 'ARM Linux: High CPU utilization (over {$ARM.CPU.WARN}% for 5m)'
+              priority: WARNING
+              description: 'CPU utilization is too high.'
+            - uuid: e5f6a7b8c9d04101234567890abcdef1
+              expression: 'min(/WISLA ARM Linux/arm.cpu.util,5m)>{$ARM.CPU.CRIT}'
+              name: 'ARM Linux: Critical CPU utilization'
+              event_name: 'ARM Linux: Critical CPU utilization (over {$ARM.CPU.CRIT}% for 5m)'
+              priority: HIGH
+              description: 'CPU utilization is critically high.'
+        - uuid: f6a7b8c9d0e14201234567890abcdef2
+          name: 'Memory used'
+          type: ZABBIX_PASSIVE
+          key: arm.mem.used
+          delay: '60s'
+          value_type: FLOAT
+          units: B
+          description: 'Used RAM in bytes (agent key: arm.mem.used).'
+          tags:
+            - tag: component
+              value: memory
+        - uuid: a7b8c9d0e1f24301234567890abcdef3
+          name: 'Root filesystem used percent'
+          type: ZABBIX_PASSIVE
+          key: arm.disk.root.used_pct
+          delay: '300s'
+          value_type: FLOAT
+          units: '%'
+          description: 'Root volume used space in percent (agent key: arm.disk.root.used_pct).'
+          tags:
+            - tag: component
+              value: storage
+          triggers:
+            - uuid: b8c9d0e1f2a34401234567890abcdef4
+              expression: 'last(/WISLA ARM Linux/arm.disk.root.used_pct)>{$ARM.DISK.WARN}'
+              name: 'ARM Linux: Root disk space low'
+              event_name: 'ARM Linux: Root disk usage over {$ARM.DISK.WARN}%'
+              priority: WARNING
+              description: 'Root filesystem is running out of free space.'
+            - uuid: c9d0e1f2a3b44501234567890abcdef5
+              expression: 'last(/WISLA ARM Linux/arm.disk.root.used_pct)>{$ARM.DISK.CRIT}'
+              name: 'ARM Linux: Root disk space critical'
+              event_name: 'ARM Linux: Root disk usage over {$ARM.DISK.CRIT}%'
+              priority: HIGH
+              description: 'Root filesystem free space is critically low.'

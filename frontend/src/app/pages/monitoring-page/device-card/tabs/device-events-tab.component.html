@@ -1,0 +1,258 @@
+<section class="content-card events-panel list-page-card">
+  <div class="section-heading">
+    <div>
+      <h2>События устройства</h2>
+      <p>
+        Пороговые нарушения для <strong>{{ device().hostName || device().ip }}</strong>. Подстрока в имени метрики уходит на сервер с небольшой задержкой при вводе.
+      </p>
+    </div>
+    <div class="list-page-heading-actions">
+      <p-button styleClass="ns-action-blue" label="Обновить" [outlined]="true" [disabled]="loading()" (onClick)="refreshEvents()" />
+    </div>
+  </div>
+
+  <div class="list-summary-grid">
+    <div class="list-summary-tile"><span>Всего по фильтру</span><strong>{{ eventsTotal() }}</strong></div>
+    <div class="list-summary-tile"><span>На странице</span><strong>{{ eventsOnPage() }}</strong></div>
+    <div
+      class="list-summary-tile"
+      role="button"
+      tabindex="0"
+      (click)="applyQuickStatusFilter('OPEN')"
+      (keydown.enter)="applyQuickStatusFilter('OPEN')"
+      (keydown.space)="$event.preventDefault(); applyQuickStatusFilter('OPEN')"
+      [attr.aria-label]="'Фильтр по статусу: ' + monitoringEventStatusLabel('OPEN')"
+    >
+      <span>Активных на странице</span><strong>{{ eventsOpenOnPage() }}</strong>
+    </div>
+    <div
+      class="list-summary-tile"
+      role="button"
+      tabindex="0"
+      (click)="applyQuickStatusFilter('RESOLVED')"
+      (keydown.enter)="applyQuickStatusFilter('RESOLVED')"
+      (keydown.space)="$event.preventDefault(); applyQuickStatusFilter('RESOLVED')"
+      [attr.aria-label]="'Фильтр по статусу: ' + monitoringEventStatusLabel('RESOLVED')"
+    >
+      <span>Устранённых на странице</span><strong>{{ eventsResolvedOnPage() }}</strong>
+    </div>
+  </div>
+
+  <div class="list-filters device-events-toolbar">
+    <label class="users-search p-input-container">
+      <span>Поиск по метрике</span>
+      <input
+        pInputText
+        type="search"
+        class="device-events-metric-input w-full"
+        placeholder="Подстрока в имени метрики"
+        [ngModel]="metricSearch()"
+        (ngModelChange)="onMetricSearchInput($event)"
+        [ngModelOptions]="{ standalone: true }"
+      />
+    </label>
+    <label class="p-input-container">
+      <span>Статус</span>
+      <app-device-option-select
+        [options]="statusOptions"
+        optionValueKey="value"
+        [value]="statusFilter()"
+        (valueChange)="onStatusFilterChangeFromSelect($event)"
+        styleClass="w-full"
+      />
+    </label>
+  </div>
+
+  <div class="device-events-view-toolbar">
+    <span id="device-events-view-mode-legend" class="device-events-sr-only">Представление: таблица или таймлайн</span>
+    <p-selectButton
+      [options]="eventsViewModeOptions"
+      optionLabel="label"
+      optionValue="mode"
+      [(ngModel)]="eventsViewMode"
+      [ngModelOptions]="{ standalone: true }"
+      [allowEmpty]="false"
+      [disabled]="loading()"
+      ariaLabelledBy="device-events-view-mode-legend"
+      size="small"
+      styleClass="device-events-view-selectbutton"
+    >
+      <ng-template pTemplate="item" let-option>
+        <i [class]="option.icon" [title]="option.label"></i>
+      </ng-template>
+    </p-selectButton>
+  </div>
+
+  @if (eventsViewMode === 'table') {
+    <app-monitoring-events-table
+      [events]="sortedEvents()"
+      [loading]="loading()"
+      [lazy]="true"
+      (lazyLoad)="onLazyLoad($event)"
+      [sortField]="sortField()"
+      [sortOrder]="sortOrder()"
+      [paginator]="true"
+      [rows]="eventPage()?.size ?? 20"
+      [totalRecords]="eventPage()?.totalElements ?? 0"
+      [first]="tableFirst()"
+      [rowsPerPageOptions]="[10, 20, 50]"
+      [showCurrentPageReport]="true"
+      [alwaysShowPaginator]="false"
+      currentPageReportTemplate="{first}–{last} из {totalRecords}"
+      [emptySecondaryText]="eventsTableEmptyHint()"
+      (deviceNameFilterRequest)="onTableDeviceNameFilter($event)"
+      (deviceIpFilterRequest)="onTableDeviceIpFilter($event)"
+      (macFilterRequest)="onTableMacFilter($event)"
+      (metricFilterRequest)="onTableMetricFilter($event)"
+      (statusFilterRequest)="onTableStatusFilter($event)"
+      (levelFilterRequest)="onTableLevelFilter($event)"
+    />
+  } @else {
+  <div class="device-events-timeline-shell">
+    @if (loading() && (eventPage()?.content?.length ?? 0) === 0) {
+      <div class="device-events-timeline-loading" aria-live="polite">
+        <div class="monitoring-preloader-spinner"></div>
+        <span>Загрузка событий…</span>
+      </div>
+    } @else if (!loading() && sortedEvents().length === 0) {
+      <div class="device-events-timeline-empty">
+        <div class="empty-state empty-state-inline">
+          <strong>Событий не найдено</strong>
+          <p>
+            @if (statusFilter() !== 'ALL' || metricSearch().trim()) {
+              Попробуйте изменить фильтры.
+            } @else {
+              Нарушения порогов метрик для этого устройства не зафиксированы.
+            }
+          </p>
+        </div>
+      </div>
+    } @else {
+      <div class="device-events-timeline-inner">
+        <p-timeline
+          [value]="sortedEvents()"
+          layout="vertical"
+          align="left"
+          class="device-events-timeline"
+        >
+          <ng-template pTemplate="opposite" let-ev>
+            <div class="device-events-timeline-opposite">
+              @let st = formatTimelineStamp(ev.breachStartedAt);
+              <span class="device-events-timeline-opposite-date">{{ st.date }}</span>
+              <span class="device-events-timeline-opposite-time">{{ st.time }}</span>
+            </div>
+          </ng-template>
+          <ng-template pTemplate="marker" let-ev>
+            <span
+              class="event-level-chip device-events-timeline-marker"
+              [ngClass]="monitoringEventLevelChipClass(normalizeMonitoringEventLevel(ev.thresholdLevel))"
+              [attr.title]="monitoringEventLevelLabel(ev.thresholdLevel)"
+            ></span>
+          </ng-template>
+          <ng-template pTemplate="content" let-ev>
+            <article class="device-events-timeline-card">
+              <header class="device-events-timeline-card-head">
+                <div class="device-events-timeline-card-head-main">
+                  <h3 class="device-events-timeline-metric" [attr.title]="ev.metricName">
+                    {{ resolveMetricDisplayLabel(ev.metricName, ev.metricDisplayName) }}
+                  </h3>
+                  <span class="device-events-timeline-mac-top">{{ ev.deviceMacAddress }}</span>
+                </div>
+                <span
+                  class="event-level-chip device-events-timeline-level-chip"
+                  [ngClass]="monitoringEventLevelChipClass(normalizeMonitoringEventLevel(ev.thresholdLevel))"
+                >
+                  {{ monitoringEventLevelLabel(ev.thresholdLevel) }}
+                </span>
+              </header>
+              <div class="device-events-timeline-meter-block">
+                <p-metergroup
+                  [value]="thresholdMeterItems(ev.thresholdValue, ev.actualValue)"
+                  [min]="0"
+                  [max]="100"
+                  orientation="horizontal"
+                  labelPosition="end"
+                  labelOrientation="horizontal"
+                  styleClass="device-events-threshold-metergroup"
+                >
+                  <ng-template pTemplate="start">
+                    <div class="device-events-meter-lbl device-events-meter-lbl--top">
+                      <span class="device-events-meter-lbl-key">Значение:</span>
+                      <strong
+                        class="device-events-meter-lbl-num"
+                        [class.device-events-meter-lbl-num--warn]="meterActualExcessTone(ev) === 'warn'"
+                        [class.device-events-meter-lbl-num--over]="meterActualExcessTone(ev) === 'over'"
+                      >
+                        {{ ev.actualValue }}
+                      </strong>
+                    </div>
+                  </ng-template>
+                  <ng-template pTemplate="end">
+                    <div class="device-events-meter-lbl device-events-meter-lbl--bottom">
+                      @if (ev.actualValue > ev.thresholdValue) {
+                        <span
+                          class="device-events-meter-threshold-pin"
+                          [style.left.%]="meterBarBoundaryPercentClamped(ev)"
+                        >
+                          <span class="device-events-meter-lbl-key">Порог:</span>
+                          <strong class="device-events-meter-lbl-num">{{ ev.thresholdValue }}</strong>
+                        </span>
+                      } @else {
+                        <div class="device-events-meter-threshold-right">
+                          <span class="device-events-meter-lbl-key">Порог:</span>
+                          <strong class="device-events-meter-lbl-num">{{ ev.thresholdValue }}</strong>
+                        </div>
+                      }
+                    </div>
+                  </ng-template>
+                  <ng-template pTemplate="label"></ng-template>
+                </p-metergroup>
+              </div>
+              @if (ev.triggerName || ev.recoveryPath) {
+                <div class="device-events-timeline-trigger-block">
+                  @if (ev.triggerName) {
+                    <strong class="device-events-timeline-trigger-name">{{ ev.triggerName }}</strong>
+                  }
+                  @if (ev.recoveryPath) {
+                    <span class="device-events-timeline-recovery">{{ ev.recoveryPath }}</span>
+                  }
+                </div>
+              }
+              <footer class="device-events-timeline-card-foot">
+                <span
+                  class="event-status-chip device-events-timeline-status-chip"
+                  [class.event-status-open]="ev.status === 'OPEN'"
+                  [class.event-status-resolved]="ev.status === 'RESOLVED'"
+                >
+                  {{ monitoringEventStatusLabel(ev.status) }}
+                </span>
+                <span class="device-events-timeline-foot-sep">·</span>
+                <span class="device-events-timeline-foot-normalized">
+                  Нормализация:
+                  @if (ev.status === 'RESOLVED') {
+                    {{ formatDate(ev.normalizedAt) }}
+                  } @else {
+                    —
+                  }
+                </span>
+              </footer>
+            </article>
+          </ng-template>
+        </p-timeline>
+      </div>
+    }
+    <p-paginator
+      class="device-events-timeline-paginator p-dataview-paginator-bottom"
+      [rows]="eventPage()?.size ?? 20"
+      [totalRecords]="eventPage()?.totalElements ?? 0"
+      [first]="tableFirst()"
+      [rowsPerPageOptions]="[10, 20, 50]"
+      [showCurrentPageReport]="true"
+      [alwaysShow]="false"
+      [showFirstLastIcon]="true"
+      currentPageReportTemplate="{first}–{last} из {totalRecords}"
+      (onPageChange)="onEventsPaginatorChange($event)"
+    />
+  </div>
+  }
+</section>

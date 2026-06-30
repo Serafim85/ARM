@@ -1,0 +1,81 @@
+.dashboard-graph-widget {
+  min-height: 140px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dashboard-graph-widget-chart {
+  flex: 1 1 auto;
+  min-height: 220px;
+  width: 100%;
+  overflow: hidden;
+}
+
+:host ::ng-deep .dashboard-graph-widget-chart .dashboard-graph-widget-echarts-tooltip {
+  max-width: min(100%, 280px) !important;
+  height: 100%;
+  max-height: calc(100% - 30px);
+  overflow: hidden !important;
+  overscroll-behavior: contain;
+  pointer-events: auto;
+  box-sizing: content-box;
+}
+
+:host ::ng-deep .dashboard-graph-widget-chart .dashboard-graph-tooltip {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-height: inherit;
+  box-sizing: border-box;
+}
+
+:host ::ng-deep .dashboard-graph-widget-chart .dashboard-graph-tooltip-head {
+  flex-shrink: 0;
+  font-weight: 700;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+:host ::ng-deep .dashboard-graph-widget-chart .dashboard-graph-tooltip-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  pointer-events: none;
+}
+
+:host ::ng-deep .dashboard-graph-widget-chart .dashboard-graph-tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+  line-height: 1.35;
+}
+
+:host ::ng-deep .dashboard-graph-widget-chart .dashboard-graph-tooltip-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .dashboard-graph-widget-chart .dashboard-graph-tooltip-value {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.dashboard-graph-widget-error {
+  margin: 0;
+  font-size: 13px;
+  color: #b91c1c;
+}
+
+.dashboard-graph-widget-hint {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}

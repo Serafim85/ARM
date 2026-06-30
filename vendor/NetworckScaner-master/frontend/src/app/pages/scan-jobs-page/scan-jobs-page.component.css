@@ -1,0 +1,417 @@
+/* Одна плитка слева, те же размеры/типографика, что полоса доступности на /monitoring. */
+.scan-jobs-discovery-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 19.5rem);
+  justify-items: start;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 520px) {
+  .scan-jobs-discovery-strip {
+    grid-template-columns: 1fr;
+  }
+}
+
+.scan-jobs-discovery-strip .monitoring-availability-label {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.scan-jobs-discovery-strip .monitoring-availability-value {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.scan-jobs-discovery-strip .monitoring-availability-slate {
+  background: #1f2937;
+  color: #fff;
+}
+
+.scan-jobs-discovery-strip .monitoring-availability-slate .monitoring-availability-label {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* Плитка «Обнаружено новых» должна отличаться от slate-тайлов. */
+.scan-jobs-discovery-strip .monitoring-availability-card.monitoring-availability-discovery {
+  background: #075985; /* sky-800 */
+  color: #fff;
+}
+
+.scan-jobs-discovery-strip .monitoring-availability-card.monitoring-availability-discovery .monitoring-availability-label {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* Кнопка: сброс + глобальный .level-card (центрирование текста, как плитки на /monitoring). */
+.scan-jobs-discovery-card-button {
+  width: 100%;
+  margin: 0;
+  border: none;
+  font: inherit;
+}
+
+.discovery-view-loading {
+  margin: 0;
+  padding: 8px 0 16px;
+  font-size: 14px;
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.page-head-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.row-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.col-actions {
+  width: 76px;
+  min-width: 76px;
+}
+
+:host ::ng-deep .scan-job-state-tag.p-tag {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 6.75rem;
+  width: 6.75rem;
+  box-sizing: border-box;
+}
+
+:host ::ng-deep .scan-job-state-tag.p-tag .p-tag-label {
+  flex: 1;
+  text-align: center;
+}
+
+.jobs-row-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.job-name-link {
+  all: unset;
+  cursor: pointer;
+  display: inline;
+  color: var(--primary-color, #2563eb);
+}
+
+.job-name-link--no-results {
+  color: #0f172a;
+}
+
+.job-name-link--no-results:hover {
+  color: #0f172a;
+}
+
+.job-name-link:hover {
+  text-decoration: underline;
+}
+
+.scan-label-with-help {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scan-help-icon {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1;
+  cursor: help;
+}
+
+.scan-help-icon:hover {
+  color: #334155;
+}
+
+.job-name-link:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.28);
+  border-radius: 6px;
+}
+
+.scan-job-top-grid {
+  align-items: start;
+}
+
+.dialog-section-sep {
+  margin: 18px 0;
+  height: 1px;
+  background: #eef2f7;
+}
+
+.dialog-section-head {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.dialog-section-head strong {
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+}
+
+.auto-monitoring-mode {
+  display: grid;
+  gap: 10px;
+  min-height: 40px;
+}
+
+.auto-monitoring-mode-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auto-monitoring-mode-item label {
+  cursor: pointer;
+  line-height: 1.35;
+}
+
+.hidden-keep-space {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.scan-job-probes-block {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.scan-job-dialog-footer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.scan-job-results-meta {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.scan-job-results-title {
+  display: block;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.scan-job-results-sub {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 6px;
+  gap: 8px;
+  align-items: center;
+}
+
+.scan-section-results {
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.scan-section-results--empty {
+  background: linear-gradient(180deg, #fafbfc 0%, #fff 48%);
+  border-style: solid;
+  border-color: #e8ecf1;
+}
+
+.scan-section-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.scan-section-head-results {
+  flex-wrap: wrap;
+}
+
+.scan-results-heading-actions {
+  margin-left: auto;
+  align-self: center;
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.scan-results-heading-actions-left {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.scan-results-heading-actions-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.scan-section-titles h2 {
+  margin: 0 0 6px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.scan-section-titles p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #64748b;
+  max-width: 48rem;
+}
+
+.scan-results-placeholder {
+  text-align: center;
+  padding: 36px 20px 28px;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+}
+
+.scan-results-placeholder-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.scan-results-placeholder-text {
+  margin: 0;
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.results-toolbar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.results-filter {
+  display: grid;
+  gap: 8px;
+  max-width: 420px;
+  width: 100%;
+  min-width: min(100%, 260px);
+}
+
+.scan-results-monitoring-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 14px 16px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #eef2f7;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.scan-results-monitoring-footer .template-select-wrap {
+  flex: 1 1 220px;
+  min-width: 0;
+  max-width: min(100%, 420px);
+}
+
+/* PrimeNG: поле не расширяет flex-ряд и не вылезает из колонки. */
+.scan-results-monitoring-footer .template-select-wrap ::ng-deep .p-multiselect {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.scan-results-monitoring-footer .template-select-wrap ::ng-deep .p-multiselect-label-container {
+  overflow: hidden;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.scan-results-monitoring-footer .template-select-wrap ::ng-deep .p-multiselect-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.scan-results-monitoring-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-start;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+  padding-top: 0;
+}
+
+.empty-state {
+  display: grid;
+  gap: 8px;
+  padding: 28px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
+  background: #f8fafc;
+}
+
+@media (max-width: 768px) {
+  .scan-results-heading-actions {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .scan-results-heading-actions-right {
+    margin-left: 0;
+  }
+
+  .scan-results-monitoring-footer .template-select-wrap {
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+}
+
+.dialog-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.muted {
+  color: var(--text-color-secondary);
+}

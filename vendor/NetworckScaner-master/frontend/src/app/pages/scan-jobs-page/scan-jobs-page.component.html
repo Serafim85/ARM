@@ -1,0 +1,562 @@
+@if (discoveryViewOpen()) {
+  <section
+    class="content-card scan-section scan-section-results scan-section-discovery list-page-card"
+    [class.scan-section-results--empty]="!discoveryLoading() && discoveryDevices().length === 0"
+  >
+    <div class="scan-job-results-meta">
+      <div class="scan-job-results-meta-main">
+        <strong class="scan-job-results-title">Обнаружено новых</strong>
+        <div class="scan-job-results-sub">
+          <span class="muted"
+            >Уникальные IP из последних результатов задач, ещё не поставлены на мониторинг</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <div class="scan-section-head scan-section-head-results">
+      <div class="scan-section-titles">
+        <h2>Список устройств</h2>
+        <p>
+          @if (discoveryLoading()) {
+            Загрузка списка…
+          } @else if (discoveryDevices().length === 0) {
+            Нет устройств для постановки на мониторинг.
+          } @else {
+            Отметьте строки в таблице. Шаблон мониторинга и кнопка — под таблицей. Поиск учитывает поля
+            устройства и подписи доступности.
+          }
+        </p>
+      </div>
+      <div class="scan-results-heading-actions">
+        <div class="scan-results-heading-actions-left">
+          <p-button
+            label="Назад к автосканированию"
+            [outlined]="true"
+            icon="pi pi-arrow-left"
+            (onClick)="backToJobs()"
+          />
+        </div>
+      </div>
+    </div>
+
+    @if (discoveryLoading()) {
+      <p class="discovery-view-loading muted">Загрузка…</p>
+    } @else if (discoveryDevices().length === 0) {
+      <div class="scan-results-placeholder">
+        <p class="scan-results-placeholder-title">Устройств нет</p>
+        <p class="scan-results-placeholder-text">
+          В последних результатах задач не осталось устройств без мониторинга или сканирование ещё не выполнялось.
+        </p>
+      </div>
+    } @else {
+      <div class="results-toolbar results-toolbar-prime">
+        <label class="results-filter p-input-container">
+          <span>Поиск по списку</span>
+          <input
+            pInputText
+            type="search"
+            name="discoveryFilter"
+            [ngModel]="discoveryFilter()"
+            (ngModelChange)="discoveryFilter.set($event)"
+            placeholder="IP, вендор, модель, SNMP, ICMP…"
+            class="w-full"
+          />
+        </label>
+      </div>
+
+      @if (filteredDiscoveryDevices().length === 0) {
+        <div class="empty-state">
+          <strong>Совпадений нет</strong>
+          <p>Измените строку поиска — фильтр проходит по всем полям устройства и доступности.</p>
+        </div>
+      } @else {
+        <app-scan-results-table
+          [devices]="filteredDiscoveryDevices()"
+          [showSelection]="true"
+          [selectedIps]="discoverySelectedIps()"
+          (selectionChange)="onDiscoverySelectionChange($event)"
+          tableClass="p-datatable-sm netscan-p-table scan-results-table"
+        />
+
+        <div class="scan-results-monitoring-footer">
+          <label class="p-input-container template-select-wrap">
+            <p-button
+              label="Выбрать шаблоны мониторинга"
+              styleClass="ns-action-blue w-full"
+              [outlined]="true"
+              (onClick)="openMonitoringTemplatePicker()"
+            />
+            <span class="muted">
+              @if (mon.monitoringTemplateAutoDetection()) {
+                Автоопределение
+              } @else if (selectedMonitoringTemplateNames().length === 0) {
+                Шаблоны не выбраны
+              } @else {
+                Выбрано: {{ selectedMonitoringTemplateNames().join(', ') }}
+              }
+            </span>
+          </label>
+          <div class="scan-results-monitoring-actions">
+            <p-button
+              label="Поставить на мониторинг отмеченные"
+              styleClass="ns-action-blue"
+              [outlined]="false"
+              [disabled]="discoverySelectedIps().length === 0 || !hasMonitoringTemplateSelection()"
+              (onClick)="activateDiscoveryMonitoring()"
+            />
+          </div>
+        </div>
+      }
+    }
+  </section>
+} @else if (resultsViewOpen()) {
+  <section
+    class="content-card scan-section scan-section-results list-page-card"
+    [class.scan-section-results--empty]="lastResultDevices().length === 0"
+  >
+    <div class="scan-job-results-meta">
+      <div class="scan-job-results-meta-main">
+        <strong class="scan-job-results-title">{{ resultsJob()?.name ?? 'Задача' }}</strong>
+        <div class="scan-job-results-sub">
+          <span class="muted">Расписание: {{ cronLabel(resultsJob()?.cron) }}</span>
+          <span class="muted">· Последний запуск: {{ formatDateTime(resultsJob()?.lastRunAt) }}</span>
+          <span class="muted">·</span>
+          <p-tag
+            [value]="scanJobStatusLabel(resultsJob()?.lastStatus)"
+            [severity]="scanJobStatusTagSeverity(resultsJob()?.lastStatus)"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="scan-section-head scan-section-head-results">
+      <div class="scan-section-titles">
+        <h2>Результаты</h2>
+        <p>
+          @if (lastResultDevices().length === 0) {
+            У этой задачи нет найденных устройств в последнем запуске.
+          } @else {
+            Отметьте строки в таблице. Шаблон мониторинга и кнопки постановки — под таблицей. Поиск учитывает все поля строки и подписи доступности.
+          }
+        </p>
+      </div>
+      <div class="scan-results-heading-actions">
+        <div class="scan-results-heading-actions-left">
+          <p-button
+            label="Назад к автосканированию"
+            [outlined]="true"
+            icon="pi pi-arrow-left"
+            (onClick)="backToJobs()"
+          />
+        </div>
+        <div class="scan-results-heading-actions-right">
+          <p-button
+            icon="pi pi-ellipsis-v"
+            [text]="true"
+            [rounded]="true"
+            severity="secondary"
+            [disabled]="resultsJob() == null"
+            (onClick)="openResultsActionsMenu($event)"
+            [attr.aria-label]="'Действия: ' + (resultsJob()?.name ?? '')"
+          />
+        </div>
+      </div>
+    </div>
+
+      @if (lastResultDevices().length === 0) {
+        <div class="scan-results-placeholder">
+          <p class="scan-results-placeholder-title">Устройства не найдены</p>
+          <p class="scan-results-placeholder-text">
+            Попробуйте изменить параметры задачи и запустить снова.
+          </p>
+        </div>
+      } @else {
+        <div class="results-toolbar results-toolbar-prime">
+          <label class="results-filter p-input-container">
+            <span>Поиск по результатам</span>
+            <input
+              pInputText
+              type="search"
+              name="resultFilter"
+              [ngModel]="lastResultFilter()"
+              (ngModelChange)="lastResultFilter.set($event)"
+              placeholder="IP, вендор, модель, SNMP, ICMP…"
+              class="w-full"
+            />
+          </label>
+        </div>
+
+        @if (filteredLastResultDevices().length === 0) {
+          <div class="empty-state">
+            <strong>Совпадений нет</strong>
+            <p>Измените строку поиска — фильтр проходит по всем полям устройства и доступности.</p>
+          </div>
+        } @else {
+          <app-scan-results-table
+            [devices]="filteredLastResultDevices()"
+            [showSelection]="true"
+            [selectedIps]="selectedIps()"
+            (selectionChange)="onLastResultSelectionChange($event)"
+            [showMonitoring]="true"
+            tableClass="p-datatable-sm netscan-p-table scan-results-table"
+          />
+
+          <div class="scan-results-monitoring-footer">
+            <label class="p-input-container template-select-wrap">
+              <p-button
+                label="Выбрать шаблоны мониторинга"
+                styleClass="ns-action-blue w-full"
+                [outlined]="true"
+                (onClick)="openMonitoringTemplatePicker()"
+              />
+              <span class="muted">
+                @if (mon.monitoringTemplateAutoDetection()) {
+                  Автоопределение
+                } @else if (selectedMonitoringTemplateNames().length === 0) {
+                  Шаблоны не выбраны
+                } @else {
+                  Выбрано: {{ selectedMonitoringTemplateNames().join(', ') }}
+                }
+              </span>
+            </label>
+            <div class="scan-results-monitoring-actions">
+              <p-button
+                label="Поставить на мониторинг отмеченные"
+                styleClass="ns-action-blue"
+                [outlined]="false"
+                [disabled]="selectedIps().length === 0 || !hasMonitoringTemplateSelection()"
+                (onClick)="setMonitoringForSelected(true)"
+              />
+              <p-button
+                label="Снять с мониторинга отмеченные"
+                [outlined]="true"
+                severity="danger"
+                [disabled]="selectedIps().length === 0"
+                (onClick)="setMonitoringForSelected(false)"
+              />
+            </div>
+          </div>
+        }
+      }
+  </section>
+} @else {
+  <section class="content-card list-page-card">
+    <div class="page-head">
+      <div>
+        <h1>Автосканирование</h1>
+        <p>Создавайте задачи сканирования сети по расписанию и просматривайте последний результат.</p>
+      </div>
+      <div class="page-head-actions">
+        <p-button
+          label="Обновить"
+          styleClass="ns-action-blue"
+          [outlined]="true"
+          (onClick)="jobs.load()"
+          [disabled]="jobs.loading()"
+        />
+        <p-button
+          label="Создать задачу автосканирования"
+          styleClass="ns-action-blue"
+          [outlined]="false"
+          (onClick)="goToCreateJob()"
+        />
+        @if (selectedJobs().length > 0) {
+          <p-button
+            label="Удалить"
+            severity="danger"
+            [outlined]="true"
+            [disabled]=""
+            (onClick)="confirmDeleteSelected()"
+          />
+        }
+      </div>
+    </div>
+
+    <div class="scan-jobs-discovery-strip">
+      <button
+        type="button"
+        class="monitoring-availability-card level-card monitoring-availability-slate monitoring-availability-discovery scan-jobs-discovery-card-button"
+        (click)="openDiscoveryView()"
+        [attr.aria-expanded]="discoveryViewOpen()"
+        aria-label="Открыть список устройств из последних запусков задач, ещё не на мониторинге"
+      >
+        <span class="monitoring-availability-label">Обнаружено новых</span>
+        <strong class="monitoring-availability-value">{{
+          jobs.discoveredNotMonitoredCount() ?? '—'
+        }}</strong>
+      </button>
+    </div>
+
+    @if (!hasJobs()) {
+      <div class="empty-state">
+        <strong>Задач пока нет</strong>
+        <p>Создайте задачу на странице «Сканирование» или добавьте её по кнопке выше.</p>
+      </div>
+    } @else {
+      <p-table
+        [value]="jobs.sortedJobs()"
+        [paginator]="true"
+        dataKey="id"
+        [selection]="selectedJobs()"
+        (selectionChange)="selectedJobs.set($event)"
+        selectionMode="multiple"
+        [rows]="20"
+        [rowsPerPageOptions]="[10, 20, 50]"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="{first}–{last} из {totalRecords}"
+        stripedRows
+        class="p-datatable-sm netscan-p-table"
+      >
+        <ng-template #header>
+          <tr>
+            <th style="width: 3rem">
+              <p-tableHeaderCheckbox />
+            </th>
+            <th>Название</th>
+            <th style="width: 9rem">Состояние</th>
+            <th>
+              <span class="scan-label-with-help">
+                Расписание
+                <i
+                  class="pi pi-question-circle scan-help-icon"
+                  tabindex="0"
+                  pTooltip="Запуск будет по расписанию, привязанному к времени на часах. Например, «каждые 30 минут» — в начале часа и в середине часа."
+                  tooltipPosition="bottom"
+                ></i>
+              </span>
+            </th>
+            <th style="width: 8rem">Статус</th>
+            <th style="width: 10rem">Последний запуск</th>
+            <th style="width: 8rem">Найдено</th>
+            <th style="width: 10rem">Обнаружено новых</th>
+            <th class="col-actions">Действия</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-job>
+          <tr>
+            <td>
+              <p-tableCheckbox [value]="job" />
+            </td>
+            <td>
+              @if (hasLastResult(job)) {
+                <button
+                  type="button"
+                  class="job-name-link"
+                  [class.job-name-link--no-results]="(job.lastResultCount ?? 0) === 0"
+                  (click)="openLastResult(job, $event)"
+                  [attr.aria-label]="'Открыть результаты: ' + job.name"
+                >
+                  <strong>{{ job.name }}</strong>
+                </button>
+              } @else {
+                <strong>{{ job.name }}</strong>
+              }
+            </td>
+            <td>
+              <p-tag
+                styleClass="scan-job-state-tag"
+                [value]="job.enabled ? 'Включена' : 'Выключена'"
+                [severity]="job.enabled ? 'success' : 'danger'"
+              />
+            </td>
+            <td>{{ cronLabel(job.cron) }}</td>
+            <td>
+              <p-tag
+                [value]="scanJobStatusLabelForJob(job)"
+                [severity]="scanJobStatusTagSeverity(job.lastStatus)"
+              />
+            </td>
+            <td>{{ formatDateTime(job.lastRunAt) }}</td>
+            <td>{{ job.lastResultCount ?? 0 }}</td>
+            <td>{{ job.discoveredNotMonitoredCount ?? 0 }}</td>
+            <td class="col-actions">
+              <div class="jobs-row-actions">
+                <p-button
+                  icon="pi pi-ellipsis-v"
+                  [text]="true"
+                  [rounded]="true"
+                  severity="secondary"
+                  (onClick)="openJobsRowMenu($event, job)"
+                  [attr.aria-label]="'Действия: ' + job.name"
+                />
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </section>
+}
+
+<p-confirmDialog />
+<p-menu #jobsRowMenu [popup]="true" [model]="jobsRowMenuItems()" appendTo="body" />
+
+<p-dialog
+  header="Редактирование задачи"
+  [modal]="true"
+  [closable]="true"
+  [dismissableMask]="true"
+  styleClass="scan-job-dialog dashboards-dialog"
+  [style]="{ width: '67.2rem', maxWidth: '98vw', maxHeight: '85vh' }"
+  [contentStyle]="{ overflow: 'auto' }"
+  [visible]="editDialogOpen()"
+  (visibleChange)="editDialogOpen.set($event)"
+>
+  @if (editLoading()) {
+    <p class="muted">Загрузка параметров задачи…</p>
+  }
+  <div class="form-grid form-grid-wide scan-job-top-grid">
+    <label class="span-2 p-input-container">
+      <span>Название</span>
+      <input
+        pInputText
+        type="text"
+        [ngModel]="editName()"
+        (ngModelChange)="editName.set($event)"
+        [ngModelOptions]="{ standalone: true }"
+        placeholder="Название задачи"
+        class="w-full"
+      />
+    </label>
+
+    <label class="span-2 p-input-container">
+      <span>Расписание</span>
+      <app-device-option-select
+        [options]="cronSelectOptions()"
+        optionValueKey="value"
+        [value]="cronSelectValue()"
+        (valueChange)="onCronPresetChangeFromSelect($event)"
+        placeholder="Выберите расписание"
+        styleClass="w-full"
+      />
+    </label>
+
+    <label class="span-2 p-input-container">
+      <span>Состояние</span>
+      <div class="checkbox-row">
+        <p-checkbox
+          [binary]="true"
+          [ngModel]="editEnabled()"
+          (ngModelChange)="editEnabled.set($event)"
+          [ngModelOptions]="{ standalone: true }"
+        />
+        <span>Включена</span>
+      </div>
+    </label>
+
+    <label class="span-2 p-input-container">
+      <span>Мониторинг</span>
+      <div class="checkbox-row">
+        <p-checkbox
+          [binary]="true"
+          [ngModel]="editAutoMonitoringEnabled()"
+          (ngModelChange)="editAutoMonitoringEnabled.set($event)"
+          [ngModelOptions]="{ standalone: true }"
+        />
+        <span>Автоматически ставить найденные устройства на мониторинг</span>
+      </div>
+    </label>
+
+    @if (editAutoMonitoringEnabled()) {
+      <label class="span-2 p-input-container">
+        <span>Режим выбора шаблона</span>
+        <div class="auto-monitoring-mode">
+          <div class="auto-monitoring-mode-item">
+            <p-radioButton
+              name="editAutoMonitoringMode"
+              value="AUTO"
+              [ngModel]="editAutoMonitoringMode()"
+              (ngModelChange)="setEditAutoMonitoringMode($event)"
+              [ngModelOptions]="{ standalone: true }"
+              inputId="editAutoMonitoringModeAuto"
+            />
+            <label for="editAutoMonitoringModeAuto">Подбирать шаблон автоматически</label>
+            <i
+              class="pi pi-question-circle scan-help-icon"
+              tabindex="0"
+              [pTooltip]="autoMonitoringModeAutoTooltip"
+              tooltipPosition="top"
+              [attr.aria-label]="autoMonitoringModeAutoTooltip"
+            ></i>
+          </div>
+          <div class="auto-monitoring-mode-item">
+            <p-radioButton
+              name="editAutoMonitoringMode"
+              value="MANUAL"
+              [ngModel]="editAutoMonitoringMode()"
+              (ngModelChange)="setEditAutoMonitoringMode($event)"
+              [ngModelOptions]="{ standalone: true }"
+              inputId="editAutoMonitoringModeManual"
+            />
+            <label for="editAutoMonitoringModeManual">Выбрать шаблоны вручную</label>
+          </div>
+        </div>
+      </label>
+      <label class="span-2 p-input-container" [class.hidden-keep-space]="editAutoMonitoringMode() !== 'MANUAL'">
+        <p-button
+          label="Выбрать шаблоны мониторинга"
+          styleClass="ns-action-blue w-full"
+          [outlined]="true"
+          (onClick)="openEditMonitoringTemplatePicker()"
+        />
+        <span class="muted">
+          @if (selectedEditMonitoringTemplateNames().length === 0) {
+            Шаблоны не выбраны
+          } @else {
+            Выбрано: {{ selectedEditMonitoringTemplateNames().join(', ') }}
+          }
+        </span>
+      </label>
+    }
+  </div>
+
+  <div class="dialog-section-sep"></div>
+
+  <div class="dialog-section-head">
+    <strong>Параметры сканирования</strong>
+    <p class="muted">Будут сохранены в задаче и использованы при каждом запуске.</p>
+  </div>
+
+  <div class="scan-job-probes-block">
+    <app-discovery-probes-form />
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="scan-job-dialog-footer">
+      <p-button
+        label="Сохранить"
+        styleClass="ns-action-blue"
+        [disabled]="editLoading()"
+        (onClick)="saveEdit()"
+      />
+      <p-button
+        label="Отмена"
+        [outlined]="true"
+        styleClass="ns-action-blue"
+        (onClick)="editDialogOpen.set(false)"
+      />
+    </div>
+  </ng-template>
+</p-dialog>
+
+<app-monitoring-template-picker-dialog
+  [visible]="monitoringTemplatePickerOpen()"
+  (visibleChange)="monitoringTemplatePickerOpen.set($event)"
+  [templates]="mon.monitoringTemplates()"
+  [templatesLoading]="mon.templatesLoading()"
+  [selectedTemplateIds]="mon.selectedMonitoringTemplateIds()"
+  [autoDetectionEnabled]="true"
+  [autoDetection]="mon.monitoringTemplateAutoDetection()"
+  (selectionChange)="onMonitoringTemplateSelectionChange($event)"
+/>
+
+<app-monitoring-template-picker-dialog
+  [visible]="editMonitoringTemplatePickerOpen()"
+  (visibleChange)="editMonitoringTemplatePickerOpen.set($event)"
+  [templates]="mon.monitoringTemplates()"
+  [templatesLoading]="mon.templatesLoading()"
+  [selectedTemplateIds]="editMonitoringTemplateIds()"
+  (selectedTemplateIdsChange)="editMonitoringTemplateIds.set($event)"
+/>
+

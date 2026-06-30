@@ -1,0 +1,65 @@
+<section class="telemetry-panel-grid">
+  @if (!ms.hasMonitoringDetailsEntry(device.id)) {
+    <div class="telemetry-panel-loader">
+      <div class="monitoring-preloader">
+        <div class="monitoring-preloader-spinner"></div>
+        <span>Загрузка телеметрии…</span>
+      </div>
+    </div>
+  } @else {
+    <section class="content-card telemetry-card">
+      <header class="telemetry-toolbar">
+        <div>
+          <h2>Телеметрия устройства</h2>
+          <p>Данные обновляются при получении доступных метрик шаблона, live-режим опрашивает раз в 10 секунд.</p>
+        </div>
+      </header>
+
+      <div class="telemetry-meta-row">
+        <div class="telemetry-meta-primary">
+          <span>
+            Последнее обновление:
+            <strong>{{ formatTimestamp(details().collectedAt) }}</strong>
+          </span>
+          <span
+            class="telemetry-live-chip"
+            [class.telemetry-live-chip--placeholder]="!liveState().active"
+            [attr.aria-hidden]="!liveState().active ? 'true' : null"
+          >
+            LIVE · осталось {{ liveRemainingSeconds() }} сек
+          </span>
+        </div>
+      </div>
+      @if (liveState().lastError) {
+        <p class="telemetry-error">{{ liveState().lastError }}</p>
+      }
+
+      <footer class="telemetry-actions-row">
+        <button type="button" class="btn-secondary" (click)="refreshSnapshot()">Обновить данные</button>
+        @if (!liveState().active) {
+          <button type="button" class="btn-accent" (click)="startLive()">Запустить live</button>
+        } @else {
+          <button type="button" class="btn-danger" (click)="stopLive()">Остановить live</button>
+        }
+      </footer>
+    </section>
+
+    @if (!hasGaugeMetrics()) {
+      <section class="content-card telemetry-card">
+        <p class="telemetry-error">В текущем шаблоне нет доступных CPU/RAM/ROM метрик для отображения графиков.</p>
+      </section>
+    } @else {
+      <div class="telemetry-gauge-grid">
+        @for (metric of gaugeMetrics(); track metric.label) {
+          <section class="content-card telemetry-gauge-card ">
+            <div class="telemetry-gauge-header">
+              <strong>{{ metric.label }}</strong>
+            </div>
+            <div class="telemetry-gauge-chart" echarts [options]="gaugeOption(metric)"></div>
+            <p>{{ metric.hint }}</p>
+          </section>
+        }
+      </div>
+    }
+  }
+</section>

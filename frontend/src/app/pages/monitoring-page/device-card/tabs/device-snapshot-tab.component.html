@@ -1,0 +1,118 @@
+<section class="content-card configuration-panel list-page-card">
+  <div class="section-heading">
+    <div>
+      <h2>Текущее состояние</h2>
+      <p>Последние значения по каждой метрике устройства. Данные обновляются раз в минуту, пока открыта вкладка.</p>
+    </div>
+  </div>
+
+  <div class="snapshot-table-toolbar">
+    <input
+      pInputText
+      type="text"
+      class="snapshot-metric-search"
+      placeholder="Поиск по метрике…"
+      [value]="q()"
+      (input)="onSearchInput($any($event.target).value)"
+    />
+  </div>
+
+  <p-table
+    [value]="snapshotRows()"
+    [loading]="loading()"
+    dataKey="itemKey"
+    stripedRows
+    class="p-datatable-sm netscan-p-table"
+    [tableStyle]="{ 'min-width': '76rem' }"
+  >
+    <ng-template #header>
+      <tr>
+        <th>Метрика</th>
+        <th>Значение</th>
+        <th>Единицы</th>
+        <th>Пороги</th>
+        <th>Последний сбор</th>
+        <th>Преобразование</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-row>
+      <tr>
+        <td>
+          <app-metric-label-cell
+            [itemKey]="row.itemKey"
+            [itemDisplayName]="row.itemDisplayName"
+            [instanceKey]="row.instanceKey"
+            [titleLink]="canOpenMetricCharts(row.itemKey)"
+            (titleClick)="openMetricCharts(row)"
+          />
+        </td>
+        <td class="snapshot-value-cell">
+          @if (walkJsonTable(row); as wt) {
+            <div class="walk-json-wrap">
+              <table class="walk-json-table">
+                <thead>
+                  <tr>
+                    @for (col of wt.columns; track col) {
+                      <th>{{ col }}</th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (r of wt.rows; track $index) {
+                    <tr>
+                      @for (col of wt.columns; track col) {
+                        <td>{{ r[col] }}</td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            {{ metricValue(row) }}
+          }
+        </td>
+        <td>{{ metricUnit(row) }}</td>
+        <td class="snapshot-thresholds-cell">
+          @if (thresholdLabels(row).length === 0) {
+            —
+          } @else {
+            <ul class="snapshot-threshold-list">
+              @for (item of thresholdLabels(row); track item.label) {
+                <li [class.snapshot-threshold-breached]="item.breached">{{ item.label }}</li>
+              }
+            </ul>
+          }
+        </td>
+        <td>{{ row.lastCollectedAt | date: 'dd.MM.yyyy HH:mm:ss' }}</td>
+        <td>{{ row.preprocessingStatus || 'ok' }}</td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="6">
+          @if (loading()) {
+            Загрузка…
+          } @else if (q().trim()) {
+            Нет метрик по запросу «{{ q().trim() }}».
+          } @else {
+            Состояние пока не собрано. Данные появятся после цикла опроса.
+          }
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <p-paginator
+    class="device-snapshot-paginator p-dataview-paginator-bottom"
+    [rows]="pageSize()"
+    [totalRecords]="snapshotTotalElements()"
+    [first]="tableFirst()"
+    [rowsPerPageOptions]="[10, 20, 50, 100]"
+    [showCurrentPageReport]="true"
+    [alwaysShow]="false"
+    [showFirstLastIcon]="true"
+    currentPageReportTemplate="{first}–{last} из {totalRecords}"
+    (onPageChange)="onPageChange($event)"
+  />
+</section>

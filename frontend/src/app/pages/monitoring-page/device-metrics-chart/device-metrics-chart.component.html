@@ -1,0 +1,172 @@
+<section class="content-card device-metrics-chart-page">
+  <div class="metrics-chart-container">
+    <div class="metrics-toolbar">
+      <div class="metrics-period-group">
+        <span id="metrics-period-label" class="metrics-period-label">Период</span>
+        <div class="chart-toolbar-control metrics-period-controls" (click)="onPeriodSelectControlClick($event)">
+          <p-selectButton
+            #periodSelect
+            [options]="periodOptions"
+            optionLabel="label"
+            optionValue="value"
+            [allowEmpty]="false"
+            [ngModel]="selectedPeriod()"
+            (ngModelChange)="onPeriodChange($event)"
+            [ngModelOptions]="{ standalone: true }"
+            ariaLabelledBy="metrics-period-label"
+            styleClass="chart-toolbar-selectbutton chart-toolbar-selectbutton--embedded chart-toolbar-selectbutton--text"
+          >
+            <ng-template pTemplate="item" let-option>
+              <span class="metrics-period-option" [attr.data-period-value]="option.value">{{ option.label }}</span>
+            </ng-template>
+          </p-selectButton>
+        </div>
+      </div>
+
+      <div class="metrics-period-group metrics-search-group">
+        <span id="metrics-search-label" class="metrics-period-label">Поиск</span>
+        <div class="chart-toolbar-control metrics-search-controls">
+          <input
+            pInputText
+            type="text"
+            class="metrics-chart-search-input"
+            placeholder="Название графика…"
+            [value]="chartNameSearch()"
+            (input)="onChartNameSearchInput($any($event.target).value)"
+            aria-labelledby="metrics-search-label"
+          />
+        </div>
+      </div>
+
+      <div class="metrics-period-group">
+        <span id="metrics-display-label" class="metrics-period-label">Отображение</span>
+        <div class="chart-toolbar-control metrics-display-controls">
+          <p-selectButton
+            [options]="layoutOptions"
+            optionLabel="label"
+            optionValue="value"
+            [allowEmpty]="false"
+            [ngModel]="selectedLayout()"
+            (ngModelChange)="onLayoutChange($event)"
+            [ngModelOptions]="{ standalone: true }"
+            ariaLabelledBy="metrics-display-label"
+            styleClass="chart-toolbar-selectbutton chart-toolbar-selectbutton--embedded chart-toolbar-selectbutton--icon-only"
+          >
+            <ng-template pTemplate="item" let-option>
+              <i [class]="option.icon" [title]="option.label"></i>
+            </ng-template>
+          </p-selectButton>
+          <app-chart-legend-placement-select
+            [placement]="legendPlacement()"
+            (placementChange)="onLegendPlacementChange($event)"
+            ariaLabelledBy="metrics-display-label"
+          />
+          <app-chart-base-color-select
+            [color]="baseColor()"
+            (colorChange)="onBaseColorChange($event)"
+            ariaLabelledBy="metrics-display-label"
+          />
+        </div>
+      </div>
+    </div>
+
+    <p-popover
+      #customRangePopover
+      styleClass="metrics-custom-range-popover-panel"
+      [dismissable]="true"
+      [attr.aria-label]="'Произвольный период: выбор дат'"
+    >
+      <div class="metrics-custom-range-popover">
+        <span class="metrics-custom-range-hint">
+          Не более 31 дня включительно; «По» — не позже сегодня
+        </span>
+        <div class="metrics-custom-range-row">
+          <label class="metrics-date-field">
+            <span class="metrics-date-field-label">С</span>
+            <input
+              type="date"
+              class="metrics-date-input"
+              [value]="customFromInputString()"
+              (change)="onCustomFromInput($any($event.target).value)"
+              [attr.min]="minFromInputValue()"
+              [attr.max]="maxFromInputValue()"
+            />
+          </label>
+          <label class="metrics-date-field">
+            <span class="metrics-date-field-label">По</span>
+            <input
+              type="date"
+              class="metrics-date-input"
+              [value]="customToInputString()"
+              (change)="onCustomToInput($any($event.target).value)"
+              [attr.min]="minToInputValue()"
+              [attr.max]="maxToInputValue()"
+            />
+          </label>
+        </div>
+      </div>
+    </p-popover>
+
+    @if (loading()) {
+    <div class="chart-loading">Загрузка данных метрик...</div>
+    }
+
+    @if (!loading() && chartPanels().length === 0) {
+    <div class="chart-loading">
+      @if (chartNameSearchActive()) {
+        Нет графиков по запросу «{{ chartNameSearchActive() }}».
+      } @else {
+        Нет данных метрик за выбранный период.
+      }
+    </div>
+    }
+
+    <div class="charts-grid" [class.is-two-col]="selectedLayout() === 'DOUBLE'">
+    @for (panel of chartPanels(); track panel.groupKey) {
+      <section class="chart-panel" [class.chart-panel--pie]="panel.isPie === true">
+        <div class="chart-panel-header">
+          <h3>{{ panel.displayName }}</h3>
+          @if (panel.unit) {
+            <span class="chart-unit">{{ panel.unit }}</span>
+          }
+        </div>
+        <div
+          class="chart-canvas-wrapper"
+          [attr.data-panel-key]="panel.groupKey"
+          [style.height.px]="panelMinHeightPx(panel)"
+        >
+          @defer (on viewport) {
+            <div [class]="'chart-legend-layout ' + legendLayoutClass()">
+              @if (panel.legendRows.length > 0 && legendPanelBefore()) {
+                <app-chart-legend-stats-panel [rows]="panel.legendRows" [placement]="legendPlacement()" />
+              }
+              <div
+                class="chart-legend-layout__chart echarts-host"
+                echarts
+                [options]="panel.chartOption"
+                [autoResize]="true"
+                (chartInit)="onPanelChartInit($event)"
+              ></div>
+              @if (panel.legendRows.length > 0 && !legendPanelBefore()) {
+                <app-chart-legend-stats-panel [rows]="panel.legendRows" [placement]="legendPlacement()" />
+              }
+            </div>
+          } @placeholder {
+            <div
+              class="chart-lazy-placeholder"
+              [style.min-height.px]="panelMinHeightPx(panel)"
+              aria-hidden="true"
+            ></div>
+          }
+        </div>
+      </section>
+    }
+    @if (loadingMore()) {
+    <div class="chart-loading chart-loading-more">Загрузка графиков…</div>
+    }
+    @if (hasMorePanels()) {
+    <div #loadMoreSentinel class="chart-panels-load-more-sentinel" aria-hidden="true"></div>
+    }
+    </div>
+  </div>
+</section>

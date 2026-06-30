@@ -1,0 +1,331 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import 'primeicons/primeicons.css';
+
+/* Базовые дизайн-токены приложения (используются в page-level CSS). */
+:root {
+  --ns-surface: #ffffff;
+  --ns-border: #e2e8f0;
+  --ns-bg-muted: #f1f5f9;
+  --ns-bg-subtle: #f8fafc;
+
+  --ns-text-muted: #64748b;
+  --ns-neutral-900: #0f172a;
+  --ns-neutral-700: #334155;
+
+  /* Для тёмных hero/бейджей. */
+  --ns-primary-100: #dbeafe;
+
+  /* Action-кнопки (синий стиль, близкий к сайдбару). */
+  --ns-action-blue-bg: #1d4ed8;
+  --ns-action-blue-bg-hover: #1e40af;
+  --ns-action-blue-border: rgba(37, 99, 235, 0.55);
+  --ns-action-blue-ink: #ffffff;
+  --ns-action-blue-outline-ink: #1d4ed8;
+  --ns-action-blue-outline-hover-bg: rgba(37, 99, 235, 0.1);
+  --ns-action-blue-focus-ring: rgba(37, 99, 235, 0.42);
+
+  /* Статусы (используются на списках/баннерах). */
+  --ns-success-bg: #ecfdf5;
+  --ns-success-text-dark: #047857;
+
+  --ns-danger-bg: #fef2f2;
+  --ns-danger-bg-strong: #fecaca;
+  --ns-danger-text: #dc2626;
+  --ns-danger-text-dark: #991b1b;
+
+  --ns-warning-bg-light: #fff7ed;
+  --ns-orange-800: #9a3412;
+  --ns-orange-300: #fdba74;
+
+  /* Цвета для События мониторинга */
+  --ep-disaster: #ba1b1b;
+  --ep-average: #ed791a;
+  --ep-warning: #ffb62c;
+  --ep-high: #d7393a;
+  --ep-success: #2cb543;
+  --ep-information: #15a3b7;
+  --ep-info-text: #0c4a6e;
+}
+
+/* Только элементы: не трогаем *::before/*::after — иначе ломаются PrimeIcons (глиф в :before) */
+* {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.pi,
+.pi::before,
+.pi::after {
+  font-family: 'primeicons', sans-serif;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* PrimeNG при блокировке прокрутки дублирует отступ под скроллбар — с scrollbar-gutter не нужен. */
+body.p-overflow-hidden {
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+}
+
+.w-full {
+  width: 100%;
+}
+
+/* Компактный тултип даты сборки приложения (PrimeNG appendTo=body) */
+.app-build-tooltip.p-tooltip {
+  max-width: none !important;
+}
+
+.app-build-tooltip.p-tooltip.p-tooltip-top,
+.app-build-tooltip.p-tooltip.p-tooltip-bottom,
+.app-build-tooltip.p-tooltip.p-tooltip-right,
+.app-build-tooltip.p-tooltip.p-tooltip-left {
+  padding: 0 !important;
+}
+
+.app-build-tooltip.p-tooltip .p-tooltip-text {
+  background: #1e3a5f !important;
+  color: #fff !important;
+  border-radius: 6px !important;
+  padding: 4px 10px !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  line-height: 1.35 !important;
+  font-variant-numeric: tabular-nums;
+  box-shadow: none !important;
+  white-space: nowrap !important;
+  word-break: normal !important;
+}
+
+.app-build-tooltip.p-tooltip-top .p-tooltip-arrow {
+  border-width: 5px 5px 0 5px !important;
+  margin-left: calc(-1 * 5px) !important;
+  border-top-color: #1e3a5f !important;
+  border-bottom-color: #1e3a5f !important;
+}
+
+.app-build-tooltip.p-tooltip-right .p-tooltip-arrow {
+  border-right-color: #1e3a5f !important;
+}
+
+.app-build-tooltip.p-tooltip-left .p-tooltip-arrow {
+  border-left-color: #1e3a5f !important;
+}
+
+/* Настройки системы: широкие подсказки для полей LDAP (PrimeNG appendTo=body) */
+.settings-field-tooltip.p-tooltip .p-tooltip-text {
+  max-width: 360px;
+  white-space: normal;
+  line-height: 1.45;
+  font-size: 13px;
+}
+
+.empty-state-inline {
+  padding: 1.25rem 0;
+  text-align: center;
+}
+
+.netscan-p-table.p-datatable-sm {
+  margin-top: 4px;
+}
+
+/* Ресайз колонок: маркер «за что тянуть» только при наведении + синяя линия при перетаскивании */
+.netscan-p-table.p-datatable th.p-datatable-resizable-column {
+  position: relative;
+}
+
+.netscan-p-table.p-datatable .p-datatable-column-resizer {
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  cursor: col-resize;
+  user-select: none;
+  touch-action: none;
+  z-index: 2;
+}
+
+/* Вертикальная риска у правого края — невидима по умолчанию, появляется при наведении.
+   Показываем только там, где реально есть ресайзер (в режиме fit у последней колонки его нет). */
+.netscan-p-table.p-datatable th.p-datatable-resizable-column:has(.p-datatable-column-resizer)::after {
+  content: '';
+  position: absolute;
+  top: 22%;
+  bottom: 22%;
+  right: 3px;
+  width: 2px;
+  background: var(--ns-action-blue-bg, #1d4ed8);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.netscan-p-table.p-datatable th.p-datatable-resizable-column:has(.p-datatable-column-resizer):hover::after {
+  opacity: 1;
+}
+
+.netscan-p-table.p-datatable .p-datatable-column-resize-indicator {
+  width: 2px !important;
+  background: var(--ns-action-blue-bg, #1d4ed8) !important;
+  opacity: 1;
+  box-shadow: 0 0 0 1px rgba(29, 78, 216, 0.25);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Широкие p-table не раздувают viewport: скролл у контейнера таблицы, пагинатор снаружи */
+.list-page-card p-table.p-datatable {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.list-page-card .p-datatable-table-container {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.list-page-card .monitoring-compact-host {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.p-input-container {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 14px;
+  color: var(--ns-neutral-700);
+}
+
+.p-dialog.scan-job-dialog .p-dialog-content {
+  background: #ffffff;
+  padding-bottom: 18px;
+}
+
+.p-dialog.scan-job-dialog .p-dialog-footer {
+  background: #ffffff;
+  border-top: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 -8px 18px rgba(15, 23, 42, 0.05);
+  justify-content: flex-start;
+  padding-top: 22px;
+}
+
+/* Scan page: blue progressbar */
+.ns-progressbar-blue.p-progressbar {
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(37, 99, 235, 0.14);
+}
+
+.ns-progressbar-blue.p-progressbar .p-progressbar-value {
+  background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 52%, #3b82f6 100%);
+}
+
+.ns-progressbar-blue.p-progressbar.p-progressbar-indeterminate .p-progressbar-value {
+  background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 52%, #3b82f6 100%);
+}
+
+.ns-progressbar-blue.p-progressbar .p-progressbar-label,
+.ns-progressbar-blue.p-progressbar-determinate .p-progressbar-label {
+  display: none !important;
+  visibility: hidden;
+  width: 0;
+  overflow: hidden;
+}
+
+.level-card {
+  box-shadow: 1px 1px 4px 0px hsl(0deg 0% 50.2% / 55%);
+  border-radius: 12px;
+  padding: 14px 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 88px;
+  justify-content: center;
+  box-sizing: border-box;
+  cursor: pointer;
+  user-select: none;
+  outline: 2px solid transparent;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, outline-color 0.12s ease, filter 0.12s ease;
+}
+
+.level-card:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+.level-card:active {
+  transform: translateY(0);
+}
+
+.level-card:focus-visible {
+  outline-color: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.55), 0 10px 22px rgba(15, 23, 42, 0.22);
+}
+
+.level-card-selected {
+  outline-color: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.55), 0 10px 22px rgba(15, 23, 42, 0.22);
+}
+
+/*
+ * Диалог «Несохранённые изменения» на странице топологии: appendTo="body", вне :host —
+ * стили футера должны быть глобальными, иначе кнопки остаются разной высоты.
+ */
+.p-dialog.topology-page__switch-dialog .p-dialog-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+.p-dialog.topology-page__switch-dialog .p-dialog-footer p-button {
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.p-dialog.topology-page__switch-dialog .p-dialog-footer p-button .p-button,
+.p-dialog.topology-page__switch-dialog .p-dialog-footer button.p-button {
+  min-height: 2.75rem;
+  height: 100%;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.p-dialog.topology-page__switch-dialog .p-dialog-footer button.p-button .p-button-label {
+  white-space: nowrap;
+}
+
+/* Методы обнаружения: panel appendTo="body" — без синей заливки выбранных пунктов */
+.discovery-methods-panel .p-multiselect-option.p-multiselect-option-selected,
+.discovery-methods-panel .p-multiselect-option.p-multiselect-option-selected.p-focus {
+  background: transparent;
+  color: #334155;
+}
+
+.discovery-methods-panel .p-multiselect-option.p-focus:not(.p-multiselect-option-selected) {
+  background: #f8fafc;
+}
+
+.discovery-methods-panel .p-multiselect-option.p-multiselect-option-selected:hover {
+  background: #f8fafc;
+}

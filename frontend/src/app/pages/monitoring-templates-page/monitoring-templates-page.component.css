@@ -1,0 +1,182 @@
+@import '../../shared-ui.css';
+
+/* ---- Filters ---- */
+
+.templates-list-filters {
+  grid-template-columns: minmax(240px, 1fr);
+}
+
+/* ---- Table ---- */
+
+.templates-p-table {
+  --templates-col-id: 170px;
+  --templates-col-source: 140px;
+  --templates-col-vendor: 190px;
+  --templates-col-versions: 210px;
+  --templates-col-priority: 90px;
+  --templates-col-actions: 76px;
+
+  margin-top: 4px;
+}
+
+/* Липкая шапка PrimeNG таблицы */
+.templates-p-table .p-datatable-thead > tr > th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #f8fafc;
+  color: #6b7280;
+  font-weight: 700;
+}
+
+/* Ровный вертикальный ритм строк (PrimeNG иногда переопределяет padding темой) */
+.templates-p-table .p-datatable-tbody > tr > td {
+  vertical-align: top;
+}
+
+/* Предсказуемые ширины колонок */
+.templates-p-table .col-id {
+  width: var(--templates-col-id);
+  min-width: var(--templates-col-id);
+}
+
+.templates-p-table .col-source {
+  width: var(--templates-col-source);
+  min-width: var(--templates-col-source);
+}
+
+.templates-p-table .col-vendor {
+  width: var(--templates-col-vendor);
+  min-width: var(--templates-col-vendor);
+}
+
+.templates-p-table .col-versions {
+  width: var(--templates-col-versions);
+  min-width: var(--templates-col-versions);
+}
+
+.templates-p-table .col-priority {
+  width: var(--templates-col-priority);
+  min-width: var(--templates-col-priority);
+}
+
+.templates-p-table .col-actions {
+  width: var(--templates-col-actions);
+  min-width: var(--templates-col-actions);
+}
+
+.templates-p-table .col-name {
+  min-width: 320px;
+}
+
+/* ---- Cells ---- */
+
+.templates-search-field,
+.template-id-cell,
+.template-main-cell,
+.template-meta-cell {
+  display: grid;
+  gap: 4px;
+}
+
+.templates-search-field span {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.template-muted {
+  color: #64748b;
+}
+
+/* ---- Row actions ---- */
+
+.templates-row-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ---- Details ---- */
+
+.template-details-card {
+  margin-top: 0;
+}
+
+/* ---- Dialog ---- */
+
+.template-dialog-lead {
+  margin: 0 0 12px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.template-import-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin: 12px 0 10px;
+}
+
+.template-priority-field {
+  grid-column: 1 / -1;
+}
+
+.template-field-hint {
+  color: #64748b;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.template-field-error {
+  color: #b91c1c;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.template-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.template-warning-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.template-warning-item {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff7ed;
+  color: #9a3412;
+  border: 1px solid #fdba74;
+}
+
+.template-details-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.template-details-panel {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.template-feature-row {
+  display: grid;
+  gap: 4px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.template-feature-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}

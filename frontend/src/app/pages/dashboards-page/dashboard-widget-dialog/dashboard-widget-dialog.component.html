@@ -1,0 +1,121 @@
+<p-dialog
+  [header]="isEditMode() ? 'Редактировать виджет' : 'Создать виджет'"
+  [modal]="true"
+  [style]="{ width: 'min(1000px, 96vw)' }"
+  styleClass="dashboards-dialog"
+  [visible]="visible"
+  (visibleChange)="onVisibleChange($event)"
+>
+  <div class="dashboards-dialog-body">
+    @if (error) {
+      <div class="dashboards-banner dashboards-banner-error">{{ error }}</div>
+    }
+
+    <label class="p-input-container">
+      <span>Тип виджета</span>
+      <app-device-option-select
+        [options]="typeOptions"
+        optionValueKey="value"
+        [value]="selectedType"
+        (valueChange)="onTypeChangeFromSelect($event)"
+        styleClass="w-full"
+        [disabled]="isEditMode()"
+      />
+    </label>
+
+    <label class="p-input-container">
+      <span>Имя</span>
+      <input
+        pInputText
+        class="w-full"
+        placeholder="Название виджета"
+        [(ngModel)]="name"
+        [ngModelOptions]="{ standalone: true }"
+      />
+    </label>
+
+    <label class="p-input-container">
+      <span>Интервал обновления (сек, опционально)</span>
+      <p-inputNumber
+        [(ngModel)]="refreshIntervalSeconds"
+        [ngModelOptions]="{ standalone: true }"
+        [min]="1"
+        [useGrouping]="false"
+        class="w-full"
+        inputStyleClass="w-full"
+        placeholder="Пусто = null"
+      />
+      <small class="widget-field-hint">
+        Период автоматического обновления данных виджета в секундах. Если не указано — обновление каждые 120 секунд.
+      </small>
+    </label>
+
+    <div class="checkbox-line">
+      <p-checkbox
+        [(ngModel)]="showHeader"
+        [ngModelOptions]="{ standalone: true }"
+        binary="true"
+        inputId="widget-show-header"
+        id="widget-show-header"
+      />
+      <label for="widget-show-header">Показывать заголовок</label>
+    </div>
+
+    <div class="p-input-container widget-cell-border-inline">
+      <span class="widget-cell-border-inline-title">Граница ячейки</span>
+      <div class="widget-cell-border-inline-row">
+        <div class="widget-cell-border-width">
+          <span class="widget-cell-border-inline-label">Ширина (px)</span>
+          <div class="widget-cell-border-slider-row">
+            <p-slider
+              [(ngModel)]="borderWidthPx"
+              [ngModelOptions]="{ standalone: true }"
+              [min]="0"
+              [max]="32"
+              [step]="1"
+              class="widget-border-slider"
+            />
+            <span class="widget-cell-border-px" aria-live="polite">{{ borderWidthPx }}</span>
+          </div>
+        </div>
+        <div class="widget-cell-border-color">
+          <span class="widget-cell-border-inline-label">Цвет</span>
+          <div class="color-field-row color-field-row--inline">
+            <input
+              type="color"
+              class="color-picker-native"
+              [value]="borderColorPickerValue"
+              (input)="onBorderColorPicked($event)"
+              title="Выбрать цвет"
+              aria-label="Выбрать цвет границы ячейки"
+            />
+            <input
+              pInputText
+              class="w-full color-field-text"
+              [(ngModel)]="borderColor"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="gray или #808080"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @switch (selectedType) {
+      @case ('CLOCK') {
+        <app-clock-widget-fields />
+      }
+      @case ('PROBLEMS') {
+        <app-problems-widget-fields />
+      }
+      @case ('GRAPH') {
+        <app-graph-widget-fields />
+      }
+    }
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Отмена" styleClass="ns-action-blue" [text]="true" [disabled]="saving" (onClick)="close()" />
+    <p-button styleClass="ns-action-blue" [label]="saving ? 'Сохранение…' : 'Сохранить'" [disabled]="saving" (onClick)="save()" />
+  </ng-template>
+</p-dialog>

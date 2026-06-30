@@ -1,0 +1,144 @@
+<div class="editor-section">
+  <h4 class="editor-title">Настройки проблем</h4>
+
+  <label class="p-input-container">
+    <span>Показывать</span>
+    <app-device-option-select
+      [options]="showOptions"
+      optionValueKey="value"
+      [(value)]="show"
+      styleClass="w-full"
+    />
+  </label>
+
+  <label class="p-input-container">
+    <span>Количество строк</span>
+    <p-inputNumber
+      [(ngModel)]="showLines"
+      [ngModelOptions]="{ standalone: true }"
+      [min]="1"
+      [useGrouping]="false"
+      inputStyleClass="w-full"
+      class="w-full"
+    />
+  </label>
+
+  <div class="editor-checkbox-grid">
+    <div class="checkbox-line">
+      <p-checkbox
+        [(ngModel)]="showTimeline"
+        [ngModelOptions]="{ standalone: true }"
+        binary="true"
+        inputId="problems-show-timeline"
+        id="problems-show-timeline"
+      />
+      <label for="problems-show-timeline">Показывать timeline</label>
+    </div>
+    <div class="checkbox-line">
+      <p-checkbox
+        [(ngModel)]="showSuppressed"
+        [ngModelOptions]="{ standalone: true }"
+        binary="true"
+        inputId="problems-show-suppressed"
+        id="problems-show-suppressed"
+      />
+      <label for="problems-show-suppressed">Показывать подавленные</label>
+    </div>
+    <div class="checkbox-line">
+      <p-checkbox
+        [(ngModel)]="highlightRow"
+        [ngModelOptions]="{ standalone: true }"
+        binary="true"
+        inputId="problems-highlight-row"
+        id="problems-highlight-row"
+      />
+      <label for="problems-highlight-row">Подсвечивать строку</label>
+    </div>
+  </div>
+
+  <label class="p-input-container">
+    <span>Сортировка по</span>
+    <app-device-option-select
+      [options]="sortByOptions"
+      optionValueKey="value"
+      [(value)]="sortBy"
+      styleClass="w-full"
+    />
+  </label>
+
+  <label class="p-input-container">
+    <span>Порядок сортировки</span>
+    <app-device-option-select
+      [options]="sortOrderOptions"
+      optionValueKey="value"
+      [(value)]="sortOrder"
+      styleClass="w-full"
+    />
+  </label>
+
+  <label class="p-input-container">
+    <span>Фильтр по имени проблемы (опционально)</span>
+    <input
+      pInputText
+      class="w-full"
+      [(ngModel)]="problem"
+      [ngModelOptions]="{ standalone: true }"
+      placeholder="Например: High CPU"
+    />
+    <small class="widget-field-hint">{{ problemHint }}</small>
+  </label>
+
+  <label class="p-input-container">
+    <span>Хосты (опционально)</span>
+    <div #hostsMultiSelectHost class="problems-multiselect-host">
+      <p-multiSelect
+        optionLabel="label"
+        optionValue="id"
+        class="w-full"
+        appendTo="body"
+        display="chip"
+        placeholder="Выберите хосты"
+        filterPlaceholder="Поиск"
+        emptyFilterMessage="Ничего не найдено"
+        emptyMessage="Ничего не найдено"
+        [selectedItemsLabel]="hostsSelectedSummaryLabel()"
+        [maxSelectedLabels]="maxVisibleHostChips()"
+        [options]="deviceOptions"
+        [(ngModel)]="selectedDeviceIds"
+        (ngModelChange)="refreshChipLimits('host')"
+        [ngModelOptions]="{ standalone: true }"
+        [filter]="true"
+        [showClear]="true"
+        [disabled]="devicesLoading"
+      />
+    </div>
+    <small class="widget-field-hint">{{ hostsHint }}</small>
+  </label>
+
+  <label class="p-input-container">
+    <span>Теги (опционально)</span>
+    <div #tagsMultiSelectHost class="problems-multiselect-host">
+      <p-multiSelect
+        optionLabel="label"
+        optionValue="value"
+        class="w-full"
+        appendTo="body"
+        display="chip"
+        placeholder="Выберите теги"
+        filterPlaceholder="Поиск"
+        emptyFilterMessage="Ничего не найдено"
+        emptyMessage="Нет тегов"
+        [selectedItemsLabel]="tagsSelectedSummaryLabel()"
+        [maxSelectedLabels]="maxVisibleTagChips()"
+        [options]="tagOptions"
+        [(ngModel)]="selectedDeviceTags"
+        (ngModelChange)="refreshChipLimits('tag')"
+        [ngModelOptions]="{ standalone: true }"
+        [filter]="true"
+        [showClear]="true"
+        [disabled]="devicesLoading"
+      />
+    </div>
+    <small class="widget-field-hint">{{ tagsHint }}</small>
+  </label>
+</div>

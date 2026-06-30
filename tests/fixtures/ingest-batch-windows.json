@@ -1,0 +1,12 @@
+{
+  "hostname": "pilot-windows-01",
+  "timestamp": "2026-06-22T12:00:00Z",
+  "agent_version": "0.1.0-dev",
+  "metrics": [
+    { "key": "arm.cpu.util", "value": 8.1, "clock": "2026-06-22T12:00:00Z" },
+    { "key": "arm.mem.used", "value": 8589934592, "clock": "2026-06-22T12:00:00Z" },
+    { "key": "arm.disk.root.used_pct", "value": 62.0, "clock": "2026-06-22T12:00:00Z" }
+  ],
+  "events": [],
+  "logs": []
+}

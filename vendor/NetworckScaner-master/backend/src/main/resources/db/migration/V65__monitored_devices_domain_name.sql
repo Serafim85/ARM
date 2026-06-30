@@ -1,0 +1,2 @@
+ALTER TABLE monitored_devices
+  ADD COLUMN IF NOT EXISTS domain_name VARCHAR(255) NOT NULL DEFAULT '-';

@@ -1,0 +1,29 @@
+<section class="content-card workstation-card-page">
+  <div class="workstation-card-toolbar">
+    <a routerLink="/workstations" class="workstation-back-link">← К списку АРМ</a>
+  </div>
+
+  @if (ws.workstationDetailLoading()) {
+    <p>Загрузка…</p>
+  } @else if (ws.workstationDetail(); as detail) {
+    <div class="section-heading">
+      <div>
+        <h1>{{ detail.displayName || detail.hostname }}</h1>
+        <p>{{ detail.hostname }} · {{ detail.primaryIp || 'IP не указан' }}</p>
+      </div>
+      <p-tag [value]="statusLabel(detail.status)" [severity]="statusSeverity(detail.status)" />
+    </div>
+
+    <dl class="workstation-facts">
+      <div><dt>ОС</dt><dd>{{ osLabel(detail.osType) }}</dd></div>
+      <div><dt>Версия агента</dt><dd>{{ detail.agentVersion || '—' }}</dd></div>
+      <div><dt>Последний контакт</dt><dd>{{ detail.lastSeenAt ? (detail.lastSeenAt | date: 'dd.MM.yyyy HH:mm:ss') : '—' }}</dd></div>
+      <div><dt>Зарегистрирован</dt><dd>{{ detail.createdAt | date: 'dd.MM.yyyy HH:mm' }}</dd></div>
+    </dl>
+
+    <app-workstation-metrics-charts [workstationId]="detail.id" />
+    <app-workstation-telemetry-section [workstationId]="detail.id" />
+  } @else {
+    <p>АРМ не найден.</p>
+  }
+</section>

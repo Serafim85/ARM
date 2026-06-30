@@ -1,0 +1,204 @@
+:host {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.scan-table-container {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+:host ::ng-deep .scan-results-table.p-datatable {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+:host ::ng-deep .scan-results-table .p-datatable-table-container,
+:host ::ng-deep .scan-results-table .p-datatable-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+:host ::ng-deep .scan-results-table .p-datatable-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+:host ::ng-deep .scan-results-table .p-datatable-thead > tr > th,
+:host ::ng-deep .scan-results-table .p-datatable-tbody > tr > td {
+  box-sizing: border-box;
+}
+
+:host ::ng-deep .scan-results-table.p-datatable-sm .p-datatable-thead > tr > th,
+:host ::ng-deep .scan-results-table.p-datatable-sm .p-datatable-tbody > tr > td {
+  padding-left: 0.65rem;
+  padding-right: 0.65rem;
+}
+
+:host ::ng-deep .scan-results-table.p-datatable-sm .p-datatable-thead > tr > th {
+  vertical-align: top;
+}
+
+:host ::ng-deep .scan-results-table.p-datatable-sm .p-datatable-tbody > tr > td {
+  vertical-align: middle;
+}
+
+:host ::ng-deep .scan-results-table .p-datatable-thead > tr > th.scan-table-th {
+  line-height: 1.2;
+  overflow: hidden;
+}
+
+:host ::ng-deep .scan-results-table .scan-table-th-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.15rem;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+:host ::ng-deep .scan-results-table .scan-table-th-label {
+  flex: 0 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+:host ::ng-deep .scan-results-table .scan-table-th-sort {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  height: 1.2em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .scan-results-table .scan-table-th--split .scan-table-th-inner {
+  display: block;
+  width: auto;
+}
+
+:host ::ng-deep .scan-results-table .scan-table-th-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.15rem;
+}
+
+:host ::ng-deep .scan-results-table .scan-table-th-sub {
+  display: block;
+  line-height: 1.2;
+}
+
+:host ::ng-deep .scan-results-table .scan-table-th-sort p-sorticon,
+:host ::ng-deep .scan-results-table .scan-table-th-sort .p-datatable-sort-icon {
+  flex-shrink: 0;
+}
+
+:host ::ng-deep .scan-results-table .p-datatable-tbody > tr > td:not(.col-select):not(.col-scanning):not(.col-status):not(.col-monitoring) {
+  max-width: 0;
+  overflow: hidden;
+}
+
+:host ::ng-deep .scan-results-table .col-select {
+  width: 3%;
+  padding-left: 0.4rem;
+  padding-right: 0.4rem;
+  text-align: center;
+}
+
+:host ::ng-deep .scan-results-table .col-host {
+  width: 7.5%;
+}
+
+:host ::ng-deep .scan-results-table .col-name {
+  width: 8.5%;
+}
+
+:host ::ng-deep .scan-results-table .col-serial {
+  width: 8%;
+}
+
+:host ::ng-deep .scan-results-table .col-ip {
+  width: 7.5%;
+}
+
+:host ::ng-deep .scan-results-table .col-domain {
+  width: 7%;
+}
+
+:host ::ng-deep .scan-results-table .col-mac {
+  width: 8%;
+}
+
+:host ::ng-deep .scan-results-table .col-vendor {
+  width: 5.5%;
+}
+
+:host ::ng-deep .scan-results-table .col-model {
+  width: 6%;
+}
+
+:host ::ng-deep .scan-results-table .col-fw {
+  width: 6.5%;
+}
+
+:host ::ng-deep .scan-results-table .col-scanning {
+  width: 10%;
+}
+
+:host ::ng-deep .scan-results-table .p-datatable-thead > tr > th.col-scanning,
+:host ::ng-deep .scan-results-table .p-datatable-tbody > tr > td.col-scanning {
+  padding-left: 0.45rem;
+  padding-right: 0.45rem;
+}
+
+:host ::ng-deep .scan-results-table .p-datatable-tbody > tr > td.col-scanning {
+  vertical-align: top;
+  overflow: visible;
+  white-space: normal;
+  max-width: none;
+  padding-top: 0.55rem;
+  padding-bottom: 0.55rem;
+}
+
+:host ::ng-deep .scan-results-table .col-status {
+  width: 6%;
+}
+
+:host ::ng-deep .scan-results-table .col-monitoring {
+  width: 7%;
+}
+
+.scan-table-cell-text {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.col-scanning {
+  overflow: visible;
+}
+
+.availability-list-compact {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.availability-list-compact .availability-chip {
+  padding: 3px 7px;
+  font-size: 11px;
+  line-height: 1.25;
+}

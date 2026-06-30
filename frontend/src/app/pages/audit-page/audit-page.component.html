@@ -1,0 +1,168 @@
+<section class="content-card list-page-card audit-page-card">
+  <div class="section-heading">
+    <div>
+      <h1>Аудит</h1>
+      <p>Журнал действий пользователей: вход и выход, мониторинг, автосканирование, шаблоны, топология, дашборды.</p>
+    </div>
+    <div class="list-page-heading-actions">
+      <p-button
+        styleClass="ns-action-blue"
+        label="Настроить столбцы"
+        icon="pi pi-cog"
+        [outlined]="true"
+        (onClick)="openColumnsDialog()"
+        aria-label="Настроить ширину столбцов таблицы аудита"
+      />
+      <p-button
+        label="Обновить"
+        styleClass="ns-action-blue"
+        [outlined]="true"
+        [disabled]="loading()"
+        (onClick)="load()"
+      />
+    </div>
+  </div>
+
+  <div class="list-filters audit-filters">
+    <label class="audit-field p-input-container">
+      <span>Время с</span>
+      <input
+        type="datetime-local"
+        class="w-full audit-datetime-input"
+        [ngModel]="filterFromLocal()"
+        (ngModelChange)="filterFromLocal.set($event)"
+        [ngModelOptions]="{ standalone: true }"
+      />
+    </label>
+    <label class="audit-field p-input-container">
+      <span>Время по</span>
+      <input
+        type="datetime-local"
+        class="w-full audit-datetime-input"
+        [ngModel]="filterToLocal()"
+        (ngModelChange)="filterToLocal.set($event)"
+        [ngModelOptions]="{ standalone: true }"
+      />
+    </label>
+    <label class="audit-field audit-field-wide p-input-container">
+      <span>Пользователь</span>
+      <input
+        pInputText
+        type="text"
+        class="w-full"
+        placeholder="Подстрока логина (email)"
+        [ngModel]="filterActorLocal()"
+        (ngModelChange)="filterActorLocal.set($event)"
+        [ngModelOptions]="{ standalone: true }"
+      />
+    </label>
+    <label class="audit-field p-input-container">
+      <span>Раздел</span>
+      <app-device-option-select
+        [options]="categoryFilterOptions"
+        optionValueKey="value"
+        [value]="filterCategoryLocal()"
+        (valueChange)="onCategoryFilterChange($event)"
+        styleClass="w-full"
+      />
+    </label>
+    <label class="audit-field p-input-container">
+      <span>Действие</span>
+      <app-device-option-select
+        [options]="actionFilterOptions"
+        optionValueKey="value"
+        [value]="filterActionLocal()"
+        (valueChange)="onActionFilterChange($event)"
+        styleClass="w-full"
+      />
+    </label>
+  </div>
+  <div class="audit-filter-actions">
+    <p-button label="Применить" styleClass="ns-action-blue" [disabled]="loading()" (onClick)="applyFilters()" />
+    <p-button
+      label="Сбросить"
+      styleClass="ns-action-blue"
+      [outlined]="true"
+      [disabled]="loading()"
+      (onClick)="resetFilters()"
+    />
+  </div>
+
+  <p-table
+    #auditTableWidths="nsTableColumnWidths"
+    nsTableColumnWidths="audit"
+    [nsTableColumnDefs]="auditTableColumns"
+    [nsTableColumnOrder]="auditTableColumnOrder"
+    [nsTableColumnWidthsMap]="auditTableColumnWidthsMap()"
+    [value]="events()"
+    [lazy]="true"
+    [paginator]="true"
+    [rows]="rows()"
+    [first]="first()"
+    [totalRecords]="totalRecords()"
+    [loading]="loading()"
+    [rowsPerPageOptions]="[10, 20, 50]"
+    [showCurrentPageReport]="true"
+    [alwaysShowPaginator]="true"
+    currentPageReportTemplate="{first}–{last} из {totalRecords}"
+    stripedRows
+    [resizableColumns]="true"
+    columnResizeMode="fit"
+    [tableStyle]="{ width: '100%' }"
+    class="p-datatable-sm netscan-p-table"
+    (onLazyLoad)="onLazyLoad($event)"
+  >
+    <ng-template #header>
+      <tr>
+        <th pResizableColumn [ngStyle]="columnBoundsStyle(auditTableColumnBounds, 'occurredAt')">Время</th>
+        <th pResizableColumn [ngStyle]="columnBoundsStyle(auditTableColumnBounds, 'actorLogin')">Пользователь</th>
+        <th pResizableColumn [ngStyle]="columnBoundsStyle(auditTableColumnBounds, 'category')">Раздел</th>
+        <th pResizableColumn [ngStyle]="columnBoundsStyle(auditTableColumnBounds, 'action')">Действие</th>
+        <th pResizableColumn [ngStyle]="columnBoundsStyle(auditTableColumnBounds, 'target')">Объект</th>
+        <th pResizableColumn [ngStyle]="columnBoundsStyle(auditTableColumnBounds, 'details')">Подробности</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-row>
+      <tr>
+        <td>{{ formatTime(row.occurredAt) }}</td>
+        <td>{{ row.actorLogin }}</td>
+        <td>{{ categoryLabelFor(row.category) }}</td>
+        <td>{{ actionLabelFor(row.action) }}</td>
+        <td class="audit-target-cell">{{ row.target }}</td>
+        <td class="audit-details-cell">{{ row.details ?? '—' }}</td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="6">Записей пока нет.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</section>
+
+<p-dialog
+  header="Настройка столбцов"
+  [modal]="true"
+  [style]="{ width: 'min(420px, 94vw)' }"
+  styleClass="audit-columns-dialog"
+  [visible]="columnsDialogOpen()"
+  (visibleChange)="columnsDialogOpen.set($event)"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <p class="audit-columns-dialog-hint">
+    Потяните разделитель между заголовками колонок в таблице, чтобы изменить ширину. При наведении на границу
+    появится маркер изменения размера.
+  </p>
+  <ng-template #footer>
+    <div class="audit-columns-dialog-footer">
+      <p-button label="Закрыть" styleClass="ns-action-blue" [outlined]="true" (onClick)="closeColumnsDialog()" />
+      <p-button
+        label="Сбросить ширину колонок"
+        styleClass="ns-action-blue"
+        [text]="true"
+        (onClick)="resetAuditTableColumnWidths()"
+      />
+    </div>
+  </ng-template>
+</p-dialog>

@@ -1,0 +1,134 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.clock-root {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  /* column + stretch: иначе единственный ребёнок не получает высоту плитки, flex:1 у .clock-analog__chart-slot даёт 0px и cqh=0 */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.clock-msg {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #64748b;
+  text-align: center;
+  line-height: 1.35;
+}
+
+.clock-msg--muted {
+  color: #94a3b8;
+}
+
+.clock-digital {
+  width: 100%;
+  min-height: 5rem;
+  padding: 0.65rem 0.5rem;
+  border-radius: 10px;
+  background: #e9eaeb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  box-sizing: border-box;
+}
+
+.clock-digital__date,
+.clock-digital__zone {
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: #aab4bd;
+  line-height: 1.25;
+}
+
+.clock-digital__time {
+  font-size: clamp(1.15rem, 2.8vw, 1.55rem);
+  font-weight: 700;
+  color: #1f2d3d;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+.clock-analog {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0.4rem;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* Область под график: занимает оставшуюся высоту плитки */
+.clock-analog__chart-slot {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  /* Размеры слота для cqw/cqh: квадрат = min(ширина, высота), без width:100%+aspect-ratio+max-height (ломает пропорции на широких плитках) */
+  container-type: size;
+  container-name: clock-chart;
+}
+
+/* Квадрат строго по меньшей стороне области слота */
+.clock-analog__echarts {
+  box-sizing: border-box;
+  width: min(100cqw, 100cqh);
+  height: min(100cqw, 100cqh);
+  max-width: 100%;
+  max-height: 100%;
+  margin-inline: auto;
+  border-radius: 50%;
+  /* Лёгкий подъём как у полноэкранного chart-container в демо */
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.14);
+}
+
+/* Браузеры без cqw/cqh: вписать квадрат через max + aspect-ratio */
+@supports not (width: 1cqw) {
+  .clock-analog__echarts {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    aspect-ratio: 1;
+  }
+}
+
+.clock-analog__caption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  text-align: center;
+  max-width: 100%;
+}
+
+.clock-analog__cap-date,
+.clock-analog__cap-zone {
+  font-size: 0.78rem;
+  color: #aab4bd;
+}
+
+.clock-analog__cap-time {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1f2d3d;
+}

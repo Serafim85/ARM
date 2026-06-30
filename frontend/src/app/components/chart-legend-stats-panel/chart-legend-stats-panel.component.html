@@ -1,0 +1,42 @@
+<div class="chart-legend-stats-panel" [class]="placementClass()">
+  <table class="chart-legend-stats-table">
+    <thead>
+      <tr>
+        <th scope="col">Метрика</th>
+        @if (showAggregateStats()) {
+          <th scope="col">Мин.</th>
+          <th scope="col">Макс.</th>
+          <th scope="col">Сред.</th>
+        }
+        <th scope="col">Значение</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of seriesRows(); track row.name) {
+        <tr>
+          <th scope="row" class="chart-legend-stats-name">
+            <span class="chart-legend-stats-swatch" [style.background-color]="row.color"></span>
+            <span class="chart-legend-stats-name-text" [title]="row.name">{{ row.name }}</span>
+          </th>
+          @if (showAggregateStats()) {
+            <td>{{ formatValue(row.min, row.unit, row) }}</td>
+            <td>{{ formatValue(row.max, row.unit, row) }}</td>
+            <td>{{ formatValue(row.avg, row.unit, row) }}</td>
+          }
+          <td>{{ formatValue(row.last, row.unit, row) }}</td>
+        </tr>
+      }
+      @for (row of thresholdRows(); track row.caption) {
+        <tr class="chart-legend-stats-row--threshold">
+          <th scope="row" class="chart-legend-stats-name" [attr.colspan]="showAggregateStats() ? 5 : 2">
+            <span
+              class="chart-legend-stats-swatch chart-legend-stats-swatch--threshold"
+              [style.border-color]="row.color"
+            ></span>
+            <span class="chart-legend-stats-name-text" [title]="row.caption">{{ row.caption }}</span>
+          </th>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

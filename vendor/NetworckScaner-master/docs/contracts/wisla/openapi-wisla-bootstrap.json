@@ -1,0 +1,222 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "NetworkScanner Wisla Bootstrap Contract",
+    "description": "Machine-readable snapshot for NS-1 bootstrap endpoint consumed by Wisla.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/integration/wisla/v1/monitored-devices": {
+      "get": {
+        "tags": [
+          "Интеграция Wisla"
+        ],
+        "summary": "Список устройств на мониторинге для Wisla bootstrap/re-sync",
+        "operationId": "monitoredDevices",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Номер страницы (с нуля)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Размер страницы (1..500)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500,
+              "default": 100
+            }
+          },
+          {
+            "name": "updatedSince",
+            "in": "query",
+            "description": "Возвращать устройства, обновленные не ранее указанной даты (ISO-8601)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProbeBootstrapPageResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "ProbeBootstrapPageResponse": {
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "sourceSystem",
+          "generatedAt",
+          "page",
+          "size",
+          "totalElements",
+          "totalPages",
+          "first",
+          "last",
+          "items"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "type": "string",
+            "example": "1.0"
+          },
+          "sourceSystem": {
+            "type": "string",
+            "example": "networkscanner"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProbeBootstrapPayload"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProbeBootstrapPayload": {
+        "type": "object",
+        "required": [
+          "sourceSystem",
+          "externalDeviceId",
+          "ip",
+          "hostName",
+          "name",
+          "serialNumber",
+          "macAddress",
+          "vendor",
+          "model",
+          "firmwareVersion",
+          "templateIds",
+          "templateVersion",
+          "packVersion",
+          "schemaVersion",
+          "updatedAt"
+        ],
+        "properties": {
+          "sourceSystem": {
+            "type": "string"
+          },
+          "externalDeviceId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ip": {
+            "type": "string"
+          },
+          "hostName": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "serialNumber": {
+            "type": "string"
+          },
+          "macAddress": {
+            "type": "string"
+          },
+          "vendor": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "firmwareVersion": {
+            "type": "string"
+          },
+          "templateIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "effectiveTemplateId": {
+            "type": "string"
+          },
+          "templateVersion": {
+            "type": "string"
+          },
+          "packVersion": {
+            "type": "string"
+          },
+          "schemaVersion": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

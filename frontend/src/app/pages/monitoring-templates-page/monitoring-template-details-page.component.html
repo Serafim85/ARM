@@ -1,0 +1,84 @@
+<section class="content-card list-page-card templates-details-page">
+  <div class="section-heading">
+    <div class="templates-details-heading-main">
+      <a
+        routerLink="/monitoring-templates"
+        class="templates-back-link"
+        aria-label="К списку шаблонов мониторинга"
+      >
+        <i class="pi pi-arrow-circle-left" aria-hidden="true"></i>
+      </a>
+      <div class="templates-details-heading-text">
+        <h1>{{ mon.selectedTemplateDetails()?.summary?.name || 'Шаблон' }}</h1>
+        <p>
+          {{ templateId() }}
+          @if (mon.selectedTemplateDetails()?.summary?.description; as desc) {
+            · {{ desc || 'Без описания' }}
+          }
+        </p>
+      </div>
+    </div>
+  </div>
+
+  @if (mon.selectedTemplateDetailsLoading()) {
+    <div class="empty-state">
+      <strong>Загрузка структуры шаблона...</strong>
+      <p>Получаем coverage report, items, discovery rules и триггеры.</p>
+    </div>
+  } @else if (mon.selectedTemplateDetails()) {
+    @let details = mon.selectedTemplateDetails()!;
+    <div class="list-summary-grid">
+      <div class="list-summary-tile"><span>Элементы</span><strong>{{ details.items.length }}</strong></div>
+      <div class="list-summary-tile"><span>Обнаружение</span><strong>{{ details.discoveryRules.length }}</strong></div>
+      <div class="list-summary-tile"><span>Триггеры</span><strong>{{ details.triggers.length }}</strong></div>
+      <div class="list-summary-tile"><span>Карты значений</span><strong>{{ details.valueMaps.length }}</strong></div>
+      <div class="list-summary-tile"><span>Графики</span><strong>{{ details.graphNames.length }}</strong></div>
+    </div>
+
+    <div class="template-details-grid">
+      <div class="template-details-panel">
+        <h3>Покрытие</h3>
+        @for (feature of details.coverage.features; track feature.key) {
+          <div class="template-feature-row">
+            <strong>{{ feature.title }}</strong>
+            <span>
+              {{ feature.presentInTemplate ? 'Есть' : 'Нет' }} ·
+              импорт: {{ feature.importSupported ? 'да' : 'нет' }} ·
+              выполнение: {{ feature.runtimeSupported ? 'да' : 'нет' }}
+            </span>
+            @if (feature.notes) {
+              <small>{{ feature.notes }}</small>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="template-details-panel">
+        <h3>Элементы</h3>
+        @for (item of details.items.slice(0, 24); track item.key) {
+          <div class="template-feature-row">
+            <strong>{{ item.key }}</strong>
+            <span>{{ item.type }} · {{ item.runtimeSupported ? 'выполняется' : 'только импорт' }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="template-details-panel">
+        <h3>Триггеры</h3>
+        @for (trigger of details.triggers.slice(0, 18); track trigger.uuid || trigger.expression) {
+          <div class="template-feature-row">
+            <strong>{{ trigger.name }}</strong>
+            <span class="clamp-1">
+              {{ trigger.priority }} · {{ trigger.expression }}
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="empty-state">
+      <strong>Шаблон не найден</strong>
+      <p>Попробуйте открыть детали из списка шаблонов ещё раз.</p>
+    </div>
+  }
+</section>

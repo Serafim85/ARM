@@ -1,0 +1,137 @@
+dn: ou=people,dc=networkscanner,dc=local
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=groups,dc=networkscanner,dc=local
+objectClass: organizationalUnit
+ou: groups
+
+dn: cn=netops,ou=groups,dc=networkscanner,dc=local
+objectClass: groupOfUniqueNames
+cn: netops
+uniqueMember: uid=svc-ldap,ou=people,dc=networkscanner,dc=local
+uniqueMember: uid=admin,ou=people,dc=networkscanner,dc=local
+uniqueMember: uid=operator,ou=people,dc=networkscanner,dc=local
+uniqueMember: uid=viewer,ou=people,dc=networkscanner,dc=local
+
+dn: cn=app-admins,ou=groups,dc=networkscanner,dc=local
+objectClass: groupOfUniqueNames
+cn: app-admins
+uniqueMember: uid=admin,ou=people,dc=networkscanner,dc=local
+
+dn: cn=app-operators,ou=groups,dc=networkscanner,dc=local
+objectClass: groupOfUniqueNames
+cn: app-operators
+uniqueMember: uid=operator,ou=people,dc=networkscanner,dc=local
+uniqueMember: uid=operator1,ou=people,dc=networkscanner,dc=local
+uniqueMember: uid=operator2,ou=people,dc=networkscanner,dc=local
+
+dn: cn=app-viewers,ou=groups,dc=networkscanner,dc=local
+objectClass: groupOfUniqueNames
+cn: app-viewers
+uniqueMember: uid=viewer,ou=people,dc=networkscanner,dc=local
+uniqueMember: uid=viewer1,ou=people,dc=networkscanner,dc=local
+uniqueMember: uid=viewer2,ou=people,dc=networkscanner,dc=local
+
+dn: uid=svc-ldap,ou=people,dc=networkscanner,dc=local
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: svc-ldap
+sn: service
+uid: svc-ldap
+mail: svc-ldap@networkscanner.local
+displayName: LDAP Service Account
+userPassword: svc-ldap-pass
+
+dn: uid=admin,ou=people,dc=networkscanner,dc=local
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: admin
+sn: Administrator
+givenName: Admin
+uid: admin
+mail: admin@example.com
+displayName: Администратор системы
+userPassword: password
+
+dn: uid=operator,ou=people,dc=networkscanner,dc=local
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: operator
+sn: Operator
+givenName: Operator
+uid: operator
+mail: operator@example.com
+displayName: Оператор сети
+userPassword: operator123
+
+dn: uid=viewer,ou=people,dc=networkscanner,dc=local
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: viewer
+sn: Viewer
+givenName: Viewer
+uid: viewer
+mail: viewer@example.com
+displayName: Наблюдатель
+userPassword: viewer123
+
+dn: uid=operator1,ou=people,dc=networkscanner,dc=local
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: operator1
+sn: Operator One
+givenName: Operator
+uid: operator1
+mail: operator1@example.com
+displayName: Оператор 1
+userPassword: operator123
+
+dn: uid=operator2,ou=people,dc=networkscanner,dc=local
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: operator2
+sn: Operator Two
+givenName: Operator
+uid: operator2
+mail: operator2@example.com
+displayName: Оператор 2
+userPassword: operator123
+
+dn: uid=viewer1,ou=people,dc=networkscanner,dc=local
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: viewer1
+sn: Viewer One
+givenName: Viewer
+uid: viewer1
+mail: viewer1@example.com
+displayName: Наблюдатель 1
+userPassword: viewer123
+
+dn: uid=viewer2,ou=people,dc=networkscanner,dc=local
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: viewer2
+sn: Viewer Two
+givenName: Viewer
+uid: viewer2
+mail: viewer2@example.com
+displayName: Наблюдатель 2
+userPassword: viewer123

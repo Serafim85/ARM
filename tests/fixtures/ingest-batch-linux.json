@@ -1,0 +1,31 @@
+{
+  "hostname": "pilot-linux-01",
+  "timestamp": "2026-06-22T12:00:00Z",
+  "agent_version": "0.1.0-dev",
+  "os_type": "linux",
+  "primary_ip": "192.168.1.10",
+  "metrics": [
+    { "key": "arm.cpu.util", "value": 12.5, "clock": "2026-06-22T12:00:00Z" },
+    { "key": "arm.mem.used", "value": 4294967296, "clock": "2026-06-22T12:00:00Z" },
+    { "key": "arm.disk.root.used_pct", "value": 45.2, "clock": "2026-06-22T12:00:00Z" }
+  ],
+  "logs": [
+    {
+      "level": "warning",
+      "message": "systemd-journal: service wisla-arm-agent restarted",
+      "clock": "2026-06-22T12:00:00Z",
+      "source": "journald"
+    }
+  ],
+  "events": [
+    {
+      "type": "BSOD",
+      "message": "Unexpected shutdown detected",
+      "clock": "2026-06-22T11:58:00Z",
+      "severity": "HIGH",
+      "error_code": "0x000000EF",
+      "error_text": "CRITICAL_PROCESS_DIED",
+      "source": "wisla-arm-agent"
+    }
+  ]
+}

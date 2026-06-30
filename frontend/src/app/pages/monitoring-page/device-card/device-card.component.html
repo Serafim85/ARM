@@ -1,0 +1,77 @@
+@if (showDevicePageSkeleton()) {
+  <div class="scan-page">
+    <header class="scan-page-header device-card-page-header">
+      <div class="device-card-title-row">
+        <a routerLink="/monitoring" class="device-card-back-link" aria-label="Назад к списку мониторинга">
+          <i class="pi pi-arrow-circle-left" aria-hidden="true"></i>
+        </a>
+        <div class="device-card-title-block">
+          <h1 class="scan-page-title">Загрузка…</h1>
+          <p class="scan-page-lead">Получаем данные устройства…</p>
+        </div>
+      </div>
+    </header>
+    <div class="device-card-preloader-outer">
+      <div class="monitoring-preloader">
+        <div class="monitoring-preloader-spinner"></div>
+        <span>Загрузка данных устройства...</span>
+      </div>
+    </div>
+  </div>
+} @else if (device()) {
+  <div class="scan-page">
+    <header class="scan-page-header device-card-page-header">
+      <div class="device-card-title-row">
+        <a routerLink="/monitoring" class="device-card-back-link" aria-label="Назад к списку мониторинга">
+          <i class="pi pi-arrow-circle-left" aria-hidden="true"></i>
+        </a>
+        <div class="device-card-title-block">
+          <h1 class="scan-page-title">{{ pageTitle() }}</h1>
+          <p class="scan-page-lead">{{ pageLead() }}</p>
+        </div>
+      </div>
+    </header>
+    <div class="device-card-tabs-root">
+      <p-tabs [value]="activeTabSegment()" (valueChange)="onTabChange($event)">
+        <p-tablist>
+          <p-tab value="info">Общая информация</p-tab>
+          <p-tab value="configuration">Сетевые интерфейсы</p-tab>
+          <p-tab value="metrics">Графики метрик</p-tab>
+          <p-tab value="snapshot">Текущее состояние</p-tab>
+          <p-tab value="item-config">Настройки мониторинга</p-tab>
+          <p-tab value="events">
+            <span class="device-card-tab-events-label">
+              События
+              @if (openEventsCount() > 0) {
+                <p-badge [value]="openEventsCount()" severity="danger" />
+              }
+            </span>
+          </p-tab>
+          <p-tab value="config-management">Управление конфигурацией</p-tab>
+        </p-tablist>
+        <p-tabpanels [pt]="deviceCardTabPanelsPt">
+          <p-tabpanel [value]="activeTabSegment()">
+            <router-outlet />
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>
+    </div>
+  </div>
+} @else {
+  <div class="scan-page">
+    <header class="scan-page-header device-card-page-header">
+      <div class="device-card-title-row">
+        <a routerLink="/monitoring" class="device-card-back-link" aria-label="Назад к списку мониторинга">
+          <i class="pi pi-arrow-circle-left" aria-hidden="true"></i>
+        </a>
+        <div class="device-card-title-block">
+          <h1 class="scan-page-title">Устройство недоступно</h1>
+          <p class="scan-page-lead">Устройство не найдено или снято с мониторинга.</p>
+        </div>
+      </div>
+    </header>
+    <div class="device-card-empty-hint">
+      <p>Перейдите в список мониторинга и выберите другое устройство.</p>
+    </div>
+  </div>
+}

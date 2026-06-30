@@ -1,0 +1,790 @@
+# Трекинг покрытия требований WISLA АРМ
+# Обновляйте поля status и notes по ходу разработки прототипа.
+#
+# status:
+#   waived      — сознательно не делаем (согласовано)
+#   deferred    — после прототипа
+#   planned     — в плане прототипа, ещё не начато
+#   in_progress — в работе
+#   prototype   — есть в прототипе (базовая реализация)
+#   done        — готово для демо/пилота
+#
+# phase: mvp | v1 | v2  (см. docs/requirements/дорожная-карта.yaml)
+# ns_reuse: что берём из vendor/NetworckScaner-master (или —)
+
+meta:
+  project: WISLA АРМ
+  document_source: docs/requirements/требования-мониторинг-АРМ.docx
+  questions_source: docs/requirements/проблемные-места-требований_V1.xlsx
+  reference_project: vendor/NetworckScaner-master
+  target_scale: 5000
+  pilot: "2 VM (Linux + Windows)"
+  updated: "2026-06-17"
+  roadmap: docs/requirements/дорожная-карта.yaml
+  database: "TimescaleDB (PostgreSQL 16) — см. infrastructure в docs/requirements/дорожная-карта.yaml"
+
+summary:
+  total: 0
+  by_status:
+    prototype: 0
+    planned: 0
+    in_progress: 0
+    deferred: 0
+    waived: 0
+    done: 0
+
+requirements:
+
+  # ─── §1 Архитектура ───────────────────────────────────────────────
+
+  - id: REQ-1.4-agent
+    section: "§1.4"
+    title: "Агент WISLA АРМ (Win/Linux, служба, сбор метрик)"
+    questions: []
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: —
+    extensibility: "Единый протокол agent API; версия агента в heartbeat"
+    acceptance: "Агент на 2 VM шлёт данные стабильно 24+ ч"
+    notes: "Greenfield. NS не содержит агента — пишем с нуля."
+
+  - id: REQ-1.4-policy
+    section: "§1.4.5"
+    title: "Политики с сервера (службы, пороги, интервалы)"
+    questions: []
+    phase: v1
+    status: deferred
+    mvp: false
+    ns_reuse: "monitoring item-config UI (адаптировать)"
+    extensibility: "Таблица policies + API; агент тянет конфиг по расписанию"
+    acceptance: "—"
+    notes: "Прототип: конфиг агента на диске. API политик — заглушка."
+
+  - id: REQ-1.4-buffer
+    section: "§1.4.11"
+    title: "Локальный буфер при недоступности сервера"
+    questions: []
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: —
+    extensibility: "Настраиваемый объём/срок в policy"
+    acceptance: "2 ч offline → данные доставлены после восстановления"
+    notes: ""
+
+  - id: REQ-1.5-transfer
+    section: "§1.5"
+    title: "HTTPS, API-key, JSON batch, heartbeat"
+    questions: ["009.1", "009.2", "013.2"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "JWT/security patterns; новый AgentIngestController"
+    extensibility: "mTLS в v1 без смены схемы payload"
+    acceptance: "Batch ingest, ключ в заголовке"
+    notes: "Ротация ключа «раз в час» — упростить для прототипа (отзыв в UI)."
+
+  - id: REQ-1.5-proxy
+    section: "§1.5.6"
+    title: "Работа через HTTP/HTTPS прокси"
+    questions: ["021.1", "021.4"]
+    phase: v1
+    status: deferred
+    mvp: false
+    ns_reuse: —
+    extensibility: "Поля proxy в policy + UI настроек"
+    acceptance: "—"
+    notes: "Excel: настройка через UI модуля — v1."
+
+  - id: REQ-1.6-server
+    section: "§1.6"
+    title: "Сервер: приём, БД, нормализация Win/Linux, UI"
+    questions: ["012.1", "012.3", "013.1"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "backend monitoring module, metric_values, Flyway"
+    extensibility: "Отдельный пакет workstation/arm рядом с monitoring"
+    acceptance: "Метрики Win/Linux в единых графиках"
+    notes: ""
+
+  - id: REQ-1.7-wisla
+    section: "§1.7"
+    title: "Интеграция с центральной WISLA"
+    questions: ["007.1", "007.6", "008.1"]
+    phase: v1
+    status: deferred
+    mvp: false
+    ns_reuse: "INTEGRATION_WISLA_*.md, WislaEventBridge, Kafka config"
+    extensibility: "sourceSystem + externalDeviceId уже в контракте NS"
+    acceptance: "—"
+    notes: "Excel: не обязательна в первой версии. Swagger ждём."
+
+  - id: REQ-1.8-registration
+    section: "§1.8"
+    title: "Регистрация и версия агента"
+    questions: ["017.1", "017.3"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "monitored_devices → workstations"
+    extensibility: "Таблица agent_credentials"
+    acceptance: "Авто-регистрация, версия в карточке"
+    notes: ""
+
+  - id: REQ-1.9-agentless
+    section: "§1.9"
+    title: "Безагентный режим WinRM/SSH"
+    questions: ["010.2"]
+    phase: —
+    status: waived
+    mvp: false
+    ns_reuse: —
+    extensibility: —
+    acceptance: "—"
+    notes: "Excel: не нужен."
+
+  - id: REQ-1.10-templates
+    section: "§1.6 + NS"
+    title: "Zabbix-шаблоны .template для метрик и порогов АРМ"
+    questions: ["014.1", "014.3", "019.2"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "monitoring-templates/, MonitoringTemplateResolver, ThresholdEvaluation"
+    extensibility: "arm-linux.template, arm-windows.template; agent keys = item keys"
+    acceptance: "Порог CPU/диск через trigger; не SNMP-collector"
+    notes: "Тащим в MVP: движок уже в NS. Пишем ARM-шаблоны, агент шлёт те же keys."
+
+  # ─── §2 Учёт АРМ ──────────────────────────────────────────────────
+
+  - id: REQ-2.1-registry
+    section: "§2.1"
+    title: "Реестр АРМ (hostname, IP, ОС, пользователь)"
+    questions: []
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "MonitoringPageComponent → WorkstationsList"
+    extensibility: "Поля department, tags в схеме с первого дня"
+    acceptance: "Список 2 VM с корректными полями"
+    notes: ""
+
+  - id: REQ-2.2-inventory
+    section: "§2.2"
+    title: "Инвентарь железа (CPU, RAM, диски, S/N)"
+    questions: ["002.2"]
+    phase: v1
+    status: deferred
+    mvp: false
+    ns_reuse: "device info tab"
+    extensibility: "inventory_snapshot JSON от агента"
+    acceptance: "—"
+    notes: "Excel: S.M.A.R.T./серийники — не MVP."
+
+  - id: REQ-2.3-groups
+    section: "§2.3"
+    title: "Группы/теги АРМ"
+    questions: []
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "tags в monitoring devices"
+    extensibility: "Многие теги, фильтр в списке"
+    acceptance: "Одна группа/тег на хост"
+    notes: "Прототип: одно текстовое поле group."
+
+  - id: REQ-2.4-profiles
+    section: "§2.4"
+    title: "Профиль мониторинга для группы"
+    questions: []
+    phase: v1
+    status: deferred
+    mvp: false
+    ns_reuse: "monitoring templates assignment"
+    extensibility: "group → template_id"
+    acceptance: "—"
+    notes: "Прототип: один шаблон на всех."
+
+  - id: REQ-2.5-status
+    section: "§2.5"
+    title: "Статус online/offline, last contact, версия агента"
+    questions: ["001.2"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "availability refresh, device status badges"
+    extensibility: "heartbeat interval в policy"
+    acceptance: "Offline через N мин без heartbeat"
+    notes: ""
+
+  # ─── §3 Производительность ────────────────────────────────────────
+
+  - id: REQ-3.1-metrics-ui
+    section: "§3.1"
+    title: "Текущие значения и история метрик (графики)"
+    questions: ["012.1", "012.2"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "DeviceCard metrics tab, chartPanels API"
+    extensibility: "30 дней default, tiered aggregation позже"
+    acceptance: "Графики CPU/RAM/диск за 24 ч"
+    notes: ""
+
+  - id: REQ-3.2-disk
+    section: "§3.2"
+    title: "Диск: занятость, свободное место"
+    questions: ["014.2"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "template items disk.*"
+    extensibility: "Несколько томов (§10.3)"
+    acceptance: "% и ГБ на системном томе"
+    notes: "Задержки диска — deferred."
+
+  - id: REQ-3.3-cpu
+    section: "§3.3"
+    title: "CPU: загрузка, очередь/iowait"
+    questions: []
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "template item cpu.util"
+    extensibility: —
+    acceptance: "График загрузки CPU"
+    notes: "iowait — если агент отдаёт."
+
+  - id: REQ-3.4-ram
+    section: "§3.4"
+    title: "ОЗУ: использование и доступная"
+    questions: []
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "template item mem.*"
+    extensibility: —
+    acceptance: "График RAM"
+    notes: ""
+
+  - id: REQ-3.5-smart
+    section: "§3.5"
+    title: "S.M.A.R.T. / здоровье диска"
+    questions: ["002.2"]
+    phase: —
+    status: waived
+    mvp: false
+    ns_reuse: —
+    extensibility: "item smart.health в шаблоне — позже"
+    acceptance: "—"
+    notes: "Excel: не MVP, отдельное ПО."
+
+  - id: REQ-3.6-network
+    section: "§3.6"
+    title: "Доступность АРМ (online/offline)"
+    questions: []
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "availability_history, Wisla availability events"
+    extensibility: —
+    acceptance: "Статус в списке и карточке"
+    notes: ""
+
+  - id: REQ-3.7-log-metrics
+    section: "§3.7"
+    title: "Метрики по журналам (частота error/warning)"
+    questions: ["005.1"]
+    phase: v1
+    status: deferred
+    mvp: false
+    ns_reuse: "trigger на счётчики log.*"
+    extensibility: "Счётчики в агенте"
+    acceptance: "—"
+    notes: "Прототип: сами события логов, без агрегированных метрик."
+
+  # ─── §4 Службы и стабильность ─────────────────────────────────────
+
+  - id: REQ-4.1-services
+    section: "§4.1"
+    title: "Контроль перечня служб (running/stopped/failed)"
+    questions: ["019.1"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "events на trigger service.*"
+    extensibility: "Список служб в template discovery или config"
+    acceptance: "3–5 служб в конфиге, статус в карточке"
+    notes: "Excel: общее состояние хоста, не CPU по службе."
+
+  - id: REQ-4.2-service-resources
+    section: "§4.2–4.3"
+    title: "Ресурсы по службе (CPU/RAM), графики"
+    questions: ["019.3"]
+    phase: v1
+    status: deferred
+    mvp: false
+    ns_reuse: —
+    extensibility: "item service.cpu[name]"
+    acceptance: "—"
+    notes: "Excel: смотрим общее состояние хоста."
+
+  - id: REQ-4.5-bsod
+    section: "§4.5"
+    title: "BSoD / kernel panic"
+    questions: ["003.2"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "monitoring_events"
+    extensibility: "Скрипт + поле error_code, error_text"
+    acceptance: "Событие BSoD с описанием в UI"
+    notes: "Есть скрипт; PDF kolicestvo-bsod — референс отчёта."
+
+  - id: REQ-4.6-event-feed
+    section: "§4.6"
+    title: "Лента значимых событий по АРМ"
+    questions: []
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "EventsPage, device events tab"
+    extensibility: —
+    acceptance: "Сбои служб, пороги, offline в ленте"
+    notes: ""
+
+  - id: REQ-4.7-logs-view
+    section: "§4.7"
+    title: "Просмотр логов ОС в карточке АРМ"
+    questions: ["005.1", "005.2", "006.3"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "новая вкладка в DeviceCard"
+    extensibility: "Фильтры, правила, correlation_id"
+    acceptance: "Warning/error, фильтр по уровню, переход ↔ аварийный журнал"
+    notes: "TTL: для прототипа 90 дней в коде, Excel хотел «без срока» — зафиксировать лимит."
+
+  - id: REQ-4.8-alarm-journal
+    section: "§4.8"
+    title: "Журнал аварийных сообщений в карточке АРМ"
+    questions: ["005.3", "006.1"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "events + флаг processed"
+    extensibility: "processed_by, processed_at"
+    acceptance: "Фильтр, уровень, «обработано»"
+    notes: ""
+
+  # ─── §5 Аудит сессий ──────────────────────────────────────────────
+
+  - id: REQ-5.1-availability
+    section: "§5.1"
+    title: "Периоды доступности АРМ (uptime / last seen)"
+    questions: []
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "availability_history"
+    extensibility: —
+    acceptance: "Last seen в карточке"
+    notes: ""
+
+  - id: REQ-5.2-5.6-sessions
+    section: "§5.2–5.6"
+    title: "Вход/выход, активная сессия, тип RDP/SSH"
+    questions: ["003.1", "003.3", "002.4"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "новая вкладка Sessions"
+    extensibility: "session_events table"
+    acceptance: "Текущий пользователь; Win 1 сессия; Linux несколько; тип сессии"
+    notes: "Ответ 003.1 про JWT — ошибка, уточнить отдельно. PDF monitoring-aktivnyx-polzovatelei — референс."
+
+  - id: REQ-5-security-log
+    section: "§5"
+    title: "Security log / PAM / wtmp (глубокий аудит)"
+    questions: ["003.4"]
+    phase: —
+    status: waived
+    mvp: false
+    ns_reuse: —
+    extensibility: —
+    acceptance: "—"
+    notes: "Excel: не MVP."
+
+  # ─── §6 Отчёты ─────────────────────────────────────────────────────
+
+  - id: REQ-6.1-6.2-reports
+    section: "§6.1–6.2"
+    title: "Отчёты по АРМ и парку"
+    questions: ["014.1", "014.4"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "новый Reports module; пороги из templates"
+    extensibility: "Шаблоны отчётов как Zabbix"
+    acceptance: "CSV + XLSX за период"
+    notes: ""
+
+  - id: REQ-6.3-export
+    section: "§6.3"
+    title: "Экспорт PDF / CSV / XLSX"
+    questions: ["015.1", "015.2"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: —
+    extensibility: "PDF generator service"
+    acceptance: "CSV и XLSX в MVP; PDF — если успеем"
+    notes: "Excel: оба табличных формата; PDF в доп."
+
+  - id: REQ-6.4-recommendations
+    section: "§6.4–6.5"
+    title: "Рекомендации модернизации/замены"
+    questions: ["014.3"]
+    phase: v1
+    status: deferred
+    mvp: false
+    ns_reuse: "trigger templates + текстовые шаблоны"
+    extensibility: "Правила + ручной комментарий инженера"
+    acceptance: "—"
+    notes: "Прототип: авто-текст из сработавших triggers."
+
+  # ─── §7 Информирование ────────────────────────────────────────────
+
+  - id: REQ-7.1-alerts
+    section: "§7.1"
+    title: "Правила оповещения по порогам и событиям"
+    questions: []
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "ThresholdEvaluation, trigger expressions"
+    extensibility: "Те же .template triggers"
+    acceptance: "Диск, offline, служба stopped"
+    notes: ""
+
+  - id: REQ-7.2-email
+    section: "§7.2"
+    title: "Email-уведомления"
+    questions: ["022.1"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "SystemSettings SMTP, notification subscriptions"
+    extensibility: —
+    acceptance: "Тестовый алерт на почту"
+    notes: ""
+
+  - id: REQ-7.3-telegram
+    section: "§7.3"
+    title: "Telegram"
+    questions: ["022.2", "022.3"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "новый TelegramNotifier"
+    extensibility: "Бот + chat_id в настройках"
+    acceptance: "Алерт и уведомление о закрытии хоста"
+    notes: ""
+
+  - id: REQ-7.5-processed
+    section: "§7.5"
+    title: "Признак «обработано» в журнале аварийных"
+    questions: []
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "event acknowledge pattern"
+    extensibility: —
+    acceptance: "Инженер помечает событие обработанным"
+    notes: ""
+
+  - id: REQ-7-maintenance
+    section: "§7 + Excel 022.4"
+    title: "Окно техобслуживания (mute alerts)"
+    questions: ["022.4"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "новая сущность maintenance_windows"
+    extensibility: "По АРМ и по группе"
+    acceptance: "В окне ТО алерты не шлются"
+    notes: "Excel: явно в MVP."
+
+  # ─── §8 Интерфейс ─────────────────────────────────────────────────
+
+  - id: REQ-8.1-card
+    section: "§8.1"
+    title: "Карточка АРМ (все обязательные блоки)"
+    questions: ["011.5"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "DeviceCardComponent + вкладки"
+    extensibility: "Табы lazy-load"
+    acceptance: "Скриншот design/mockups/photo_2026-06-16 как референс layout"
+    notes: ""
+
+  - id: REQ-8.2-attention
+    section: "§8.2"
+    title: "Список АРМ, требующих внимания"
+    questions: []
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "EventsPage filters / PROBLEMS widget"
+    extensibility: —
+    acceptance: "Фильтр по открытым проблемам"
+    notes: ""
+
+  - id: REQ-8.3-charts
+    section: "§8.3"
+    title: "Графики истории за период"
+    questions: []
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "metrics tab"
+    extensibility: —
+    acceptance: "Выбор периода 24ч / 7д"
+    notes: ""
+
+  - id: REQ-8.5-roles
+    section: "§8.5"
+    title: "Роли: просмотр / администрирование"
+    questions: ["009.3"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "Spring Security roles, adminGuard"
+    extensibility: "Аудит действий админа"
+    acceptance: "OPERATOR vs ADMIN"
+    notes: ""
+
+  - id: REQ-8-mobile
+    section: "§8 + Excel 011.3"
+    title: "Мобильная адаптация UI"
+    questions: ["011.3"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "PrimeNG responsive, shared-ui.css, flex layout"
+    extensibility: "Breakpoints в theme"
+    acceptance: "Список + карточка читаемы на телефоне"
+    notes: "Тащим в MVP: PrimeNG уже responsive; доработать карточку и таблицы."
+
+  - id: REQ-8-login
+    section: "§8"
+    title: "Страница входа (локальный / LDAP)"
+    questions: ["011.1", "020.2"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "LoginPageComponent"
+    extensibility: "SSO hook позже"
+    acceptance: "Скриншот design/mockups/photo_2026-05-19"
+    notes: "LDAP — если успеем; локальный точно."
+
+  # ─── §9 Хранение ──────────────────────────────────────────────────
+
+  - id: REQ-INFRA-DB
+    section: "§9 / infrastructure"
+    title: "СУБД: TimescaleDB (PostgreSQL 16) — единое хранилище"
+    questions: ["012.1", "012.4"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "docker-compose timescaledb, metric_values hypertable, Flyway, JPA"
+    extensibility: "Continuous aggregates v2; read-replica при росте"
+    acceptance: "docker-compose up timescaledb; backend пишет метрики и события в wisla_arm"
+    notes: "Явно зафиксировано в docs/requirements/дорожная-карта.yaml → infrastructure. SQLite только на агенте (буфер)."
+
+  - id: REQ-9.1-metrics-retention
+    section: "§9.1"
+    title: "История метрик (30 дней default)"
+    questions: ["012.1", "012.4"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "TimescaleDB, metric_values"
+    extensibility: "retention_policy table"
+    acceptance: "30 дней, настраиваемо в конфиге"
+    notes: ""
+
+  - id: REQ-9.2-events-retention
+    section: "§9.2"
+    title: "Хранение событий, аудита, логов"
+    questions: ["004.2", "005.4"]
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "Flyway + TTL job"
+    extensibility: "Прототип: 90 дней логов, 1 год аудит (Excel)"
+    acceptance: "Данные не пропадают на пилоте"
+    notes: "Не «без срока» — осознанный компромисс для 5000 АРМ."
+
+  - id: REQ-9.3-aggregation
+    section: "§9.3"
+    title: "Агрегация старых метрик"
+    questions: ["012.2"]
+    phase: v1
+    status: deferred
+    mvp: false
+    ns_reuse: "Timescale continuous aggregates"
+    extensibility: —
+    acceptance: "—"
+    notes: ""
+
+  # ─── §10 Дополнительные ───────────────────────────────────────────
+
+  - id: REQ-10.1-software
+    section: "§10.1"
+    title: "Инвентаризация ПО"
+    questions: ["002.3"]
+    phase: —
+    status: waived
+    mvp: false
+    ns_reuse: —
+    extensibility: —
+    acceptance: "—"
+    notes: "Excel: скорее не будем."
+
+  - id: REQ-10.2-search-user
+    section: "§10.2"
+    title: "Поиск АРМ по пользователю"
+    questions: []
+    phase: v1
+    status: deferred
+    mvp: false
+    ns_reuse: "search в списке"
+    extensibility: —
+    acceptance: "—"
+    notes: ""
+
+  - id: REQ-10.3-multi-disk
+    section: "§10.3"
+    title: "Несколько дисков/разделов"
+    questions: []
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "LLD или multi item в template"
+    extensibility: "disk[{mountpoint}]"
+    acceptance: "Системный + один data-том"
+    notes: ""
+
+  - id: REQ-10.5-comments
+    section: "§10.5"
+    title: "Комментарий инженера к АРМ/событию"
+    questions: []
+    phase: v1
+    status: deferred
+    mvp: false
+    ns_reuse: —
+    extensibility: "comments table"
+    acceptance: "—"
+    notes: ""
+
+  - id: REQ-10.6-sso
+    section: "§10.6"
+    title: "SSO через WISLA"
+    questions: ["020.1", "020.4"]
+    phase: —
+    status: waived
+    mvp: false
+    ns_reuse: "auth module hook"
+    extensibility: "OIDC provider interface"
+    acceptance: "—"
+    notes: "Excel: не в пилоте."
+
+  - id: REQ-10.7-dashboards
+    section: "§10.7"
+    title: "Сводные дашборды по парку"
+    questions: []
+    phase: mvp
+    status: planned
+    mvp: true
+    ns_reuse: "DashboardsList, PROBLEMS widget"
+    extensibility: —
+    acceptance: "Виджет: проблемные ПК, алерты за сутки"
+    notes: ""
+
+  # ─── Вопросы из Excel (мета-трекинг) ───────────────────────────────
+
+questions_coverage:
+  - id: "001"
+    answered: true
+    reflected_in: [REQ-1.6-server, REQ-2.5-status, REQ-9.1-metrics-retention]
+  - id: "002"
+    answered: true
+    reflected_in: [REQ-3.5-smart, REQ-10.1-software, REQ-5.2-5.6-sessions]
+  - id: "003"
+    answered: true
+    partial: true
+    note: "003.1 ответ про JWT — не про аудит; уточнить"
+    reflected_in: [REQ-5.2-5.6-sessions, REQ-4.5-bsod, REQ-5-security-log]
+  - id: "004"
+    answered: true
+    reflected_in: [REQ-9.2-events-retention]
+  - id: "005"
+    answered: true
+    reflected_in: [REQ-4.7-logs-view, REQ-4.8-alarm-journal]
+  - id: "006"
+    answered: true
+    reflected_in: [REQ-4.7-logs-view, REQ-4.8-alarm-journal]
+  - id: "007"
+    answered: true
+    reflected_in: [REQ-1.7-wisla]
+  - id: "008"
+    answered: true
+    partial: true
+    note: "008.3 не отвечен"
+    reflected_in: [REQ-1.7-wisla, REQ-7.3-telegram]
+  - id: "009"
+    answered: true
+    reflected_in: [REQ-1.5-transfer, REQ-8.5-roles]
+  - id: "010"
+    answered: true
+    reflected_in: [REQ-1.9-agentless]
+  - id: "011"
+    answered: true
+    reflected_in: [REQ-8-mobile, REQ-8-login, REQ-8.1-card]
+  - id: "012"
+    answered: true
+    reflected_in: [REQ-9.1-metrics-retention, REQ-3.1-metrics-ui]
+  - id: "013"
+    answered: true
+    reflected_in: [REQ-1.5-transfer, REQ-1.6-server]
+  - id: "014"
+    answered: true
+    reflected_in: [REQ-6.1-6.2-reports, REQ-1.10-templates]
+  - id: "015"
+    answered: true
+    reflected_in: [REQ-6.3-export]
+  - id: "016"
+    answered: true
+    reflected_in: [REQ-1.4-agent]
+  - id: "017"
+    answered: true
+    reflected_in: [REQ-1.8-registration]
+  - id: "018"
+    answered: true
+    reflected_in: "все planned/deferred/waived"
+  - id: "019"
+    answered: true
+    reflected_in: [REQ-4.1-services, REQ-1.10-templates]
+  - id: "020"
+    answered: true
+    reflected_in: [REQ-8-login, REQ-10.6-sso]
+  - id: "021"
+    answered: true
+    reflected_in: [REQ-1.5-proxy]
+  - id: "022"
+    answered: true
+    reflected_in: [REQ-7.2-email, REQ-7.3-telegram, REQ-7-maintenance]

@@ -1,0 +1,344 @@
+.discovery-probes-form {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.discovery-probes-form-top {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.discovery-probes-params-row {
+  display: grid;
+  grid-template-columns: minmax(16rem, 1.75fr) minmax(9rem, 1fr) minmax(9rem, 1fr);
+  align-items: end;
+  gap: 0.85rem 1rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+.discovery-probes-params-row--no-subnet {
+  grid-template-columns: minmax(9rem, 1fr) minmax(9rem, 1fr);
+}
+
+.discovery-probes-field {
+  min-width: 0;
+}
+
+.discovery-probes-field--subnet {
+  position: relative;
+}
+
+.discovery-probes-field-error {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 0.2rem;
+  color: #b91c1c;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.discovery-probes-params-row--subnet-error {
+  margin-bottom: 1.65rem;
+}
+
+.discovery-probes-field-input--invalid {
+  border-color: #b91c1c;
+}
+
+.discovery-probes-methods-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.discovery-probes-field--profile {
+  width: 100%;
+  max-width: 100%;
+}
+
+.discovery-probes-methods-row {
+  width: 100%;
+  max-width: 100%;
+}
+
+.discovery-methods-select-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.discovery-methods-multiselect-host {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.discovery-methods-multiselect {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+:host ::ng-deep .discovery-methods-multiselect.p-multiselect {
+  align-items: center;
+}
+
+:host ::ng-deep .discovery-methods-multiselect .p-multiselect-label-container {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .discovery-methods-multiselect .p-multiselect-label {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+:host ::ng-deep .discovery-methods-multiselect-host--single .p-chip-remove-icon,
+:host ::ng-deep .discovery-methods-multiselect-host--single .p-chip-remove-button {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.discovery-methods-reset-btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .discovery-probes-field--timeout .p-inputnumber,
+:host ::ng-deep .discovery-probes-field--retries .p-inputnumber {
+  width: 100%;
+  max-width: 100%;
+}
+
+:host ::ng-deep .discovery-probes-field--timeout .p-inputnumber .p-inputtext,
+:host ::ng-deep .discovery-probes-field--retries .p-inputnumber .p-inputtext {
+  width: 100%;
+  min-width: 0;
+}
+
+.probe-config-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.probe-config-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0.55rem 0.65rem 0.65rem;
+  border: 1px solid #b8c4d0;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.probe-config-card--full {
+  grid-column: 1 / -1;
+}
+
+.probe-config-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.25rem;
+  margin-bottom: 0.3rem;
+}
+
+.probe-config-card-head .probe-config-head {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+:host ::ng-deep .probe-config-remove-btn.p-button {
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  flex-shrink: 0;
+  margin: -0.1rem -0.15rem 0 0;
+  color: #64748b;
+}
+
+:host ::ng-deep .probe-config-remove-btn.p-button:not(:disabled):hover {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+.probe-config-head {
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  color: var(--ns-action-blue-bg, #1d4ed8);
+}
+
+.probe-config-fields {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.probe-config-fields:not(.probe-config-fields--snmpv3) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.probe-config-fields:not(.probe-config-fields--snmpv3):has(> label:nth-of-type(2)) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.probe-config-fields--snmpv3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.probe-config-card .p-input-container {
+  gap: 0.25rem;
+  font-size: 12px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+:host ::ng-deep .probe-config-fields .p-inputnumber {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+:host ::ng-deep .probe-config-fields .p-inputnumber .p-inputtext {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+:host ::ng-deep .probe-config-fields input.p-inputtext {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+:host ::ng-deep .probe-config-fields app-device-option-select {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.probe-config-card--compact .probe-config-hint {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0.5rem 0.4rem;
+  text-align: center;
+  background: #f8fafc;
+  border: 1px dashed #d1d9e3;
+  border-radius: 6px;
+}
+
+.probe-config-hint-title,
+.probe-config-hint-detail {
+  display: block;
+  width: 100%;
+}
+
+.probe-config-hint-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
+  line-height: 1.3;
+}
+
+.probe-config-hint-detail {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+.probe-config-profile-note {
+  margin: 0;
+  padding: 0.5rem 0.55rem;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.probe-config-span-all {
+  grid-column: 1 / -1;
+}
+
+.probe-config-fields--snmpv3 .probe-config-profile-note {
+  margin-bottom: 0.15rem;
+}
+
+@media (max-width: 720px) {
+  .discovery-probes-params-row,
+  .discovery-probes-params-row--no-subnet {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .discovery-probes-field-error {
+    position: static;
+    margin-top: 0.25rem;
+  }
+
+  .discovery-probes-params-row--subnet-error {
+    margin-bottom: 0;
+  }
+
+  .discovery-probes-methods-block,
+  .discovery-probes-methods-row {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 960px) {
+  .probe-config-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .probe-config-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+:host ::ng-deep .discovery-methods-panel .p-multiselect-list-container {
+  max-height: min(52vh, 420px);
+}

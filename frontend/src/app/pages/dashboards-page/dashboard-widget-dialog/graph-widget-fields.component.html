@@ -1,0 +1,100 @@
+<div class="editor-section">
+  <h4 class="editor-title">Настройки графика</h4>
+
+  <label class="p-input-container">
+    <span>Период по умолчанию</span>
+    <app-device-option-select
+      [options]="periodOptions"
+      optionValueKey="value"
+      [value]="period"
+      (valueChange)="onPeriodChange($event)"
+      styleClass="w-full"
+    />
+    <small class="widget-field-hint">
+      Начальный период при открытии дашборда. На самом графике период можно переключить без сохранения в настройки.
+    </small>
+  </label>
+
+  <div class="editor-checkbox-grid">
+    <div class="checkbox-line">
+      <p-checkbox
+        [(ngModel)]="showLegend"
+        [ngModelOptions]="{ standalone: true }"
+        binary="true"
+        inputId="graph-show-legend"
+        id="graph-show-legend"
+      />
+      <label for="graph-show-legend">Показывать легенду</label>
+    </div>
+    <div class="checkbox-line">
+      <p-checkbox
+        [(ngModel)]="fill"
+        [ngModelOptions]="{ standalone: true }"
+        binary="true"
+        inputId="graph-fill-area"
+        id="graph-fill-area"
+      />
+      <label for="graph-fill-area">Заливка под линией</label>
+    </div>
+    <div class="graph-widget-legend-placement-row">
+      <span id="graph-legend-placement-label" class="graph-widget-legend-placement-label">Расположение легенды:</span>
+      <app-chart-legend-placement-select
+        [inline]="true"
+        [(placement)]="legendPlacement"
+        ariaLabelledBy="graph-legend-placement-label"
+      />
+    </div>
+  </div>
+
+  <div class="editor-section">
+    <h5 class="editor-title">Ряды данных</h5>
+    @for (block of blocks; track $index) {
+      <div class="graph-widget-series-block">
+        <div class="graph-widget-series-head">
+          <label class="p-input-container graph-widget-device-field">
+            <span>Устройство</span>
+            <app-device-option-select
+              [options]="deviceOptions"
+              [value]="block.deviceId"
+              (valueChange)="onDeviceChange($index, $event)"
+            />
+          </label>
+          <div class="graph-widget-series-actions">
+            <p-button
+              icon="pi pi-trash"
+              [rounded]="true"
+              [text]="true"
+              severity="danger"
+              (onClick)="removeRow($index)"
+            />
+          </div>
+        </div>
+
+        <label class="p-input-container graph-widget-metrics-field">
+          <span>Метрики</span>
+          <p-multiSelect
+            optionLabel="label"
+            optionValue="value"
+            class="w-full"
+            appendTo="body"
+            display="chip"
+            placeholder="Выберите одну или несколько метрик"
+            filterPlaceholder="Поиск"
+            emptyFilterMessage="Ничего не найдено"
+            emptyMessage="Ничего не найдено"
+            selectedItemsLabel="{0} выбрано"
+            [options]="metricOptions(block.deviceId)"
+            [ngModel]="block.metricNames"
+            (ngModelChange)="onBlockMetricsChange($index, $event)"
+            [ngModelOptions]="{ standalone: true }"
+            [filter]="true"
+            [disabled]="block.deviceId == null"
+            [showClear]="true"
+          />
+        </label>
+      </div>
+    }
+
+    <p-button label="Добавить ряд" icon="pi pi-plus" [outlined]="true" (onClick)="addRow()" />
+  </div>
+</div>

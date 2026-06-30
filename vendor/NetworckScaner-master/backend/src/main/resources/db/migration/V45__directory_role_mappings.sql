@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS directory_role_mappings (
+  id BIGSERIAL PRIMARY KEY,
+  group_dn VARCHAR(1024) NOT NULL UNIQUE,
+  group_name VARCHAR(255) NOT NULL,
+  role_name VARCHAR(32) NOT NULL
+);

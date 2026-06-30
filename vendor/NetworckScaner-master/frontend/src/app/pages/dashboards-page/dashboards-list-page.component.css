@@ -1,0 +1,72 @@
+.dashboards-list-card .section-heading {
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.dashboards-list-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.dashboards-subsection {
+  margin-top: 1.5rem;
+}
+
+.dashboards-subheading {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ns-neutral-900);
+}
+
+.dashboards-list-card .dashboards-clickable-row {
+  cursor: pointer;
+}
+
+/* Полосатые строки PrimeNG задают фон ячейкам — подсветка при наведении на строку */
+.dashboards-list-card .dashboards-clickable-row:hover > td {
+  background: var(--ns-bg-muted);
+}
+
+.dashboards-default-cell {
+  text-align: center;
+  width: 160px;
+}
+
+.dashboards-banner {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+}
+
+.dashboards-banner-error {
+  background: var(--ns-danger-bg);
+  color: var(--ns-danger-text-dark);
+  border: 1px solid var(--ns-danger-bg-strong);
+}
+
+.dashboards-banner-warn {
+  background: var(--ns-warning-bg-light);
+  color: var(--ns-orange-800);
+  border: 1px solid var(--ns-orange-300);
+}
+
+.dashboards-loading {
+  margin: 1rem 0;
+  color: var(--ns-text-muted);
+}
+
+.dashboards-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 0.25rem;
+}
+
+.dashboards-hint {
+  color: var(--ns-text-muted);
+  font-size: 0.8rem;
+}

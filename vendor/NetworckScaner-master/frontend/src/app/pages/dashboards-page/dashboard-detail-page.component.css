@@ -1,0 +1,412 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* list-page-card задаёт grid — для заполнения высоты нужен столбец flex */
+.dashboards-detail-card.dashboards-detail-card {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 100%;
+  /* меньше пустоты сверху до шапки (глобально у .content-card padding 24px) */
+  padding: 14px 22px 22px;
+}
+
+/* popup-меню не должны участвовать во flex: иначе лишние отступы и «пустой» зазор над шапкой */
+.dashboards-detail-card > p-menu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  pointer-events: none;
+  border: 0;
+}
+
+.dashboards-detail-card > .section-heading {
+  flex-shrink: 0;
+}
+
+.dashboards-detail-card > .dashboards-banner {
+  flex-shrink: 0;
+}
+
+.dashboards-detail-card > .dashboards-loading,
+.dashboards-detail-card > .dashboards-widgets-section {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboards-detail-card .section-heading {
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0;
+}
+
+.dashboards-detail-heading-main {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.dashboards-detail-heading-text {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.dashboards-detail-title {
+  margin: 0;
+  font-size: clamp(1.15rem, 2.2vw, 1.5rem);
+  line-height: 1.25;
+  font-weight: 700;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboards-detail-meta-sep {
+  margin-right: 0.2rem;
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.dashboards-back-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  margin-bottom: 0;
+  border-radius: 10px;
+  color: #2563eb;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.dashboards-back-link:hover {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.dashboards-back-link:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.dashboards-back-link .pi {
+  font-size: 1rem;
+}
+
+.dashboards-detail-meta {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.82rem;
+  line-height: 1.3;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboards-detail-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+@media (max-width: 720px) {
+  .dashboards-detail-heading-main {
+    align-items: flex-start;
+  }
+
+  .dashboards-detail-heading-text {
+    flex-wrap: wrap;
+    row-gap: 0.15rem;
+  }
+
+  .dashboards-detail-title {
+    flex: 1 1 100%;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+
+  .dashboards-detail-meta {
+    flex: 1 1 100%;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+
+  .dashboards-detail-meta-sep {
+    display: none;
+  }
+}
+
+.dashboards-widgets-section {
+  margin-top: 0;
+}
+
+.dashboards-widgets-section > .empty-state-inline {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 8rem;
+}
+
+
+.dashboards-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.dashboards-widget-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.dashboards-layout-saving-hint {
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.dashboards-widget-count {
+  margin-left: 0.35rem;
+  font-weight: 500;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.dashboard-gridster {
+  flex: 1 1 auto;
+  min-height: 12rem;
+  height: 100%;
+  width: 100%;
+  margin-top: 0;
+  display: block;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* gridster: фон совпадает с карточкой */
+:host ::ng-deep gridster.dashboard-gridster {
+  background: transparent !important;
+}
+
+.dashboard-gridster-item {
+  border-radius: 12px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.dashboard-widget-tile {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  border: none;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 6%);
+}
+
+.dashboard-widget-tile-head {
+  padding: 0.65rem 0.85rem 0.35rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.dashboard-widget-tile-head--compact {
+  padding: 0.55rem 0.85rem 0.4rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.dashboard-widget-tile-head-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.dashboard-widget-tile-drag-handle {
+  cursor: grab;
+}
+
+.dashboard-gridster-item.gridster-item-moving .dashboard-widget-tile-drag-handle {
+  cursor: grabbing;
+}
+
+.dashboard-widget-tile-head-row .dashboard-widget-tile-title,
+.dashboard-widget-tile-head-row .dashboard-widget-tile-name-plain {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-widget-tile-menu-anchor {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.dashboard-graph-period-in-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.dashboard-graph-period-label {
+  font-size: 0.78rem;
+  color: var(--ns-text-muted, #64748b);
+  white-space: nowrap;
+}
+
+:host ::ng-deep .dashboard-graph-period-selectbutton.p-selectbutton {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+}
+
+:host ::ng-deep .dashboard-graph-period-selectbutton .p-togglebutton {
+  padding: 0.2rem 0.55rem;
+  font-size: 0.78rem;
+}
+
+.dashboard-widget-tile-menu-btn {
+  flex-shrink: 0;
+}
+
+.dashboard-widget-tile-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.dashboard-widget-tile-meta {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.dashboard-widget-tile-name-plain {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.dashboard-widget-tile-body {
+  flex: 1;
+  min-height: 0;
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  cursor: default;
+}
+
+.dashboard-widget-tile-body-inner {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Виджеты заполняют тело плитки по высоте (иначе flex:1 на :host не получает размер) */
+.dashboard-widget-tile-body-inner > app-dashboard-clock-widget,
+.dashboard-widget-tile-body-inner > app-dashboard-graph-widget,
+.dashboard-widget-tile-body-inner > app-dashboard-problems-widget {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  align-self: stretch;
+  width: 100%;
+}
+
+.dashboards-widget-type {
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.dashboards-widget-actions-cell {
+  white-space: nowrap;
+}
+
+.dashboards-banner {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+}
+
+.dashboards-banner-error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.dashboards-detail-card > .dashboards-loading {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  color: #64748b;
+}
+
+.dashboards-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 0.25rem;
+}
+
+.dashboards-subheading {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+

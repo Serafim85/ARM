@@ -1,0 +1,218 @@
+<div class="scan-table-container">
+  <p-table
+    [value]="devices()"
+    [paginator]="true"
+    [rows]="25"
+    [rowsPerPageOptions]="[10, 25, 50, 100]"
+    [showCurrentPageReport]="true"
+    [alwaysShowPaginator]="false"
+    currentPageReportTemplate="{first}–{last} из {totalRecords}"
+    dataKey="ip"
+    stripedRows
+    [tableStyle]="{ width: '100%' }"
+    [class]="tableClass()"
+  >
+    <ng-template #header>
+      <tr>
+        @if (showSelection()) {
+          <th class="col-select" scope="col" aria-label="Выбор"></th>
+        }
+        <th pSortableColumn="hostName" class="col-host scan-table-th">
+          <span class="scan-table-th-inner">
+            <span class="scan-table-th-label">Имя хоста</span>
+            <span class="scan-table-th-sort"><p-sortIcon field="hostName" /></span>
+          </span>
+        </th>
+        <th pSortableColumn="name" class="col-name scan-table-th">
+          <span class="scan-table-th-inner">
+            <span class="scan-table-th-label">Название</span>
+            <span class="scan-table-th-sort"><p-sortIcon field="name" /></span>
+          </span>
+        </th>
+        <th pSortableColumn="serialNumber" class="col-serial scan-table-th scan-table-th--split" pTooltip="Серийный номер" tooltipPosition="top">
+          <span class="scan-table-th-inner">
+            <span class="scan-table-th-top">
+              <span class="scan-table-th-label">Серийный</span>
+              <span class="scan-table-th-sort"><p-sortIcon field="serialNumber" /></span>
+            </span>
+            <span class="scan-table-th-sub">номер</span>
+          </span>
+        </th>
+        <th pSortableColumn="ip" class="col-ip scan-table-th">
+          <span class="scan-table-th-inner">
+            <span class="scan-table-th-label">IP-адрес</span>
+            <span class="scan-table-th-sort"><p-sortIcon field="ip" /></span>
+          </span>
+        </th>
+        <th pSortableColumn="domainName" class="col-domain scan-table-th scan-table-th--split" pTooltip="Доменное имя" tooltipPosition="top">
+          <span class="scan-table-th-inner">
+            <span class="scan-table-th-top">
+              <span class="scan-table-th-label">Доменное</span>
+              <span class="scan-table-th-sort"><p-sortIcon field="domainName" /></span>
+            </span>
+            <span class="scan-table-th-sub">имя</span>
+          </span>
+        </th>
+        <th pSortableColumn="macAddress" class="col-mac scan-table-th">
+          <span class="scan-table-th-inner">
+            <span class="scan-table-th-label">MAC</span>
+            <span class="scan-table-th-sort"><p-sortIcon field="macAddress" /></span>
+          </span>
+        </th>
+        <th pSortableColumn="vendor" class="col-vendor scan-table-th">
+          <span class="scan-table-th-inner">
+            <span class="scan-table-th-label">Вендор</span>
+            <span class="scan-table-th-sort"><p-sortIcon field="vendor" /></span>
+          </span>
+        </th>
+        <th pSortableColumn="model" class="col-model scan-table-th">
+          <span class="scan-table-th-inner">
+            <span class="scan-table-th-label">Модель</span>
+            <span class="scan-table-th-sort"><p-sortIcon field="model" /></span>
+          </span>
+        </th>
+        <th pSortableColumn="firmwareVersion" class="col-fw scan-table-th scan-table-th--split" pTooltip="Версия ПО" tooltipPosition="top">
+          <span class="scan-table-th-inner">
+            <span class="scan-table-th-top">
+              <span class="scan-table-th-label">Версия</span>
+              <span class="scan-table-th-sort"><p-sortIcon field="firmwareVersion" /></span>
+            </span>
+            <span class="scan-table-th-sub">ПО</span>
+          </span>
+        </th>
+        <th class="col-scanning scan-table-th">
+          <span class="scan-table-th-inner">
+            <span class="scan-table-th-label">Сканирование</span>
+          </span>
+        </th>
+        <th pSortableColumn="status" class="col-status scan-table-th">
+          <span class="scan-table-th-inner">
+            <span class="scan-table-th-label">Статус</span>
+            <span class="scan-table-th-sort"><p-sortIcon field="status" /></span>
+          </span>
+        </th>
+        @if (showMonitoring()) {
+          <th class="col-monitoring scan-table-th">
+            <span class="scan-table-th-inner">
+              <span class="scan-table-th-label">Мониторинг</span>
+            </span>
+          </th>
+        }
+      </tr>
+    </ng-template>
+    <ng-template #body let-device>
+      <tr>
+        @if (showSelection()) {
+          <td class="col-select">
+            <p-checkbox
+              [binary]="true"
+              [ngModel]="isSelected(device.ip)"
+              (ngModelChange)="onSelectionChange(device.ip, $event)"
+              [ngModelOptions]="{ standalone: true }"
+              [disabled]="selectionDisabled()"
+            />
+          </td>
+        }
+        <td class="col-host">
+          <span
+            class="scan-table-cell-text scan-table-cell-text--host"
+            [pTooltip]="cellTooltip(device.hostName)"
+            nsTooltipOnOverflow
+            tooltipPosition="top"
+          >{{ cellText(device.hostName) }}</span>
+        </td>
+        <td class="col-name">
+          <span
+            class="scan-table-cell-text scan-table-cell-text--name"
+            [pTooltip]="cellTooltip(resultSummary(device))"
+            nsTooltipOnOverflow
+            tooltipPosition="top"
+          >{{ cellText(resultSummary(device)) }}</span>
+        </td>
+        <td class="col-serial">
+          <span
+            class="scan-table-cell-text scan-table-cell-text--serial"
+            [pTooltip]="cellTooltip(device.serialNumber)"
+            nsTooltipOnOverflow
+            tooltipPosition="top"
+          >{{ cellText(device.serialNumber) }}</span>
+        </td>
+        <td class="col-ip">
+          <span
+            class="scan-table-cell-text scan-table-cell-text--ip"
+            [pTooltip]="cellTooltip(device.ip)"
+            nsTooltipOnOverflow
+            tooltipPosition="top"
+          >{{ cellText(device.ip) }}</span>
+        </td>
+        <td class="col-domain">
+          <span
+            class="scan-table-cell-text scan-table-cell-text--domain"
+            [pTooltip]="cellTooltip(device.domainName)"
+            nsTooltipOnOverflow
+            tooltipPosition="top"
+          >{{ cellText(device.domainName) }}</span>
+        </td>
+        <td class="col-mac">
+          <span
+            class="scan-table-cell-text scan-table-cell-text--mac"
+            [pTooltip]="cellTooltip(device.macAddress)"
+            nsTooltipOnOverflow
+            tooltipPosition="top"
+          >{{ cellText(device.macAddress) }}</span>
+        </td>
+        <td class="col-vendor">
+          <span
+            class="scan-table-cell-text scan-table-cell-text--vendor"
+            [pTooltip]="cellTooltip(device.vendor)"
+            nsTooltipOnOverflow
+            tooltipPosition="top"
+          >{{ cellText(device.vendor) }}</span>
+        </td>
+        <td class="col-model">
+          <span
+            class="scan-table-cell-text scan-table-cell-text--model"
+            [pTooltip]="cellTooltip(device.model)"
+            nsTooltipOnOverflow
+            tooltipPosition="top"
+          >{{ cellText(device.model) }}</span>
+        </td>
+        <td class="col-fw">
+          <span
+            class="scan-table-cell-text scan-table-cell-text--fw"
+            [pTooltip]="cellTooltip(device.firmwareVersion)"
+            nsTooltipOnOverflow
+            tooltipPosition="top"
+          >{{ cellText(device.firmwareVersion) }}</span>
+        </td>
+        <td class="col-scanning">
+          <div class="availability-list availability-list-compact">
+            @for (item of device.availability; track item.label) {
+              <span
+                class="availability-chip"
+                [class.red]="item.tone === 'red'"
+                [class.green]="item.tone === 'green'"
+                [pTooltip]="availabilityLabel(item.label)"
+                tooltipPosition="top"
+              >{{ availabilityLabel(item.label) }}</span>
+            }
+          </div>
+        </td>
+        <td class="col-status">
+          <span class="status-chip" [class.status-timeout]="device.status !== 'Включено'">{{ device.status }}</span>
+        </td>
+        @if (showMonitoring()) {
+          <td class="col-monitoring">
+            <span
+              class="scan-table-cell-text scan-table-cell-text--monitoring monitoring-status-text"
+              [class]="mon.monitoringStatusClass(device)"
+              [pTooltip]="cellTooltip(mon.monitoringStatusLabel(device))"
+              nsTooltipOnOverflow
+              tooltipPosition="top"
+            >{{ mon.monitoringStatusLabel(device) }}</span>
+          </td>
+        }
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

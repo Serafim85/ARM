@@ -1,0 +1,258 @@
+<div class="discovery-probes-form">
+  <div class="discovery-probes-form-top scan-form-prime">
+    @let subnetValidation = scan.subnetRangeValidation();
+    <div
+      class="discovery-probes-params-row"
+      [class.discovery-probes-params-row--no-subnet]="!showSubnet()"
+      [class.discovery-probes-params-row--subnet-error]="
+        showSubnet() && subnetValidation && !subnetValidation.ok
+      "
+    >
+      @if (showSubnet()) {
+        <label class="p-input-container discovery-probes-field discovery-probes-field--subnet">
+          <span>Подсеть</span>
+          <input
+            pInputText
+            type="text"
+            name="subnetRange"
+            [ngModel]="scan.subnetRange()"
+            (ngModelChange)="scan.onSubnetRangeInput($event)"
+            placeholder="192.168.176.0-255 или 192.168.1.0/24"
+            class="w-full"
+            [class.discovery-probes-field-input--invalid]="subnetValidation && !subnetValidation.ok"
+            [attr.aria-invalid]="subnetValidation && !subnetValidation.ok ? true : null"
+            [attr.aria-describedby]="subnetValidation && !subnetValidation.ok ? 'subnet-range-error' : null"
+          />
+          @if (subnetValidation && !subnetValidation.ok) {
+            <small id="subnet-range-error" class="discovery-probes-field-error" role="alert">
+              {{ subnetValidation.error }}
+            </small>
+          }
+        </label>
+      }
+
+      <label class="p-input-container discovery-probes-field discovery-probes-field--timeout">
+        <span>Таймаут, мс</span>
+        <p-inputNumber
+          [ngModel]="scan.timeout()"
+          (ngModelChange)="scan.timeout.set($event)"
+          [ngModelOptions]="{ standalone: true }"
+          placeholder="3000"
+          [showButtons]="false"
+          class="w-full"
+        />
+      </label>
+
+      <label class="p-input-container discovery-probes-field discovery-probes-field--retries">
+        <span>Повторы</span>
+        <p-inputNumber
+          [ngModel]="scan.retries()"
+          (ngModelChange)="scan.retries.set($event)"
+          [ngModelOptions]="{ standalone: true }"
+          placeholder="2"
+          [showButtons]="false"
+          class="w-full"
+        />
+      </label>
+    </div>
+
+    <div class="discovery-probes-methods-block">
+      <label class="p-input-container discovery-probes-field discovery-probes-field--profile">
+        <span>Профиль доступа</span>
+        <p-select
+          class="w-full discovery-probes-profile-select"
+          optionLabel="name"
+          optionValue="id"
+          placeholder="Не выбран — ввод вручную"
+          [showClear]="true"
+          [options]="scan.accessProfiles()"
+          [ngModel]="scan.accessProfileId()"
+          (ngModelChange)="scan.accessProfileId.set($event ?? null)"
+          [ngModelOptions]="{ standalone: true }"
+          appendTo="body"
+        />
+      </label>
+
+      <label class="p-input-container discovery-probes-field discovery-probes-methods-row">
+        <span>Метод обнаружения</span>
+        <div class="discovery-methods-select-row">
+        <div
+          #methodsMultiSelectHost
+          class="discovery-methods-multiselect-host"
+          [class.discovery-methods-multiselect-host--single]="!scan.canRemoveProbe()"
+        >
+          <p-multiSelect
+            optionLabel="label"
+            optionValue="value"
+            class="w-full discovery-methods-multiselect"
+            appendTo="body"
+            panelStyleClass="discovery-methods-panel"
+            placeholder="Выберите методы обнаружения"
+            filterPlaceholder="Поиск"
+            emptyFilterMessage="Ничего не найдено"
+            emptyMessage="Ничего не найдено"
+            selectedItemsLabel="Выбрано {0} методов"
+            [maxSelectedLabels]="maxVisibleMethodChips()"
+            [options]="scan.discoveryMethods"
+            [ngModel]="scan.selectedMethods()"
+            (ngModelChange)="onMethodsChange($event)"
+            [ngModelOptions]="{ standalone: true }"
+            [filter]="true"
+            [showClear]="false"
+            display="chip"
+          />
+        </div>
+        <p-button
+          type="button"
+          label="Сбросить"
+          styleClass="ns-action-blue discovery-methods-reset-btn"
+          [outlined]="true"
+          [disabled]="!scan.canResetDiscoveryMethods()"
+          (onClick)="resetMethods()"
+        />
+        </div>
+      </label>
+    </div>
+  </div>
+
+  <div class="probe-config-list">
+    @for (probe of scan.selectedProbes(); track probe.method) {
+      <div
+        class="probe-config-card"
+        [class.probe-config-card--full]="probe.method === 'SNMP_V3' && usesInlineSnmpFields(probe.method)"
+        [class.probe-config-card--compact]="!probeHasFields(probe.method)"
+      >
+        <div class="probe-config-card-head">
+          <div class="probe-config-head">{{ scan.getMethodLabel(probe.method) }}</div>
+          @if (scan.canRemoveProbe()) {
+            <p-button
+              type="button"
+              icon="pi pi-times"
+              [rounded]="true"
+              [text]="true"
+              severity="secondary"
+              styleClass="probe-config-remove-btn"
+              ariaLabel="Убрать метод"
+              (onClick)="removeProbe(probe.method)"
+            />
+          }
+        </div>
+
+        @if (probeHasFields(probe.method)) {
+          <div
+            class="probe-config-fields scan-form-prime"
+            [class.probe-config-fields--snmpv3]="probe.method === 'SNMP_V3' && usesInlineSnmpFields(probe.method)"
+          >
+            @if (usesManualProbeConfig(probe.method)) {
+              <p class="probe-config-profile-note probe-config-span-all">
+                Протокол не включён в профиле — параметры задаются вручную.
+              </p>
+            }
+            @if (probeShowsPort(probe.method)) {
+              <label class="p-input-container">
+                <span>Порт</span>
+                <p-inputNumber
+                  [ngModel]="probe.port"
+                  (ngModelChange)="onProbePortChange(probe.method, $event)"
+                  [ngModelOptions]="{ standalone: true }"
+                  [showButtons]="false"
+                  class="w-full"
+                />
+              </label>
+            }
+            @if (usesInlineSnmpFields(probe.method) && isSnmpMethod(probe.method) && probe.method !== 'SNMP_V3') {
+              <label class="p-input-container">
+                <span>Community string</span>
+                <input
+                  pInputText
+                  type="text"
+                  [ngModel]="probe.community"
+                  (ngModelChange)="onProbeFieldChange(probe.method, 'community', $event)"
+                  [ngModelOptions]="{ standalone: true }"
+                  placeholder="public"
+                  class="w-full"
+                />
+              </label>
+            }
+            @if (usesInlineSnmpFields(probe.method) && probe.method === 'SNMP_V3') {
+              <label class="p-input-container">
+                <span>Пользователь</span>
+                <input
+                  pInputText
+                  type="text"
+                  [ngModel]="probe.securityUsername"
+                  (ngModelChange)="onProbeFieldChange(probe.method, 'securityUsername', $event)"
+                  [ngModelOptions]="{ standalone: true }"
+                  placeholder="snmpuser"
+                  class="w-full"
+                />
+              </label>
+              <label class="p-input-container">
+                <span>Auth protocol</span>
+                <app-device-option-select
+                  [options]="authProtocolOptions"
+                  optionValueKey="value"
+                  [value]="probe.authProtocol ?? 'SHA'"
+                  (valueChange)="onAuthProtocolChange(probe.method, $event)"
+                  styleClass="w-full"
+                />
+              </label>
+              <label class="p-input-container">
+                <span>Auth password</span>
+                <input
+                  pInputText
+                  type="password"
+                  [ngModel]="probe.authPassword"
+                  (ngModelChange)="onProbeFieldChange(probe.method, 'authPassword', $event)"
+                  [ngModelOptions]="{ standalone: true }"
+                  placeholder="auth password"
+                  class="w-full"
+                />
+              </label>
+              <label class="p-input-container">
+                <span>Privacy protocol</span>
+                <app-device-option-select
+                  [options]="privacyProtocolOptions"
+                  optionValueKey="value"
+                  [value]="probe.privacyProtocol ?? 'AES'"
+                  (valueChange)="onPrivacyProtocolChange(probe.method, $event)"
+                  styleClass="w-full"
+                />
+              </label>
+              <label class="p-input-container">
+                <span>Priv. password</span>
+                <input
+                  pInputText
+                  type="password"
+                  [ngModel]="probe.privacyPassword"
+                  (ngModelChange)="onProbeFieldChange(probe.method, 'privacyPassword', $event)"
+                  [ngModelOptions]="{ standalone: true }"
+                  placeholder="privacy password"
+                  class="w-full"
+                />
+              </label>
+            }
+          </div>
+        } @else {
+          <p class="probe-config-hint">
+            @if (probe.method === 'ICMP' || probe.method === 'DNS') {
+              <span class="probe-config-hint-title">Без параметров</span>
+              <span class="probe-config-hint-detail">
+                @if (probe.method === 'DNS') {
+                  Обратный DNS-запрос (PTR) по IP-адресу
+                } @else {
+                  Общие таймаут и повторы
+                }
+              </span>
+            } @else if (showsProfileHint(probe.method)) {
+              <span class="probe-config-hint-title">Из профиля доступа</span>
+              <span class="probe-config-hint-detail">Порт и учётные данные</span>
+            } @else {
+              {{ getParameterlessHint(probe.method) }}
+            }
+          </p>
+        }
+      </div>
+    }
+  </div>
+</div>

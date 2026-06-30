@@ -1,0 +1,17 @@
+{
+  "name": "wisla-arm-e2e",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Playwright E2E — frontend + full stack (separate from frontend unit tests)",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:smoke": "playwright test tests/smoke",
+    "install:browsers": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.44.1",
+    "@types/node": "^20.14.2",
+    "typescript": "^5.4.5"
+  }
+}

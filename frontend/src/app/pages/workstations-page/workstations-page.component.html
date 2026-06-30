@@ -1,0 +1,111 @@
+<section class="content-card list-page-card workstations-card">
+  <div class="section-heading">
+    <div>
+      <h1>Рабочие станции</h1>
+      <p>Реестр АРМ, зарегистрированных через агент wisla-arm-agent.</p>
+    </div>
+    <div class="list-page-heading-actions">
+      <p-splitButton
+        label="Экспорт XLSX"
+        icon="pi pi-file-excel"
+        styleClass="ns-action-blue"
+        [outlined]="true"
+        (onClick)="exportReport('xlsx')"
+        [model]="exportMenuItems"
+      />
+      <p-button
+        label="Обновить"
+        styleClass="ns-action-blue"
+        [outlined]="true"
+        [disabled]="ws.workstationsLoading()"
+        (onClick)="reloadCurrentPage()"
+      />
+    </div>
+  </div>
+
+  <div class="list-summary-grid">
+    <div class="list-summary-tile"><span>Всего</span><strong>{{ ws.totalCount() }}</strong></div>
+    <div class="list-summary-tile"><span>Online</span><strong>{{ ws.onlineCount() }}</strong></div>
+    <div class="list-summary-tile"><span>Offline</span><strong>{{ ws.offlineCount() }}</strong></div>
+  </div>
+
+  <div class="list-filters">
+    <label class="workstations-field p-input-container">
+      <span>Поиск</span>
+      <input
+        pInputText
+        type="text"
+        [ngModel]="ws.searchQuery()"
+        (ngModelChange)="ws.searchQuery.set($event)"
+        [ngModelOptions]="{ standalone: true }"
+        placeholder="Имя хоста, IP"
+        class="w-full"
+        (keyup.enter)="applyFilters()"
+      />
+    </label>
+    <label class="workstations-field p-input-container">
+      <span>Статус</span>
+      <app-device-option-select
+        [options]="statusFilterOptions"
+        optionValueKey="value"
+        [value]="ws.statusFilter()"
+        (valueChange)="onStatusFilterChange($event)"
+        styleClass="w-full"
+      />
+    </label>
+    <label class="workstations-field p-input-container">
+      <span>ОС</span>
+      <app-device-option-select
+        [options]="osTypeFilterOptions"
+        optionValueKey="value"
+        [value]="ws.osTypeFilter()"
+        (valueChange)="onOsTypeFilterChange($event)"
+        styleClass="w-full"
+      />
+    </label>
+    <p-button label="Применить" styleClass="ns-action-blue" (onClick)="applyFilters()" />
+  </div>
+
+  <p-table
+    [value]="ws.workstations()"
+    [lazy]="true"
+    [paginator]="true"
+    [rows]="25"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [totalRecords]="ws.totalCount()"
+    [loading]="ws.workstationsLoading()"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="{first}–{last} из {totalRecords}"
+    (onLazyLoad)="onLazyLoad($event)"
+    dataKey="id"
+    styleClass="p-datatable-sm workstations-table"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        @for (column of tableColumns; track column.field) {
+          <th [pSortableColumn]="column.field">
+            {{ column.header }}
+            <p-sortIcon [field]="column.field" />
+          </th>
+        }
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-row>
+      <tr class="workstations-row" (click)="openWorkstation(row)">
+        <td>{{ row.hostname }}</td>
+        <td>{{ row.primaryIp || '—' }}</td>
+        <td>{{ osLabel(row.osType) }}</td>
+        <td>
+          <p-tag [value]="statusLabel(row.status)" [severity]="statusSeverity(row.status)" />
+        </td>
+        <td>{{ row.agentVersion || '—' }}</td>
+        <td>{{ row.lastSeenAt ? (row.lastSeenAt | date: 'dd.MM.yyyy HH:mm') : '—' }}</td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td [attr.colspan]="tableColumns.length">АРМ не найдены. Запустите агент или выполните ingest.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</section>

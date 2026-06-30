@@ -1,0 +1,14 @@
+{
+  "{$IF.UTIL.MAX}": "90",
+  "{$IF.ERRORS.WARN}": "2",
+  "{$IFCONTROL}": "1",
+  "{$VFS.FS.PUSED.MAX.CRIT}": "90",
+  "{$VFS.FS.PUSED.MAX.WARN}": "80",
+  "{$VFS.FS.FREE.MIN.CRIT}": "5G",
+  "{$VFS.FS.FREE.MIN.WARN}": "10G",
+  "{$ICMP_LOSS_WARN}": "20",
+  "{$ICMP_RESPONSE_TIME_WARN}": "0.15",
+  "{$ICMP.LOSS.WARN}": "20",
+  "{$ICMP.RESPONSE_TIME.WARN}": "0.15",
+  "{$SNMP.TIMEOUT}": "5m"
+}

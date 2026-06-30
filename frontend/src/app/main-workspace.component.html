@@ -1,0 +1,184 @@
+<main
+  class="dashboard"
+  [class.nav-collapsed]="sidebarCollapsed() && isDesktopSidebar()"
+  [class.nav-hidden]="!isNarrow() && sidebarHidden()"
+  [class.drawer-open]="isNarrow() && drawerOpen()"
+>
+  @if (isNarrow() && drawerOpen()) {
+    <div class="sidebar-backdrop" (click)="drawerOpen.set(false)" aria-hidden="true"></div>
+  }
+
+  <aside class="sidebar" aria-label="Основная навигация">
+    <div class="sidebar-header">
+      <a
+        routerLink="/scan"
+        class="sidebar-brand"
+        aria-label="wiSLA, на главную"
+        (click)="onNavLinkClick()"
+      >
+        @if (sidebarCollapsed() && isDesktopSidebar()) {
+          <img
+            class="sidebar-brand-img sidebar-brand-img--compact"
+            src="/wisla-logo-compact.svg"
+            alt=""
+            width="56"
+            height="40"
+          />
+        } @else {
+          <img class="sidebar-brand-img" src="/wisla-logo.svg" alt="" width="144" height="40" />
+        }
+      </a>
+      @if (isDesktopSidebar()) {
+        <p-button
+          type="button"
+          [icon]="sidebarCollapsed() ? 'pi pi-angle-double-right' : 'pi pi-angle-double-left'"
+          [text]="true"
+          [rounded]="true"
+          styleClass="sidebar-icon-btn"
+          (onClick)="toggleCollapse()"
+          [attr.aria-label]="sidebarCollapsed() ? 'Развернуть подписи' : 'Свернуть в иконки'"
+        />
+      }
+      @if (isNarrow() && drawerOpen()) {
+        <p-button
+          type="button"
+          icon="pi pi-times"
+          [text]="true"
+          [rounded]="true"
+          styleClass="sidebar-close-btn sidebar-icon-btn"
+          (onClick)="closeDrawer()"
+          aria-label="Закрыть меню"
+        />
+      }
+    </div>
+
+    <nav class="sidebar-nav" role="navigation">
+      @for (item of visibleNavigationItems(); track item.icon) {
+        <a
+          class="sidebar-nav-item"
+          [routerLink]="navPath(item)"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="navActiveMatchOptions(item)"
+          [pTooltip]="item.navLabel"
+          [tooltipDisabled]="!sidebarCollapsed() || !isDesktopSidebar()"
+          tooltipPosition="right"
+          (click)="onNavLinkClick()"
+        >
+          <i [class]="item.primeIcon + ' sidebar-nav-icon'" aria-hidden="true"></i>
+          <span class="sidebar-nav-text">{{ item.navLabel }}</span>
+        </a>
+      }
+    </nav>
+
+    <footer class="sidebar-footer">
+      <app-version-info
+        class="sidebar-footer-info"
+        [compact]="sidebarCollapsed() && isDesktopSidebar()"
+      />
+    </footer>
+  </aside>
+
+  <section class="content">
+    <header class="topbar content-card">
+      <div class="topbar-leading">
+        <p-button
+          type="button"
+          [icon]="topbarMenuIcon()"
+          [text]="true"
+          [rounded]="true"
+          styleClass="topbar-menu-btn ns-action-blue"
+          (onClick)="onTopbarMenuClick()"
+          [attr.aria-label]="topbarMenuAria()"
+        />
+        <div class="topbar-copy">
+          @if (monitoringDeviceIdFromUrl()) {
+            <nav class="topbar-breadcrumb" aria-label="Устройства">
+              <a routerLink="/monitoring" class="topbar-breadcrumb-link">
+                <i class="pi pi-arrow-circle-left topbar-breadcrumb-back-icon" aria-hidden="true"></i>
+                <span>Устройства</span>
+              </a>
+              <span class="topbar-breadcrumb-sep" aria-hidden="true">/</span>
+              <strong class="topbar-breadcrumb-current">{{ topbarMonitoringDeviceTitle() }}</strong>
+            </nav>
+          } @else {
+            <strong>{{ activeMenuItem() }}</strong>
+          }
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <div class="topbar-user-meta">
+          <span>{{ currentUserRoleLabel() }}</span>
+          <strong>{{ currentUserDisplayName() }}</strong>
+        </div>
+        <button type="button" class="avatar avatar-button" (click)="openUserModal()">
+          {{ userInitials() }}
+        </button>
+        <p-button
+          label="Выйти"
+          icon="pi pi-sign-out"
+          styleClass="topbar-logout-btn"
+          [outlined]="true"
+          (onClick)="logout()"
+        />
+      </div>
+    </header>
+
+    <router-outlet />
+  </section>
+</main>
+
+@if (userModalOpen()) {
+  <div class="modal-backdrop" (click)="closeUserModal()">
+    <section class="user-modal" (click)="$event.stopPropagation()">
+      <div class="user-modal-header">
+        <div>
+          <span class="overline">Профиль пользователя</span>
+          <h2>{{ currentUserDisplayName() }}</h2>
+        </div>
+        <p-button label="Закрыть" [text]="true" styleClass="ghost-button user-modal-close" (onClick)="closeUserModal()" />
+      </div>
+
+      <div class="user-modal-hero">
+        <div class="user-modal-avatar">{{ userInitials() }}</div>
+        <div class="user-modal-hero-copy">
+          <span class="user-modal-kicker">{{ currentUserRoleLabel() }}</span>
+          <strong>{{ currentUserDisplayName() }}</strong>
+          <p>{{ currentUserEmail() }}</p>
+        </div>
+        <div class="user-session-badge">
+          <span class="user-session-dot"></span>
+          <span>Активная сессия</span>
+        </div>
+      </div>
+
+      <div class="user-modal-body">
+        <div class="user-modal-info">
+          <div class="user-modal-row user-modal-row-primary">
+            <span>Учетная запись</span>
+            <strong>{{ currentUserDisplayName() }}</strong>
+            <small>{{ currentUserEmail() }}</small>
+          </div>
+          <div class="user-modal-row">
+            <span>Основная роль</span>
+            <strong>{{ currentUserRoleLabel() }}</strong>
+          </div>
+        </div>
+
+        <div class="user-access-panel">
+          <div class="user-access-header">
+            <span>Права доступа</span>
+            <strong>Назначенные роли</strong>
+          </div>
+          <div class="user-role-list">
+            @for (role of currentUserRoles(); track role) {
+              <span class="user-role-chip">{{ role }}</span>
+            }
+          </div>
+          <p class="user-access-description">
+            Роли управляют доступом к операциям сканирования, мониторинга и работе с эталонными конфигурациями.
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
+}

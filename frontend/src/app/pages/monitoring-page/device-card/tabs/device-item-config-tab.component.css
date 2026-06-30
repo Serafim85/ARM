@@ -1,0 +1,30 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.device-templates-tile {
+  position: relative;
+}
+
+.device-templates-edit-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+}
+
+.device-templates-tile strong {
+  min-width: 1.25rem;
+}
+
+.item-config-summary-grid {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+@media (min-width: 960px) {
+  .item-config-summary-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
