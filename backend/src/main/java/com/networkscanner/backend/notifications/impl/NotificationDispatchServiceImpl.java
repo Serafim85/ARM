@@ -865,6 +865,11 @@ public class NotificationDispatchServiceImpl implements NotificationDispatchServ
     props.put("mail.smtp.auth", String.valueOf(smtp.isAuth()));
     props.put("mail.smtp.starttls.enable", String.valueOf(smtp.isStarttls()));
     props.put("mail.smtp.ssl.enable", String.valueOf(smtp.isSsl()));
+    if (smtp.isSsl()) {
+      props.put("mail.smtp.socketFactory.port", String.valueOf(smtp.getServerPort()));
+      props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+      props.put("mail.smtp.socketFactory.fallback", "false");
+    }
     try {
       var message = sender.createMimeMessage();
       var helper = new MimeMessageHelper(message, true, java.nio.charset.StandardCharsets.UTF_8.name());

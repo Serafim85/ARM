@@ -1,0 +1,20 @@
+ID,Раздел ТЗ,Требование,Фаза,Статус MVP,Реализация в прототипе,Комментарий
+REQ-1.4-agent,§1.4,Агент WISLA АРМ Win/Linux,MVP,✅,wisla-arm-agent Go gopsutil на pilot-linux-01 pilot-windows-01,Служба/демон — dev-режим
+REQ-1.5-transfer,§1.5,HTTPS JSON batch ingest + API-key,MVP,✅,POST /api/v1/agent/ingest X-Agent-Key,Авто-регистрация АРМ
+REQ-1.6-server,§1.6,Сервер приём БД нормализация UI,MVP,✅,Spring Boot workstation + agentingest + TimescaleDB,Форк NS profile wisla-arm
+REQ-1.8-registration,§1.8,Регистрация и версия агента,MVP,✅,workstations + agent_version в карточке,При первом ingest
+REQ-1.10-templates,§1.6,Шаблоны .template пороги,MVP,✅,arm-linux arm-windows ThresholdEvaluationService,Порог диска >95% CPU >90%
+REQ-2.1-registry,§2,Реестр АРМ список фильтры,MVP,✅,GET /api/v1/workstations Angular /workstations,Online/Offline по heartbeat
+REQ-2.2-card,§2,Карточка АРМ метрики,MVP,✅,GET .../metrics графики CPU RAM диск,Timescale hypertable metric_values
+REQ-3.1-thresholds,§3,Пороговые события,MVP,✅,monitoring_events OPEN/RESOLVED,UI раздел События
+REQ-4.1-logs,§4,Логи warning/error,MVP,✅,log_events + блок Логи в карточке,MVP без полного SIEM
+REQ-4.2-bsod,§4,События BSoD,MVP,✅,workstation_events + demo-флаг WISLA_ARM_DEMO_BSOD,В карточке АРМ
+REQ-7.1-alerts,§7,Email уведомления,MVP,✅,SMTP Yandex + подписка ingeborg21@yandex.ru,Тест через Настройки → SMTP
+REQ-7.2-telegram,§7,Telegram уведомления,MVP,✅,@wislaarm_demo_bot подписка arm-workstation,TELEGRAM_ENABLED на backend
+REQ-5.1-auth,§5,Роли и JWT,MVP,✅,ADMIN OPERATOR VIEWER локальный вход,LDAP — задел
+REQ-5.2-ldap,§5,LDAP / AD,v1,🔶,OpenLDAP docker-compose demo-setup-ldap.sh,UI переключатель LOCAL/LDAP
+REQ-6.1-report,§6,Отчёт XLSX,v1,✅,GET /api/v1/workstations/report/xlsx,Листы реестр + рекомендации
+REQ-1.7-wisla,§1.7,Интеграция WISLA hub,v2,⏳,WislaIntegrationPort stub Kafka disabled,После MVP
+REQ-1.4-policy,§1.4.5,Политики с сервера,v1,⏳,Конфиг агента локально,API политик — v1
+REQ-1.9-agentless,§1.9,Безагентный WinRM/SSH,—,❌,Не делаем,waived Excel V1
+REQ-9.1-retention,§9,Хранение метрик 30 сут,MVP,✅,TimescaleDB metric_values,Политика retention — v1

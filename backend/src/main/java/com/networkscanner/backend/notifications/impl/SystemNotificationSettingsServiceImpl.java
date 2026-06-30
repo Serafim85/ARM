@@ -91,7 +91,7 @@ public class SystemNotificationSettingsServiceImpl implements SystemNotification
     String ownerEmail = requireActorEmail(authentication);
     String actorRoleKind = resolveNotificationKindForActor(authentication);
     String requestedKind = normalize(request.notificationKind(), actorRoleKind).toUpperCase(Locale.ROOT);
-    if (!actorRoleKind.equals(requestedKind)) {
+    if (!actorRoleKind.equals(requestedKind) && !adminMayManageOperatorKind(actorRoleKind, requestedKind)) {
       throw new ResponseStatusException(
           HttpStatus.FORBIDDEN,
           "Недопустимый тип подписки для вашей роли: доступен только " + actorRoleKind
@@ -136,7 +136,7 @@ public class SystemNotificationSettingsServiceImpl implements SystemNotification
   public void triggerTestNotificationEvent(TestNotificationEventRequest request, Authentication authentication) {
     String actorRoleKind = resolveNotificationKindForActor(authentication);
     String requestedKind = normalize(request.notificationKind(), actorRoleKind).toUpperCase(Locale.ROOT);
-    if (!actorRoleKind.equals(requestedKind)) {
+    if (!actorRoleKind.equals(requestedKind) && !adminMayManageOperatorKind(actorRoleKind, requestedKind)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Недопустимый тип тестового события для вашей роли.");
     }
     String eventCode = normalize(request.eventCode(), "MONITORING_EVENT_OPEN").toUpperCase(Locale.ROOT);
@@ -416,6 +416,10 @@ public class SystemNotificationSettingsServiceImpl implements SystemNotification
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Не удалось определить пользователя.");
     }
     return authentication.getName().trim().toLowerCase(Locale.ROOT);
+  }
+
+  private static boolean adminMayManageOperatorKind(String actorRoleKind, String requestedKind) {
+    return "ADMIN".equalsIgnoreCase(actorRoleKind) && "OPERATOR".equalsIgnoreCase(requestedKind);
   }
 
   private static String resolveNotificationKindForActor(Authentication authentication) {

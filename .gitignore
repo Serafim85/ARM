@@ -7,10 +7,14 @@
 
 # Secrets
 infra/telegram.env
+infra/smtp.env
+infra/notifications.env
 .env
 .env.*
 !.env.example
 !infra/telegram.env.example
+!infra/smtp.env.example
+!infra/notifications.env.example
 
 # Backend
 backend/target/

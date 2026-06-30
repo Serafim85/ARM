@@ -7,7 +7,8 @@
 
 ## High-level
 
-> **Подробные блок-схемы (Mermaid):** [`docs/architecture/ARCHITECTURE-DIAGRAM.md`](architecture/ARCHITECTURE-DIAGRAM.md)
+> **Подробные блок-схемы (Mermaid):** [`docs/architecture/ARCHITECTURE-DIAGRAM.md`](architecture/ARCHITECTURE-DIAGRAM.md)  
+> **Стек, требования, покрытие и обоснования:** [`docs/АРХИТЕКТУРА-СТЕК-И-ТРЕБОВАНИЯ.md`](АРХИТЕКТУРА-СТЕК-И-ТРЕБОВАНИЯ.md)
 
 ```text
 ┌─────────────┐     HTTPS batch JSON      ┌──────────────────────────────┐

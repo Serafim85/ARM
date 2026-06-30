@@ -26,6 +26,7 @@
 
 ## Требования, фазы, тесты
 
+- [`docs/АРХИТЕКТУРА-СТЕК-И-ТРЕБОВАНИЯ.md`](docs/АРХИТЕКТУРА-СТЕК-И-ТРЕБОВАНИЯ.md) — **архитектура, стек, требования, реализация и обоснование отложенных пунктов**
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — архитектура MVP
 - [`docs/architecture/ARCHITECTURE-DIAGRAM.md`](docs/architecture/ARCHITECTURE-DIAGRAM.md) — **блок-схемы компонентов и потоков**
 - [`docs/PHASES.md`](docs/PHASES.md) — MVP / v1 scope, DoD, test gates
