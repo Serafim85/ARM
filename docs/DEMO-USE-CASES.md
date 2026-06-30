@@ -2,7 +2,7 @@
 
 > **Формат:** удалённое демо, шаринг экрана (~25 мин)  
 > **Стенд:** Mac + VM Linux (`pilot-linux-01`) + VM Windows (`pilot-windows-01`)  
-> **Связанные документы:** [DEMO-RUNBOOK.md](DEMO-RUNBOOK.md), [DEMO-PRESENTATION.md](DEMO-PRESENTATION.md)
+> **Связанные документы:** [DEMO-RUNBOOK.md](DEMO-RUNBOOK.md), [DEMO-PRESENTATION.md](DEMO-PRESENTATION.md), [РЕЧЬ-НА-ЗАЩИТУ.md](РЕЧЬ-НА-ЗАЩИТУ.md), [FAQ-ЖЮРИ.md](FAQ-ЖЮРИ.md)
 
 **Учётные данные:** `admin@example.com` / `password`  
 **URL:** http://localhost:3000

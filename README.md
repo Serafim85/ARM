@@ -33,4 +33,6 @@
 - [`docs/requirements/дорожная-карта.yaml`](docs/requirements/дорожная-карта.yaml)
 - [`docs/requirements/трекинг-требований.yaml`](docs/requirements/трекинг-требований.yaml)
 - [`docs/TEST-COVERAGE.md`](docs/TEST-COVERAGE.md) — матрица требование → тест
+- [`docs/FAQ-ЖЮРИ.md`](docs/FAQ-ЖЮРИ.md) — **ответы на типовые вопросы жюри** (шпаргалка на защиту)
+- [`docs/РЕЧЬ-НА-ЗАЩИТУ.md`](docs/РЕЧЬ-НА-ЗАЩИТУ.md) — **вступительная речь** на демо (~4–5 мин)
 - [`tests/`](tests/) — integration (Maven) + E2E (Playwright)
