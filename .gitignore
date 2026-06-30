@@ -1,0 +1,38 @@
+# IDE / OS
+.cursor/
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Secrets
+infra/telegram.env
+.env
+.env.*
+!.env.example
+!infra/telegram.env.example
+
+# Backend
+backend/target/
+backend/.classpath
+backend/.project
+backend/.settings/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# Agent
+agent/wisla-arm-agent
+agent/wisla-arm-agent.exe
+
+# Tests
+tests/e2e/node_modules/
+tests/e2e/test-results/
+tests/e2e/playwright-report/
+tests/integration/target/
+
+# Logs / temp
+*.log
+/tmp/
