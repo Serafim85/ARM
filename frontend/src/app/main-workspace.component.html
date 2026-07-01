@@ -11,21 +11,16 @@
   <aside class="sidebar" aria-label="Основная навигация">
     <div class="sidebar-header">
       <a
-        routerLink="/scan"
+        routerLink="/workstations"
         class="sidebar-brand"
-        aria-label="wiSLA, на главную"
+        aria-label="АРМ, на главную"
         (click)="onNavLinkClick()"
       >
         @if (sidebarCollapsed() && isDesktopSidebar()) {
-          <img
-            class="sidebar-brand-img sidebar-brand-img--compact"
-            src="/wisla-logo-compact.svg"
-            alt=""
-            width="56"
-            height="40"
-          />
+          <span class="sidebar-brand-wordmark sidebar-brand-wordmark--compact" aria-hidden="true">А</span>
         } @else {
-          <img class="sidebar-brand-img" src="/wisla-logo.svg" alt="" width="144" height="40" />
+          <span class="sidebar-brand-wordmark" aria-hidden="true">АРМ</span>
+          <span class="sidebar-brand-tagline">Мониторинг</span>
         }
       </a>
       @if (isDesktopSidebar()) {

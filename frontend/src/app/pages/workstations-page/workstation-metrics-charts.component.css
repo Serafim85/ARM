@@ -61,10 +61,10 @@
 }
 
 .workstation-metric-card {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--ns-border);
   border-radius: 16px;
   padding: 0.75rem 0.75rem 0.5rem;
-  background: #fff;
+  background: var(--ns-surface);
   min-height: 280px;
   display: flex;
   flex-direction: column;
@@ -80,7 +80,7 @@
 }
 
 .workstation-metric-card-header span {
-  color: #64748b;
+  color: var(--op-text-secondary, #a1a1a6);
   font-variant-numeric: tabular-nums;
 }
 

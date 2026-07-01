@@ -36,8 +36,9 @@
   gap: 20px;
   overflow: hidden;
   background:
-    linear-gradient(180deg, rgba(37, 99, 235, 0.11) 0%, transparent 52%),
-    linear-gradient(185deg, #161f30 0%, #0f172a 45%, #0b1220 100%);
+    radial-gradient(ellipse 90% 70% at 20% 0%, var(--op-ambient-a, rgba(0, 113, 227, 0.16)) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 100% 100%, var(--op-ambient-b, rgba(79, 70, 229, 0.12)) 0%, transparent 50%),
+    linear-gradient(185deg, #141416 0%, #0a0a0c 45%, #050508 100%);
 }
 
 .login-visual-top,
@@ -68,6 +69,31 @@
   padding: 0;
 }
 
+.login-brand-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(280px, 70vw);
+  aspect-ratio: 1;
+  border-radius: 28px;
+  border: 1px solid var(--op-border, rgba(255, 255, 255, 0.11));
+  background: linear-gradient(165deg, rgba(30, 30, 34, 0.95) 0%, rgba(20, 20, 22, 0.98) 100%);
+  box-shadow:
+    0 0 0 1px rgba(0, 113, 227, 0.15),
+    0 24px 64px rgba(0, 0, 0, 0.45),
+    0 0 80px rgba(0, 113, 227, 0.12);
+}
+
+.login-brand-mark-text {
+  font-size: clamp(3rem, 8vw, 4.5rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  background: linear-gradient(135deg, #0a84ff 0%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 .login-visual-img {
   display: block;
   width: 100%;
@@ -84,7 +110,7 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #93c5fd;
+  color: var(--op-link, #7ec8ff);
 }
 
 .login-brand-title {
@@ -118,7 +144,8 @@
   min-height: 100dvh;
   padding: 48px 36px 64px;
   box-sizing: border-box;
-  background: #fff;
+  background: var(--op-bg-elevated, #141416);
+  border-left: 1px solid var(--op-border-subtle, rgba(255, 255, 255, 0.06));
 }
 
 .login-main-inner {
@@ -180,7 +207,8 @@
   gap: 0;
   padding: 3px;
   border-radius: 999px;
-  background: #f1f5f9;
+  background: var(--op-surface-2, #111113);
+  border: 1px solid var(--op-border-subtle);
 }
 
 .login-mode-btn {
@@ -192,15 +220,15 @@
   border-radius: 999px;
   font-size: 13px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--op-text-secondary);
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .login-mode-btn:has(input:checked) {
-  background: #fff;
-  color: #0f172a;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.1);
+  background: var(--op-surface);
+  color: var(--op-text);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
 .login-mode-btn input {

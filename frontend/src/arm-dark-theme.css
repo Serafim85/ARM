@@ -1,0 +1,118 @@
+/**
+ * Dark theme — tokens from AI-Platform-Vision (Outpost UI v0.4).
+ * Maps to existing --ns-* variables used across the NS fork UI.
+ */
+html.arm-dark {
+  color-scheme: dark;
+
+  --op-font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI',
+    Roboto, Helvetica, Arial, sans-serif;
+  --op-bg-deep: #000000;
+  --op-bg: #050508;
+  --op-bg-elevated: #141416;
+  --op-surface: #1e1e22;
+  --op-surface-hover: #28282d;
+  --op-surface-2: #111113;
+  --op-border: rgba(255, 255, 255, 0.11);
+  --op-border-subtle: rgba(255, 255, 255, 0.06);
+  --op-text: #f5f5f7;
+  --op-text-secondary: #a1a1a6;
+  --op-text-tertiary: #636366;
+  --op-accent: #0071e3;
+  --op-accent-bright: #0a84ff;
+  --op-accent-soft: rgba(0, 113, 227, 0.22);
+  --op-link: #7ec8ff;
+  --op-success: #34c759;
+  --op-error: #ff453a;
+  --op-warning: #ffd60a;
+  --op-radius-md: 14px;
+  --op-radius-lg: 20px;
+  --op-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.45), 0 12px 40px rgba(0, 0, 0, 0.35);
+  --op-ambient-a: rgba(0, 113, 227, 0.16);
+  --op-ambient-b: rgba(79, 70, 229, 0.12);
+  --op-floor-bloom-w: min(110vw, 2640px);
+  --op-floor-bloom-h: 80vh;
+
+  --ns-surface: var(--op-surface);
+  --ns-border: var(--op-border);
+  --ns-bg-muted: var(--op-surface-hover);
+  --ns-bg-subtle: var(--op-bg-elevated);
+  --ns-text-muted: var(--op-text-secondary);
+  --ns-neutral-900: var(--op-text);
+  --ns-neutral-700: #d1d1d6;
+  --ns-primary-100: var(--op-accent-soft);
+  --ns-action-blue-bg: var(--op-accent);
+  --ns-action-blue-bg-hover: var(--op-accent-bright);
+  --ns-action-blue-border: rgba(0, 113, 227, 0.45);
+  --ns-action-blue-ink: #ffffff;
+  --ns-action-blue-outline-ink: var(--op-link);
+  --ns-action-blue-outline-hover-bg: rgba(0, 113, 227, 0.14);
+  --ns-action-blue-focus-ring: rgba(0, 113, 227, 0.42);
+  --ns-success-bg: rgba(52, 199, 89, 0.14);
+  --ns-success-text-dark: #86efac;
+  --ns-danger-bg: rgba(255, 69, 58, 0.12);
+  --ns-danger-bg-strong: rgba(255, 69, 58, 0.22);
+  --ns-danger-text: #ff6b6b;
+  --ns-danger-text-dark: #ff453a;
+  --ns-warning-bg-light: rgba(255, 214, 10, 0.1);
+  --ns-orange-800: #fcd34d;
+  --ns-orange-300: #fbbf24;
+  --ep-info-text: var(--op-link);
+}
+
+html.arm-dark,
+html.arm-dark body {
+  font-family: var(--op-font);
+  background: var(--op-bg);
+  color: var(--op-text);
+}
+
+html.arm-dark .p-component {
+  color: var(--op-text);
+}
+
+html.arm-dark .p-inputtext,
+html.arm-dark .p-password input,
+html.arm-dark .p-select,
+html.arm-dark .p-multiselect,
+html.arm-dark .p-textarea {
+  background: var(--op-bg-elevated);
+  border-color: var(--op-border);
+  color: var(--op-text);
+}
+
+html.arm-dark .p-datatable .p-datatable-thead > tr > th {
+  background: var(--op-surface-2);
+  color: var(--op-text-secondary);
+  border-color: var(--op-border-subtle);
+}
+
+html.arm-dark .p-datatable .p-datatable-tbody > tr > td {
+  background: var(--op-surface);
+  color: var(--op-text);
+  border-color: var(--op-border-subtle);
+}
+
+html.arm-dark .p-datatable .p-datatable-tbody > tr:hover > td {
+  background: var(--op-surface-hover);
+}
+
+html.arm-dark .p-paginator {
+  background: var(--op-surface);
+  border-color: var(--op-border-subtle);
+  color: var(--op-text-secondary);
+}
+
+html.arm-dark .p-dialog .p-dialog-content,
+html.arm-dark .p-dialog .p-dialog-header,
+html.arm-dark .p-dialog .p-dialog-footer {
+  background: var(--op-surface);
+  color: var(--op-text);
+  border-color: var(--op-border-subtle);
+}
+
+html.arm-dark .p-popover .p-popover-content {
+  background: var(--op-surface);
+  border-color: var(--op-border);
+  color: var(--op-text);
+}

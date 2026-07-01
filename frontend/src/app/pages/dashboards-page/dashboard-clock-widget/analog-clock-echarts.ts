@@ -14,7 +14,7 @@ const POINTER_PATH =
   'path://M2.9,0.7L2.9,0.7c1.4,0,2.6,1.2,2.6,2.6v115c0,1.4-1.2,2.6-2.6,2.6l0,0c-1.4,0-2.6-1.2-2.6-2.6V3.3C0.3,1.9,1.4,0.7,2.9,0.7z';
 
 /** Подпись на циферблате (вместо логотипа ECharts из демо). */
-const DIAL_BRAND = 'wiSLA';
+const DIAL_BRAND = 'АРМ';
 
 const GOLD = '#C0911F';
 const HAND_SHADOW = {

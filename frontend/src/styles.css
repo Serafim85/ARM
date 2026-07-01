@@ -1,57 +1,22 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'primeicons/primeicons.css';
+@import './arm-dark-theme.css';
 
-/* Базовые дизайн-токены приложения (используются в page-level CSS). */
+/* Breakpoints (для документации; в @media — литералы). */
 :root {
-  --ns-surface: #ffffff;
-  --ns-border: #e2e8f0;
-  --ns-bg-muted: #f1f5f9;
-  --ns-bg-subtle: #f8fafc;
-
-  --ns-text-muted: #64748b;
-  --ns-neutral-900: #0f172a;
-  --ns-neutral-700: #334155;
-
-  /* Для тёмных hero/бейджей. */
-  --ns-primary-100: #dbeafe;
-
-  /* Action-кнопки (синий стиль, близкий к сайдбару). */
-  --ns-action-blue-bg: #1d4ed8;
-  --ns-action-blue-bg-hover: #1e40af;
-  --ns-action-blue-border: rgba(37, 99, 235, 0.55);
-  --ns-action-blue-ink: #ffffff;
-  --ns-action-blue-outline-ink: #1d4ed8;
-  --ns-action-blue-outline-hover-bg: rgba(37, 99, 235, 0.1);
-  --ns-action-blue-focus-ring: rgba(37, 99, 235, 0.42);
-
-  /* Статусы (используются на списках/баннерах). */
-  --ns-success-bg: #ecfdf5;
-  --ns-success-text-dark: #047857;
-
-  --ns-danger-bg: #fef2f2;
-  --ns-danger-bg-strong: #fecaca;
-  --ns-danger-text: #dc2626;
-  --ns-danger-text-dark: #991b1b;
-
-  --ns-warning-bg-light: #fff7ed;
-  --ns-orange-800: #9a3412;
-  --ns-orange-300: #fdba74;
-
-  /* Breakpoints (для документации; в @media — литералы). */
   --bp-narrow: 900px;
   --bp-tablet: 768px;
   --bp-mobile: 640px;
   --bp-phone: 480px;
 
-  /* Цвета для События мониторинга */
-  --ep-disaster: #ba1b1b;
+  /* Цвета для событий мониторинга */
+  --ep-disaster: #ff453a;
   --ep-average: #ed791a;
-  --ep-warning: #ffb62c;
-  --ep-high: #d7393a;
-  --ep-success: #2cb543;
-  --ep-information: #15a3b7;
-  --ep-info-text: #0c4a6e;
+  --ep-warning: #ffd60a;
+  --ep-high: #ff6b6b;
+  --ep-success: #34c759;
+  --ep-information: #0a84ff;
 }
 
 /* Только элементы: не трогаем *::before/*::after — иначе ломаются PrimeIcons (глиф в :before) */
@@ -221,14 +186,14 @@ body.p-overflow-hidden {
 }
 
 .p-dialog.scan-job-dialog .p-dialog-content {
-  background: #ffffff;
+  background: var(--ns-surface);
   padding-bottom: 18px;
 }
 
 .p-dialog.scan-job-dialog .p-dialog-footer {
-  background: #ffffff;
-  border-top: 1px solid rgba(226, 232, 240, 0.95);
-  box-shadow: 0 -8px 18px rgba(15, 23, 42, 0.05);
+  background: var(--ns-surface);
+  border-top: 1px solid var(--ns-border);
+  box-shadow: 0 -8px 18px rgba(0, 0, 0, 0.25);
   justify-content: flex-start;
   padding-top: 22px;
 }
@@ -325,15 +290,15 @@ body.p-overflow-hidden {
 .discovery-methods-panel .p-multiselect-option.p-multiselect-option-selected,
 .discovery-methods-panel .p-multiselect-option.p-multiselect-option-selected.p-focus {
   background: transparent;
-  color: #334155;
+  color: var(--ns-neutral-700);
 }
 
 .discovery-methods-panel .p-multiselect-option.p-focus:not(.p-multiselect-option-selected) {
-  background: #f8fafc;
+  background: var(--ns-bg-subtle);
 }
 
 .discovery-methods-panel .p-multiselect-option.p-multiselect-option-selected:hover {
-  background: #f8fafc;
+  background: var(--ns-bg-subtle);
 }
 
 /* ---- Mobile: карточки, таблицы вне list-page-card, пагinator ---- */

@@ -1,12 +1,12 @@
 :host {
   display: block;
   min-height: 100vh;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  color: #1f2937;
+  font-family: var(--op-font, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+  color: var(--op-text, #f5f5f7);
 }
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 
@@ -17,7 +17,10 @@
   grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
   align-items: stretch;
-  background: linear-gradient(180deg, #f6f9fc 0%, #eef3f8 100%);
+  background:
+    radial-gradient(ellipse var(--op-floor-bloom-w, 120vw) var(--op-floor-bloom-h, 80vh) at 50% 100%, var(--op-ambient-a) 0%, transparent 55%),
+    radial-gradient(ellipse 80vw 60vh at 80% 0%, var(--op-ambient-b) 0%, transparent 50%),
+    linear-gradient(180deg, var(--op-bg, #050508) 0%, var(--op-bg-deep, #000) 100%);
 }
 
 .dashboard.nav-collapsed:not(.nav-hidden) {
@@ -46,11 +49,11 @@
 .login-card,
 .content-card,
 .content {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
+  background: var(--ns-surface);
+  border: 1px solid var(--ns-border);
+  border-radius: var(--op-radius-lg, 20px);
   padding: 32px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+  box-shadow: var(--op-shadow-md, 0 12px 40px rgba(0, 0, 0, 0.35));
 }
 
 .badge {
@@ -58,8 +61,8 @@
   margin-bottom: 16px;
   padding: 8px 12px;
   border-radius: 999px;
-  background: rgba(99, 102, 241, 0.12);
-  color: #6366f1;
+  background: var(--op-accent-soft);
+  color: var(--op-link);
   font-size: 14px;
 }
 
@@ -86,9 +89,10 @@
   gap: 16px;
   padding: 14px 10px;
   background:
-    linear-gradient(180deg, rgba(37, 99, 235, 0.11) 0%, transparent 52%),
-    linear-gradient(185deg, #161f30 0%, #0f172a 45%, #0b1220 100%);
-  border: 1px solid rgba(30, 41, 59, 0.95);
+    radial-gradient(ellipse 90% 70% at 20% 0%, var(--op-ambient-a) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 100% 100%, var(--op-ambient-b) 0%, transparent 50%),
+    linear-gradient(185deg, #141416 0%, #0a0a0c 45%, #050508 100%);
+  border: 1px solid var(--op-border);
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(2, 6, 23, 0.22);
 }
@@ -112,11 +116,42 @@
   grid-column: 1;
   justify-self: start;
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
   padding: 6px 8px;
   border-radius: 12px;
   transition: background-color 0.15s ease;
+  text-decoration: none;
+}
+
+.sidebar-brand-wordmark {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--op-accent-bright, #0a84ff) 0%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.sidebar-brand-wordmark--compact {
+  font-size: 1.25rem;
+  width: 2.25rem;
+  text-align: center;
+}
+
+.sidebar-brand-tagline {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--op-text-tertiary, #636366);
+}
+
+.dashboard.nav-collapsed .sidebar-brand-tagline {
+  display: none;
 }
 
 .dashboard.nav-collapsed .sidebar-header {
@@ -261,25 +296,25 @@
 }
 
 .topbar-menu-btn.p-button {
-  color: #64748b;
+  color: var(--op-text-secondary);
   flex-shrink: 0;
 }
 
 .topbar-menu-btn.p-button:hover {
-  color: #0f172a;
-  background: #f1f5f9;
+  color: var(--op-text);
+  background: var(--op-surface-hover);
 }
 
 h1,
 h2 {
   margin: 0 0 12px;
-  color: #111827;
+  color: var(--op-text);
 }
 
 p {
   margin: 0;
   line-height: 1.6;
-  color: #6b7280;
+  color: var(--op-text-secondary);
 }
 
 .subtitle {
@@ -308,7 +343,8 @@ p {
 
 .content-card {
   padding: 24px;
-  background: rgba(255, 255, 255, 0.94);
+  background: color-mix(in srgb, var(--ns-surface) 94%, transparent);
+  backdrop-filter: blur(8px);
 }
 
 .topbar.content-card {
@@ -318,16 +354,8 @@ p {
   padding: 16px 20px;
 }
 
-.topbar-copy {
-  display: grid;
-  gap: 2px;
-  flex: 1 1 0;
-  min-width: 0;
-  align-content: center;
-}
-
 .topbar-copy strong {
-  color: #111827;
+  color: var(--op-text);
   font-size: 18px;
 }
 
